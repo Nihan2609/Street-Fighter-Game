@@ -1,0 +1,44 @@
+CREATE DATABASE street_fighter_game;
+USE street_fighter_game;
+
+
+CREATE TABLE players (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(100) NOT NULL,
+    wins INT DEFAULT 0,
+    losses INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+username: unique player name
+
+password: store plaintext for now (you can hash later)
+
+wins/losses: track stats
+
+created_at: record when the player joined
+
+CREATE TABLE matches (
+    match_id INT AUTO_INCREMENT PRIMARY KEY,
+    player1_id INT,
+    player2_id INT,
+    winner_id INT,
+    match_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (player1_id) REFERENCES players(id),
+    FOREIGN KEY (player2_id) REFERENCES players(id),
+    FOREIGN KEY (winner_id) REFERENCES players(id)
+);
+
+Each row = 1 game
+
+Tracks player1 vs player2 and winner
+
+
+CREATE VIEW leaderboard AS
+SELECT username, wins, losses, 
+       (wins / NULLIF((wins + losses), 0)) * 100 AS win_rate
+FROM players
+ORDER BY wins DESC, win_rate DESC;
+
+Use this to display top players sorted by win rate & number of wins.
