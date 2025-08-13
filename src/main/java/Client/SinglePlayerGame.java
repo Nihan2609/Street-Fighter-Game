@@ -38,6 +38,7 @@ public class SinglePlayerGame {
         private final double BOT_SPEED = 2.5;
 
         private final Set<KeyCode> pressedKeys = new HashSet<>();
+        private AnimationTimer gameLoop;
 
         public GameStage() {
             ImageView background = new ImageView(new Image(getClass().getResourceAsStream("/images/Dream.gif")));
@@ -70,7 +71,10 @@ public class SinglePlayerGame {
             scene.setOnKeyPressed(e -> pressedKeys.add(e.getCode()));
             scene.setOnKeyReleased(e -> pressedKeys.remove(e.getCode()));
 
-            AnimationTimer gameLoop = new AnimationTimer() {
+            // 🔊 Start background music
+            Sound.backMusic();
+
+            gameLoop = new AnimationTimer() {
                 private long lastAttackTime = 0;
                 private long lastBotAttack = 0;
 
@@ -115,11 +119,9 @@ public class SinglePlayerGame {
                     }
 
                     if (playerHealth <= 0) {
-                        stop();
-                        showGameOverDialog("Bot");
+                        endGame("Bot");
                     } else if (botHealth <= 0) {
-                        stop();
-                        showGameOverDialog(username);
+                        endGame(username);
                     }
                 }
             };
@@ -128,10 +130,21 @@ public class SinglePlayerGame {
             this.setTitle("Single Player - Street Fighter");
             this.setScene(scene);
             container.requestFocus();
+
+            this.setOnCloseRequest(e -> {
+                Sound.stopBackMusic();
+                if (gameLoop != null) gameLoop.stop();
+            });
         }
 
         private boolean checkCollision(Fighter attacker, Fighter defender) {
             return Math.abs(attacker.getX() - defender.getX()) <= 60;
+        }
+
+        private void endGame(String winner) {
+            if (gameLoop != null) gameLoop.stop();
+            Sound.stopBackMusic();
+            showGameOverDialog(winner);
         }
 
         private void showGameOverDialog(String winner) {
