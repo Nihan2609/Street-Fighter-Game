@@ -126,7 +126,5 @@ public class LoginUI extends Application {
 
     public static void main(String[] args) {
         launch(args);
-
-
     }
 }
