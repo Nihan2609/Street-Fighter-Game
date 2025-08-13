@@ -11,6 +11,9 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 
 
 public class LoginUI extends Application {
@@ -24,7 +27,7 @@ public class LoginUI extends Application {
 
         Button loginBtn = new Button("Login");
         Button signupBtn = new Button("Sign Up");
-        Button leaderboardBtn = new Button("View Leaderboard");
+        Hyperlink leaderboardLink = new Hyperlink("View Leaderboard");
 
         // Build a form grid
         GridPane form = new GridPane();
@@ -36,25 +39,43 @@ public class LoginUI extends Application {
         form.add(passwordField, 1, 1);
         GridPane.setHgrow(usernameField, Priority.ALWAYS);
         GridPane.setHgrow(passwordField, Priority.ALWAYS);
+        usernameField.setPrefWidth(220);
+        passwordField.setPrefWidth(220);
 
         // Action buttons
         HBox actions = new HBox(10, loginBtn, signupBtn);
         actions.setAlignment(Pos.CENTER);
+        loginBtn.setPrefWidth(120);
+        signupBtn.setPrefWidth(120);
 
         // Title
         Label title = new Label("Street Fighter");
-        title.getStyleClass().add("login-title");
+        title.setFont(Font.font("System", FontWeight.BOLD, 22));
 
         // Card container
-        VBox card = new VBox(16, title, form, actions, leaderboardBtn);
+        VBox card = new VBox(16, title, form, actions, leaderboardLink);
         card.setAlignment(Pos.CENTER);
         card.setPadding(new Insets(20));
         card.setMaxWidth(320);
-        card.getStyleClass().add("login-card");
+        card.setBackground(new Background(new BackgroundFill(
+                Color.rgb(255, 255, 255, 0.22),
+                new CornerRadii(16),
+                Insets.EMPTY
+        )));
+        card.setBorder(new Border(new BorderStroke(
+                Color.rgb(255, 255, 255, 0.25),
+                BorderStrokeStyle.SOLID,
+                new CornerRadii(16),
+                new BorderWidths(1)
+        )));
+        DropShadow shadow = new DropShadow();
+        shadow.setRadius(16);
+        shadow.setOffsetY(6);
+        shadow.setColor(Color.rgb(0, 0, 0, 0.45));
+        card.setEffect(shadow);
 
         // Root with background image and subtle overlay
         StackPane root = new StackPane();
-        root.getStyleClass().add("login-root");
 
         ImageView bgView = new ImageView(new Image(getClass().getResource("/images/LogBack.jpeg").toExternalForm()));
         bgView.setPreserveRatio(true);
@@ -113,16 +134,15 @@ public class LoginUI extends Application {
             }
         });
 
-        // --- Leaderboard Button ---
-        leaderboardBtn.setOnAction(e -> LeaderboardUI.display());
-        leaderboardBtn.getStyleClass().add("link-button");
+        // --- Leaderboard Link ---
+        leaderboardLink.setOnAction(e -> LeaderboardUI.display());
 
         Scene scene = new Scene(root, 420, 520);
-        scene.getStylesheets().add(getClass().getResource("/styles/login.css").toExternalForm());
 
         primaryStage.setTitle("Street Fighter Login");
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
+        primaryStage.getIcons().add(new Image(getClass().getResource("/images/cover.jpg").toExternalForm()));
         primaryStage.show();
     }
 
@@ -158,7 +178,6 @@ public class LoginUI extends Application {
 
 
         Scene scene = new Scene(dialogLayout, 250, 180);
-        scene.getStylesheets().add(getClass().getResource("/styles/login.css").toExternalForm());
         dialog.setScene(scene);
         dialog.show();
     }
