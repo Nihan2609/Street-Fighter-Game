@@ -1,0 +1,72 @@
+/* Root background tweaks */
+.login-root {
+	-fx-font-family: "Segoe UI", "Inter", system-ui, sans-serif;
+	-fx-font-size: 13px;
+	-fx-background-color: #111;
+}
+
+/* Card */
+.login-card {
+	-fx-background-color: rgba(255,255,255,0.10);
+	-fx-background-radius: 16px;
+	-fx-border-radius: 16px;
+	-fx-border-color: rgba(255,255,255,0.25);
+	-fx-border-width: 1px;
+	-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.45), 16, 0.2, 0, 6);
+}
+
+.login-title {
+	-fx-text-fill: #FFFFFF;
+	-fx-font-size: 22px;
+	-fx-font-weight: 700;
+	-fx-padding: 0 0 8 0;
+}
+
+.label {
+	-fx-text-fill: #EDEDED;
+}
+
+.text-field, .password-field {
+	-fx-background-color: rgba(255,255,255,0.85);
+	-fx-background-radius: 8px;
+	-fx-border-radius: 8px;
+	-fx-padding: 8 10 8 10;
+}
+
+.button {
+	-fx-background-color: linear-gradient(to bottom, #ff6b6b, #c73866);
+	-fx-text-fill: white;
+	-fx-background-radius: 10px;
+	-fx-padding: 8 14 8 14;
+	-fx-font-weight: 700;
+	-fx-cursor: hand;
+}
+
+.button:default {
+	-fx-effect: dropshadow(gaussian, rgba(255, 107, 107, 0.6), 18, 0.2, 0, 0);
+}
+
+.button:hover {
+	-fx-background-color: linear-gradient(to bottom, #ff7b7b, #d14b75);
+}
+
+.button:pressed {
+	-fx-background-color: linear-gradient(to bottom, #e85c5c, #b2355e);
+}
+
+/* Link-like button for leaderboard */
+.link-button {
+	-fx-background-color: transparent;
+	-fx-text-fill: #c7d2fe;
+	-fx-underline: true;
+	-fx-padding: 6 8 0 8;
+}
+
+.link-button:hover {
+	-fx-text-fill: white;
+}
+
+/* Dialog styling inherits */
+.dialog-pane {
+	-fx-background-color: #1a1a1a;
+}

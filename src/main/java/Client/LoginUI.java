@@ -8,6 +8,9 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 
 
 public class LoginUI extends Application {
@@ -23,29 +26,59 @@ public class LoginUI extends Application {
         Button signupBtn = new Button("Sign Up");
         Button leaderboardBtn = new Button("View Leaderboard");
 
+        // Build a form grid
+        GridPane form = new GridPane();
+        form.setHgap(12);
+        form.setVgap(12);
+        form.add(new Label("Username"), 0, 0);
+        form.add(usernameField, 1, 0);
+        form.add(new Label("Password"), 0, 1);
+        form.add(passwordField, 1, 1);
+        GridPane.setHgrow(usernameField, Priority.ALWAYS);
+        GridPane.setHgrow(passwordField, Priority.ALWAYS);
 
-        VBox layout = new VBox(10,
-                new Label("Username:"), usernameField,
-                new Label("Password:"), passwordField,
-                loginBtn, signupBtn, leaderboardBtn
+        // Action buttons
+        HBox actions = new HBox(10, loginBtn, signupBtn);
+        actions.setAlignment(Pos.CENTER);
+
+        // Title
+        Label title = new Label("Street Fighter");
+        title.getStyleClass().add("login-title");
+
+        // Card container
+        VBox card = new VBox(16, title, form, actions, leaderboardBtn);
+        card.setAlignment(Pos.CENTER);
+        card.setPadding(new Insets(20));
+        card.setMaxWidth(320);
+        card.getStyleClass().add("login-card");
+
+        // Root with background image and subtle overlay
+        StackPane root = new StackPane();
+        root.getStyleClass().add("login-root");
+
+        ImageView bgView = new ImageView(new Image(getClass().getResource("/images/LogBack.jpeg").toExternalForm()));
+        bgView.setPreserveRatio(true);
+        bgView.setSmooth(true);
+        bgView.fitWidthProperty().bind(root.widthProperty());
+        bgView.fitHeightProperty().bind(root.heightProperty());
+
+        Rectangle overlay = new Rectangle();
+        overlay.setFill(Color.rgb(0, 0, 0, 0.45));
+        overlay.widthProperty().bind(root.widthProperty());
+        overlay.heightProperty().bind(root.heightProperty());
+
+        root.getChildren().addAll(bgView, overlay, card);
+        StackPane.setAlignment(card, Pos.CENTER);
+
+        // Layout padding
+        StackPane.setMargin(card, new Insets(24));
+
+        // UX tweaks
+        loginBtn.setDefaultButton(true);
+        loginBtn.disableProperty().bind(
+                usernameField.textProperty().isEmpty()
+                        .or(passwordField.textProperty().isEmpty())
         );
-
-
-
-        //background image
-        BackgroundImage bg = new BackgroundImage(
-                new Image(getClass().getResource("/images/LogBack.jpeg").toExternalForm()),
-                BackgroundRepeat.NO_REPEAT,
-                BackgroundRepeat.NO_REPEAT,
-                BackgroundPosition.CENTER,
-                new BackgroundSize(300, 350, false, false, false, false)
-        );
-
-        layout.setBackground(new Background(bg));
-
-
-        layout.setPadding(new Insets(20));
-        layout.setAlignment(Pos.CENTER);
 
         // --- Login Handler ---
         loginBtn.setOnAction(e -> {
@@ -82,9 +115,14 @@ public class LoginUI extends Application {
 
         // --- Leaderboard Button ---
         leaderboardBtn.setOnAction(e -> LeaderboardUI.display());
+        leaderboardBtn.getStyleClass().add("link-button");
+
+        Scene scene = new Scene(root, 420, 520);
+        scene.getStylesheets().add(getClass().getResource("/styles/login.css").toExternalForm());
 
         primaryStage.setTitle("Street Fighter Login");
-        primaryStage.setScene(new Scene(layout, 300, 350));
+        primaryStage.setScene(scene);
+        primaryStage.setResizable(false);
         primaryStage.show();
     }
 
@@ -120,6 +158,7 @@ public class LoginUI extends Application {
 
 
         Scene scene = new Scene(dialogLayout, 250, 180);
+        scene.getStylesheets().add(getClass().getResource("/styles/login.css").toExternalForm());
         dialog.setScene(scene);
         dialog.show();
     }
