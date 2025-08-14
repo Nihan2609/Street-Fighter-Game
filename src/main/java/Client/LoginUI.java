@@ -9,7 +9,6 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.scene.image.Image;
 
-
 public class LoginUI extends Application {
 
     @Override
@@ -23,26 +22,25 @@ public class LoginUI extends Application {
         Button signupBtn = new Button("Sign Up");
         Button leaderboardBtn = new Button("View Leaderboard");
 
+        // Added a welcoming label at the top
+        Label titleLabel = new Label("Welcome to Street Fighter!"); // CHANGED
+        titleLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;"); // CHANGED
 
         VBox layout = new VBox(10,
+                titleLabel, // CHANGED
                 new Label("Username:"), usernameField,
                 new Label("Password:"), passwordField,
-                loginBtn, signupBtn, leaderboardBtn
-        );
+                loginBtn, signupBtn, leaderboardBtn);
 
-
-
-        //background image
+        // background image
         BackgroundImage bg = new BackgroundImage(
                 new Image(getClass().getResource("/images/LogBack.jpeg").toExternalForm()),
                 BackgroundRepeat.NO_REPEAT,
                 BackgroundRepeat.NO_REPEAT,
                 BackgroundPosition.CENTER,
-                new BackgroundSize(300, 350, false, false, false, false)
-        );
+                new BackgroundSize(300, 350, false, false, false, false));
 
         layout.setBackground(new Background(bg));
-
 
         layout.setPadding(new Insets(20));
         layout.setAlignment(Pos.CENTER);
@@ -99,10 +97,9 @@ public class LoginUI extends Application {
         playMultiBtn.setMaxWidth(Double.MAX_VALUE);
 
         VBox dialogLayout = new VBox(15,
-                new Label("Choose a game mode:"),
+                new Label("Choose game mode:"),
                 playPcBtn,
-                playMultiBtn
-        );
+                playMultiBtn);
         dialogLayout.setAlignment(Pos.CENTER);
         dialogLayout.setPadding(new Insets(20));
 
@@ -117,7 +114,6 @@ public class LoginUI extends Application {
             dialog.close();
             GameClient.openMultiplayer(username);
         });
-
 
         Scene scene = new Scene(dialogLayout, 250, 180);
         dialog.setScene(scene);
