@@ -22,12 +22,11 @@ public class LoginUI extends Application {
         Button signupBtn = new Button("Sign Up");
         Button leaderboardBtn = new Button("View Leaderboard");
 
-        // Added a welcoming label at the top
-        Label titleLabel = new Label("Welcome to Street Fighter!"); // CHANGED
-        titleLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;"); // CHANGED
+        Label titleLabel = new Label("Welcome to Street Fighter!"); 
+        titleLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
 
         VBox layout = new VBox(10,
-                titleLabel, // CHANGED
+
                 new Label("Username:"), usernameField,
                 new Label("Password:"), passwordField,
                 loginBtn, signupBtn, leaderboardBtn);
