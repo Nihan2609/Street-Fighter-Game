@@ -6,5 +6,4 @@ module com.example.game {
 
 
     opens Client to javafx.graphics,javafx.fxml;
-    exports com.example.game;
 }

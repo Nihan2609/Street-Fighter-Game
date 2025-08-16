@@ -83,12 +83,12 @@ public class DatabaseManager {
     }
 
 
-    // 🔗 Get DB connection
+    //  Get DB connection
     public static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
     }
 
-    // ✅ Register player
+    //  Register player
     public static boolean registerPlayer(String username, String password) {
         String sql = "INSERT INTO players (username, password) VALUES (?, ?)";
 
@@ -96,7 +96,7 @@ public class DatabaseManager {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, username);
-            stmt.setString(2, password); // plain texxt
+            stmt.setString(2, password); 
             stmt.executeUpdate();
             System.out.println("Player registered successfully!");
             return true;
@@ -108,7 +108,7 @@ public class DatabaseManager {
         }
     }
 
-    // 🔐 Login player
+    //  Login player
     public static boolean loginPlayer(String username, String password) {
         String sql = "SELECT * FROM players WHERE username = ? AND password = ?";
 
@@ -119,7 +119,7 @@ public class DatabaseManager {
             stmt.setString(2, password);
             ResultSet rs = stmt.executeQuery();
 
-            return rs.next(); // true = match found
+            return rs.next(); // 
 
         } catch (SQLException e) {
             System.out.println("Error during login.");
@@ -128,7 +128,7 @@ public class DatabaseManager {
         }
     }
 
-    // 🧠 Record match result
+    // Record match result
     public static void recordMatch(int player1Id, int player2Id, int winnerId) {
         String matchSql = "INSERT INTO matches (player1_id, player2_id, winner_id) VALUES (?, ?, ?)";
         String updateWinSql = "UPDATE players SET wins = wins + 1 WHERE id = ?";
@@ -167,7 +167,7 @@ public class DatabaseManager {
         }
     }
 
-    // 🏆 Show leaderboard
+    //  Show leaderboard
     public static void showLeaderboard() {
         String sql = "SELECT username, wins, losses FROM players ORDER BY wins DESC";
 

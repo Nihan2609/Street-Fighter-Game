@@ -15,7 +15,6 @@ import javafx.stage.Stage;
 import javafx.scene.Group;
 
 import java.util.HashSet;
-import java.util.Random;
 import java.util.Set;
 
 public class SinglePlayerGame {
@@ -214,7 +213,6 @@ class Fighter {
             body.setY(FLOOR_Y);
         }
     }
-
 
     public boolean onGround() {
         return body.getY() >= FLOOR_Y;
