@@ -8,60 +8,51 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.scene.image.Image;
-import javafx.scene.paint.Color;
+
 
 public class LoginUI extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-
+        // Username & Password
         Label userLabel = new Label("Username:");
-        userLabel.setTextFill(Color.WHITE);
+        userLabel.setTextFill(Color.WHITE); // White text
         TextField usernameField = new TextField();
         usernameField.setPromptText("Enter username");
 
         Label passLabel = new Label("Password:");
-        passLabel.setTextFill(Color.WHITE);
+        passLabel.setTextFill(Color.WHITE); // White text
         PasswordField passwordField = new PasswordField();
         passwordField.setPromptText("Enter password");
 
-
+        // Buttons
         Button loginBtn = new Button("Login");
         Button signupBtn = new Button("Sign Up");
         Button leaderboardBtn = new Button("View Leaderboard");
 
-        loginBtn.setMaxWidth(Double.MAX_VALUE);
-        signupBtn.setMaxWidth(Double.MAX_VALUE);
-        leaderboardBtn.setMaxWidth(Double.MAX_VALUE);
 
-
-        VBox formBox = new VBox(12,
-                userLabel, usernameField,
-                passLabel, passwordField,
+        VBox layout = new VBox(10,
+                new Label("Username:"), usernameField,
+                new Label("Password:"), passwordField,
                 loginBtn, signupBtn, leaderboardBtn
         );
-        formBox.setAlignment(Pos.CENTER);
-        formBox.setPadding(new Insets(20));
-        formBox.setStyle("-fx-background-color: rgba(0, 0, 0, 0.6); -fx-background-radius: 12;");
 
-        // Background Image
+
+
+        //background image
         BackgroundImage bg = new BackgroundImage(
                 new Image(getClass().getResource("/images/LogBack.jpeg").toExternalForm()),
                 BackgroundRepeat.NO_REPEAT,
                 BackgroundRepeat.NO_REPEAT,
                 BackgroundPosition.CENTER,
-                new BackgroundSize(400, 500, true, true, true, false)
+                new BackgroundSize(300, 350, false, false, false, false)
         );
 
-        StackPane root = new StackPane();
-        root.setBackground(new Background(bg));
-        root.getChildren().add(formBox);
+        layout.setBackground(new Background(bg));
 
-        Scene scene = new Scene(root, 400, 500);
 
-        primaryStage.setTitle("Street Fighter Login");
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        layout.setPadding(new Insets(20));
+        layout.setAlignment(Pos.CENTER);
 
         // --- Login Handler ---
         loginBtn.setOnAction(e -> {
@@ -98,6 +89,10 @@ public class LoginUI extends Application {
 
         // --- Leaderboard Button ---
         leaderboardBtn.setOnAction(e -> LeaderboardUI.display());
+
+        primaryStage.setTitle("Street Fighter Login");
+        primaryStage.setScene(new Scene(layout, 300, 350));
+        primaryStage.show();
     }
 
     private void showGameModeDialog(String username) {
@@ -122,12 +117,14 @@ public class LoginUI extends Application {
             dialog.close();
             SinglePlayerGame.username = username;
             SinglePlayerGame.openSinglePlayer(username);
+
         });
 
         playMultiBtn.setOnAction(ev -> {
             dialog.close();
             GameClient.openMultiplayer(username);
         });
+
 
         Scene scene = new Scene(dialogLayout, 250, 180);
         dialog.setScene(scene);
