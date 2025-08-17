@@ -8,9 +8,6 @@ public class Sound implements LineListener {
     private volatile boolean playCompleted;
     private static Clip backgroundClip;
 
-    /**
-     * Play a sound once (non-looping).
-     */
     void play(java.net.URL audioResourceUrl) {
         new Thread(() -> {
             try (AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioResourceUrl)) {
@@ -66,9 +63,7 @@ public class Sound implements LineListener {
         }
     }
 
-    /**
-     * Start background music when match begins.
-     */
+
     public static void backMusic() {
         Sound background = new Sound();
         java.net.URL audioResource = Sound.class.getResource("/sounds/rain.wav"); // change to your m4a/wav file
@@ -79,9 +74,7 @@ public class Sound implements LineListener {
         }
     }
 
-    /**
-     * Stop background music.
-     */
+
     public static void stopBackMusic() {
         if (backgroundClip != null && backgroundClip.isOpen()) {
             backgroundClip.stop();
@@ -91,9 +84,7 @@ public class Sound implements LineListener {
         }
     }
 
-    /**
-     * Play punch sound once.
-     */
+
     public static void punch() {
         Sound player = new Sound();
         java.net.URL audioResource = Sound.class.getResource("/sounds/2BH.wav");

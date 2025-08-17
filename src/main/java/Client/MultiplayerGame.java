@@ -1,206 +1,200 @@
 package Client;
 
 import javafx.animation.AnimationTimer;
-import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.control.Label;
 import javafx.stage.Stage;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
-public class MultiplayerGame extends Application {
+public class MultiplayerGame {
 
-    private static final int SERVER_PORT = 9999;  // your server's UDP port
-    private static final String SERVER_IP = "127.0.0.1"; // server IP or hostname
+    public static String username = "Player";
 
-    private DatagramSocket socket;
-    private InetAddress serverAddress;
-
-    private Set<KeyCode> pressedKeys = new HashSet<>();
-
-    private Player player, opponent;
-    private ProgressBar playerHealthBar, opponentHealthBar;
-    private double playerHealth = 1.0, opponentHealth = 1.0;
-
-    public MultiplayerGame() throws Exception {
-        socket = new DatagramSocket();
-        serverAddress = InetAddress.getByName(SERVER_IP);
+    public static void openMultiplayer(String playerName) {
+        username = playerName;
+        Platform.runLater(() -> new GameStage().show());
     }
 
-    public void start(Stage stage) {
-        Group root = new Group();
+    private static class GameStage extends Stage {
 
-        ImageView background = new ImageView(new Image(getClass().getResourceAsStream("/images/Dream.gif")));
-        background.setFitWidth(800);
-        background.setFitHeight(400);
-        root.getChildren().add(background);
+        private Fighter player;
+        private Map<String, Fighter> opponents = new HashMap<>();
+        private Map<String, ProgressBar> opponentHealthBars = new HashMap<>();
 
-        player = new Player("/images/player.gif", 100, 220, 80, 120, root);
-        opponent = new Player("/images/bot.gif", 600, 220, 80, 120, root);
+        private ProgressBar playerHealthBar;
+        private double playerHealth = 1.0;
 
-        playerHealthBar = new ProgressBar(playerHealth);
-        playerHealthBar.setPrefWidth(150);
-        playerHealthBar.setLayoutX(50);
-        playerHealthBar.setLayoutY(20);
+        private final Set<KeyCode> pressedKeys = new HashSet<>();
+        private AnimationTimer gameLoop;
 
-        opponentHealthBar = new ProgressBar(opponentHealth);
-        opponentHealthBar.setPrefWidth(150);
-        opponentHealthBar.setLayoutX(600);
-        opponentHealthBar.setLayoutY(20);
+        private DatagramSocket socket;
+        private InetAddress serverAddress;
+        private final int SERVER_PORT = 5555;
+        private final String SERVER_IP = "127.0.0.1";
 
-        Pane overlay = new Pane(playerHealthBar, opponentHealthBar);
-        overlay.setPickOnBounds(false);
+        private long lastAttackTime = 0;
 
-        StackPane container = new StackPane();
-        container.getChildren().addAll(root, overlay);
-
-        Scene scene = new Scene(container, 800, 400);
-
-        scene.setOnKeyPressed(e -> pressedKeys.add(e.getCode()));
-        scene.setOnKeyReleased(e -> pressedKeys.remove(e.getCode()));
-
-        AnimationTimer gameLoop = new AnimationTimer() {
-            private long lastSend = 0;
-
-            @Override
-            public void handle(long now) {
-                // Handle player movement input
-                if (pressedKeys.contains(KeyCode.A)) player.moveLeft();
-                if (pressedKeys.contains(KeyCode.D)) player.moveRight();
-                if (pressedKeys.contains(KeyCode.W)) player.jump();
-                player.applyGravity();
-
-                // Send player position and actions to server every 50ms
-                if (now - lastSend > 50_000_000) {
-                    sendPlayerState();
-                    lastSend = now;
-                }
-            }
-        };
-
-        gameLoop.start();
-
-        // Thread to listen to opponent updates from server
-        new Thread(this::listenForOpponentUpdates).start();
-
-        stage.setTitle("Multiplayer - Street Fighter");
-        stage.setScene(scene);
-        stage.show();
-    }
-
-    private void sendPlayerState() {
-        try {
-            String state = player.getX() + "," + player.getY(); // add more info if needed
-            byte[] buf = state.getBytes();
-            DatagramPacket packet = new DatagramPacket(buf, buf.length, serverAddress, SERVER_PORT);
-            socket.send(packet);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void listenForOpponentUpdates() {
-        byte[] buffer = new byte[256];
-        while (true) {
+        public GameStage() {
             try {
-                DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-                socket.receive(packet);
-                String data = new String(packet.getData(), 0, packet.getLength());
-                String[] parts = data.split(",");
-                double x = Double.parseDouble(parts[0]);
-                double y = Double.parseDouble(parts[1]);
+                socket = new DatagramSocket();
+                serverAddress = InetAddress.getByName(SERVER_IP);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
-                Platform.runLater(() -> {
-                    opponent.setX(x);
-                    opponent.setY(y);
-                });
+            // Background
+            ImageView background = new ImageView(new Image(getClass().getResourceAsStream("/images/Dream.gif")));
+            background.setFitWidth(800);
+            background.setFitHeight(400);
+
+            Group root = new Group(background);
+
+            // Player
+            player = new Fighter("/images/player.gif", 100, 220, 80, 120, root);
+
+            // Health bar
+            playerHealthBar = new ProgressBar(playerHealth);
+            playerHealthBar.setPrefWidth(150);
+            playerHealthBar.setLayoutX(50);
+            playerHealthBar.setLayoutY(20);
+
+            Pane overlay = new Pane(playerHealthBar);
+            overlay.setPickOnBounds(false);
+
+            StackPane container = new StackPane(root, overlay);
+            Scene scene = new Scene(container, 800, 400);
+
+            // Key handling
+            scene.setOnKeyPressed(e -> pressedKeys.add(e.getCode()));
+            scene.setOnKeyReleased(e -> pressedKeys.remove(e.getCode()));
+
+            // Game loop
+            gameLoop = new AnimationTimer() {
+                private long lastSend = 0;
+
+                @Override
+                public void handle(long now) {
+                    handlePlayerInput(now);
+                    if (now - lastSend > 50_000_000) { // ~50ms
+                        sendPlayerState();
+                        lastSend = now;
+                    }
+                }
+            };
+            gameLoop.start();
+
+            // Listen for opponents
+            new Thread(this::listenForOpponentUpdates).start();
+
+            this.setTitle("Multiplayer - Street Fighter");
+            this.setScene(scene);
+            container.requestFocus();
+
+            this.setOnCloseRequest(e -> {
+                if (gameLoop != null) gameLoop.stop();
+            });
+        }
+
+        private void sendAttack() {
+            try {
+                String msg = "ATTACK," + username;
+                byte[] buf = msg.getBytes();
+                DatagramPacket packet = new DatagramPacket(buf, buf.length, serverAddress, SERVER_PORT);
+                socket.send(packet);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-    }
 
-    // Player class (similar to your Fighter class)
-    private static class Player {
-        private ImageView body;
-        private double dy = 0;
-        private final double JUMP_FORCE = -15;
-        private final double FLOOR_Y = 220;
-        private final double gravity = 1;
 
-        public Player(String imagePath, double x, double y, double width, double height, Group root) {
-            Image image = new Image(getClass().getResourceAsStream(imagePath));
-            body = new ImageView(image);
-            body.setX(x);
-            body.setY(y);
-            body.setFitWidth(width);
-            body.setFitHeight(height);
-            body.setPreserveRatio(true);
-            body.setSmooth(true);
-            body.setCache(true);
-            root.getChildren().add(body);
+        private void handlePlayerInput(long now) {
+            if (pressedKeys.contains(KeyCode.A)) player.moveLeft();
+            if (pressedKeys.contains(KeyCode.D)) player.moveRight();
+            if (pressedKeys.contains(KeyCode.SPACE)) player.jump();
+            player.applyGravity();
+
+            if (pressedKeys.contains(KeyCode.J) && now - lastAttackTime > 500_000_000) {
+                sendAttack();
+                lastAttackTime = now;
+            }
+
         }
 
-        public void moveLeft() {
-            body.setX(body.getX() - 5);
-        }
-
-        public void moveRight() {
-            body.setX(body.getX() + 5);
-        }
-
-        public void jump() {
-            if (onGround()) {
-                dy = JUMP_FORCE;
+        private void sendPlayerState() {
+            try {
+                String state = username + "," + player.getX() + "," + player.getY() + "," + playerHealth;
+                byte[] buf = state.getBytes();
+                DatagramPacket packet = new DatagramPacket(buf, buf.length, serverAddress, SERVER_PORT);
+                socket.send(packet);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
 
-        public void applyGravity() {
-            if (!onGround()) {
-                dy += gravity;
-                body.setY(body.getY() + dy);
-            } else {
-                dy = 0;
-                body.setY(FLOOR_Y);
+
+        private void listenForOpponentUpdates() {
+            byte[] buffer = new byte[1024];
+            while (true) {
+                try {
+                    DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+                    socket.receive(packet);
+                    String data = new String(packet.getData(), 0, packet.getLength());
+                    String[] playersData = data.split(";");
+
+                    Platform.runLater(() -> {
+                        for (String p : playersData) {
+                            if (p.isEmpty()) continue;
+                            String[] parts = p.split(",");
+                            String uname = parts[0];
+                            double x = Double.parseDouble(parts[1]);
+                            double y = Double.parseDouble(parts[2]);
+                            double health = Double.parseDouble(parts[3]);
+
+                            if (uname.equals(username)) continue; // skip ourselves
+
+                            Fighter f = opponents.get(uname);
+                            if (f == null) {
+                                f = new Fighter("/images/bot.gif", x, y, 80, 120, ((Group) player.getBody().getParent()));
+                                opponents.put(uname, f);
+
+                                ProgressBar bar = new ProgressBar(health);
+                                bar.setPrefWidth(150);
+                                bar.setLayoutX(600);
+                                bar.setLayoutY(20 + 30 * opponents.size()); // stack bars
+                                opponentHealthBars.put(uname, bar);
+                                ((Pane) ((StackPane) getScene().getRoot()).getChildren().get(1)).getChildren().add(bar);
+                            } else {
+                                f.setX(x);
+                                f.setY(y);
+                                opponentHealthBars.get(uname).setProgress(health);
+                            }
+                        }
+                    });
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
 
-        public boolean onGround() {
-            return body.getY() >= FLOOR_Y;
-        }
-
-        public double getX() {
-            return body.getX();
-        }
-
-        public void setX(double x) {
-            body.setX(x);
-        }
-
-        public double getY() {
-            return body.getY();
-        }
-
-        public void setY(double y) {
-            body.setY(y);
-        }
     }
-
-    public static void main(String[] args) {
-        launch(args);
-    }
-
 }
+
+
 
