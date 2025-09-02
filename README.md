@@ -18,7 +18,7 @@ Combining **JavaFX UI elements**, **custom game logic**, and multimedia assets, 
 ## 🛠️ Technologies
 - Java SE & JavaFX
 - Scene Builder for FXML-based layouts
-- Custom assets (PNG images, WAV audio, TTF fonts)
-- Maven for build management
+- Custom assets (PNG images, WAV audio)
+
 
 
