@@ -9,10 +9,12 @@ public class GameServer {
 
     private static final int PORT = 5555;
     private static ConcurrentHashMap<String, PlayerInfo> players = new ConcurrentHashMap<>();
+    private static final double DAMAGE = 0.1;
 
     public static void main(String[] args) throws Exception {
         DatagramSocket serverSocket = new DatagramSocket(PORT);
         System.out.println("Starting Game Server on port " + PORT);
+
 
         byte[] buffer = new byte[1024];
 
@@ -22,7 +24,7 @@ public class GameServer {
 
             String data = new String(packet.getData(), 0, packet.getLength());
 
-            // --- ATTACK packet ---
+
             if (data.startsWith("ATTACK")) {
                 String[] parts = data.split(",");
                 String attacker = parts[1];
@@ -38,7 +40,7 @@ public class GameServer {
                             double dx = Math.abs(other.x - attackerInfo.x);
                             double dy = Math.abs(other.y - attackerInfo.y);
                             if (dx < 50 && dy < 50) {
-                                other.health -= 10; // 10 HP damage
+                                other.health -= DAMAGE;
                                 if (other.health < 0) other.health = 0;
                             }
                         }

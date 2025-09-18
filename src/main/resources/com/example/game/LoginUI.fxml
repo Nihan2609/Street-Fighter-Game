@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<StackPane xmlns:fx="http://javafx.com/fxml" fx:controller="Client.LoginUIController">
+
+
+    <ImageView fx:id="bgImage" fitWidth="400" fitHeight="500" preserveRatio="false">
+        <image>
+            <Image url="@../../../images/LogBack.jpeg" />
+        </image>
+    </ImageView>
+
+
+
+    <VBox spacing="12" alignment="CENTER" style="-fx-background-color: rgba(0,0,0,0.6); -fx-background-radius: 12;">
+        <padding>
+            <Insets top="20" right="20" bottom="20" left="20"/>
+        </padding>
+
+        <Label text="Username:" textFill="white" />
+        <TextField fx:id="usernameField" promptText="Enter username" />
+
+        <Label text="Password:" textFill="white" />
+        <PasswordField fx:id="passwordField" promptText="Enter password" />
+
+        <Button fx:id="loginBtn" text="Login" maxWidth="Infinity"/>
+        <Button fx:id="signupBtn" text="Sign Up" maxWidth="Infinity"/>
+        <Button fx:id="leaderboardBtn" text="View Leaderboard" maxWidth="Infinity"/>
+    </VBox>
+
+</StackPane>

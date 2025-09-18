@@ -1,22 +1,20 @@
 package Client;
 
-import javafx.beans.property.*;
-
 public class PlayerRecord {
-    private final StringProperty username = new SimpleStringProperty();
-    private final IntegerProperty wins = new SimpleIntegerProperty();
-    private final IntegerProperty losses = new SimpleIntegerProperty();
-    private final DoubleProperty winRate = new SimpleDoubleProperty();
+    private String username;
+    private int wins;
+    private int losses;
+    private double winRate;
 
-    public PlayerRecord(String u, int w, int l, double r) {
-        username.set(u);
-        wins.set(w);
-        losses.set(l);
-        winRate.set(r);
+    public PlayerRecord(String username, int wins, int losses, double winRate) {
+        this.username = username;
+        this.wins = wins;
+        this.losses = losses;
+        this.winRate = winRate;
     }
 
-    public StringProperty usernameProperty() { return username; }
-    public IntegerProperty winsProperty() { return wins; }
-    public IntegerProperty lossesProperty() { return losses; }
-    public DoubleProperty winRateProperty() { return winRate; }
+    public String getUsername() { return username; }
+    public int getWins() { return wins; }
+    public int getLosses() { return losses; }
+    public double getWinRate() { return winRate; }
 }

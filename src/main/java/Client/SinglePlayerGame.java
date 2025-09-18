@@ -70,7 +70,7 @@ public class SinglePlayerGame {
             scene.setOnKeyPressed(e -> pressedKeys.add(e.getCode()));
             scene.setOnKeyReleased(e -> pressedKeys.remove(e.getCode()));
 
-            // 🔊 Start background music
+
             Sound.backMusic();
 
             gameLoop = new AnimationTimer() {
@@ -166,9 +166,10 @@ class Fighter {
     private ImageView body;
     private double dx = 0;
     private double dy = 0;
-    private double gravity = 1;
+    private final double gravity = 1;
     private final double JUMP_FORCE = -15;
     private final double FLOOR_Y = 220;
+    private final double SCREEN_WIDTH = 800; // screen width
 
     public Fighter(String imagePath, double x, double y, double width, double height, Group root) {
         Image image = new Image(getClass().getResourceAsStream(imagePath));
@@ -185,12 +186,12 @@ class Fighter {
 
     public void moveLeft() {
         dx = -5;
-        body.setX(body.getX() + dx);
+        body.setX(Math.max(0, body.getX() + dx)); // cannot go beyond left
     }
 
     public void moveRight() {
         dx = 5;
-        body.setX(body.getX() + dx);
+        body.setX(Math.min(SCREEN_WIDTH - body.getFitWidth(), body.getX() + dx)); // cannot go beyond right
     }
 
     public void jump() {
@@ -227,7 +228,7 @@ class Fighter {
     }
 
     public void setX(double x) {
-        body.setX(x);
+        body.setX(Math.max(0, Math.min(SCREEN_WIDTH - body.getFitWidth(), x)));
     }
 
     public double getY() {

@@ -50,7 +50,7 @@ public class DatabaseManager {
                 stmt.executeUpdate();
             }
 
-            // player update statis
+
             updateStats(conn, winnerId, true);
             updateStats(conn, loserId, false);
 
@@ -83,12 +83,12 @@ public class DatabaseManager {
     }
 
 
-    //  Get DB connection
+
     public static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
     }
 
-    //  Register player
+
     public static boolean registerPlayer(String username, String password) {
         String sql = "INSERT INTO players (username, password) VALUES (?, ?)";
 
@@ -108,7 +108,7 @@ public class DatabaseManager {
         }
     }
 
-    //  Login player
+
     public static boolean loginPlayer(String username, String password) {
         String sql = "SELECT * FROM players WHERE username = ? AND password = ?";
 
@@ -128,7 +128,7 @@ public class DatabaseManager {
         }
     }
 
-    // Record match result
+
     public static void recordMatch(int player1Id, int player2Id, int winnerId) {
         String matchSql = "INSERT INTO matches (player1_id, player2_id, winner_id) VALUES (?, ?, ?)";
         String updateWinSql = "UPDATE players SET wins = wins + 1 WHERE id = ?";

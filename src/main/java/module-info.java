@@ -5,5 +5,6 @@ module com.example.game {
     requires java.desktop;
 
 
-    opens Client to javafx.graphics,javafx.fxml;
+    opens Client to javafx.graphics,javafx.fxml,javafx.base;
+    opens db to javafx.base, javafx.fxml, javafx.graphics;
 }
