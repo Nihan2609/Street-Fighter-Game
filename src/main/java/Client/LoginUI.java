@@ -6,15 +6,17 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
+import java.util.Objects;
+
 public class LoginUI extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/game/LoginUI.fxml"));
-        Scene scene = new Scene(loader.load(), 400, 500);
+        Scene scene = new Scene(loader.load(), 600, 400);
 
-        primaryStage.setTitle("Street Fighter Login");
-        Image logo = new Image(getClass().getResourceAsStream("/images/logo.jpg"));
+        primaryStage.setTitle("Street Fighter");
+        Image logo = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/logo.jpg")));
         primaryStage.getIcons().add(logo);
 
         primaryStage.setScene(scene);

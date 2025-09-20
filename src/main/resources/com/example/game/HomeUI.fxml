@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Button?>
+<?import javafx.geometry.Insets?>
+<?import javafx.geometry.Pos?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.effect.ColorAdjust?>
+
+<StackPane xmlns:fx="http://javafx.com/fxml"
+           fx:controller="Client.HomeUIController"
+           prefWidth="600" prefHeight="400">
+
+    <!-- Background Image -->
+    <ImageView fx:id="bgImage" fitHeight="400" fitWidth="600" preserveRatio="false">
+        <image>
+            <Image url="@../../../images/HomeBg.jpg" />
+        </image>
+        <effect>
+            <ColorAdjust brightness="0.3"/>
+        </effect>
+    </ImageView>
+
+    <!-- Foreground Content -->
+    <VBox alignment="CENTER" spacing="20">
+        <padding>
+            <Insets top="50" right="50" bottom="50" left="50"/>
+        </padding>
+
+        <Button text="Multiplayer" fx:id="multiplayerBtn"
+                prefWidth="200" prefHeight="40"
+                style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 18px; -fx-background-radius: 8; -fx-cursor: hand;"/>
+
+        <Button text="Vs Bot" fx:id="vsBotBtn"
+                prefWidth="200" prefHeight="40"
+                style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 18px; -fx-background-radius: 8; -fx-cursor: hand;"/>
+
+        <Button text="Leaderboard" fx:id="leaderboardBtn"
+                onAction="#openLeaderboard"
+                prefWidth="200" prefHeight="40"
+                style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 18px; -fx-background-radius: 8; -fx-cursor: hand;"/>
+
+        <Button text="Logout" fx:id="logoutBtn"
+                onAction="#logout"
+                prefWidth="200" prefHeight="40"
+                style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-size: 18px; -fx-background-radius: 8; -fx-cursor: hand;"/>
+    </VBox>
+</StackPane>

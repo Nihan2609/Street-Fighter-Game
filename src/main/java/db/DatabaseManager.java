@@ -5,7 +5,7 @@ import java.sql.*;
 public class DatabaseManager {
     private static final String DB_URL = "jdbc:mysql://localhost:3306/street_fighter_game";
     private static final String DB_USER = "root";
-    private static final String DB_PASS = "1122";
+    private static final String DB_PASS = "212001";
 
     static {
         try {

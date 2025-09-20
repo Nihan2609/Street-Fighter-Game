@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="Client.LeaderboardUIController"
+            prefWidth="600" prefHeight="400"
+            style="-fx-background-color: #1e1e2e;">
+
+    <!-- TableView fills most of the scene -->
+    <TableView fx:id="leaderboardTable" prefWidth="600" prefHeight="350">
+        <columns>
+            <TableColumn fx:id="usernameCol" text="Username" prefWidth="200"/>
+            <TableColumn fx:id="winsCol" text="Wins" prefWidth="100"/>
+            <TableColumn fx:id="lossesCol" text="Losses" prefWidth="100"/>
+            <TableColumn fx:id="winRateCol" text="Win Rate (%)" prefWidth="200"/>
+        </columns>
+    </TableView>
+
+    <!-- Back Button at the bottom -->
+    <Button fx:id="backBtn" text="Back" layoutX="250" layoutY="360" prefWidth="100" prefHeight="30"
+            style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-background-radius: 8; -fx-cursor: hand;"/>
+</AnchorPane>
