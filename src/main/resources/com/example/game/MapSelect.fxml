@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import java.lang.String?>
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="Client.MapSelectController">
+
+    <!-- Title -->
+    <top>
+        <Label text="Select Map"
+               style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: white;"
+               BorderPane.alignment="CENTER" />
+    </top>
+
+    <!-- Center: Map Selector -->
+    <center>
+        <VBox spacing="20" alignment="CENTER">
+            <ComboBox fx:id="mapChoice" prefWidth="200" />
+            <Button fx:id="startBtn" text="Start Game"
+                    style="-fx-font-size: 18px; -fx-background-color: #28a745; -fx-text-fill: white;" />
+        </VBox>
+    </center>
+
+    <!-- Styling -->
+    <stylesheets>
+        <String fx:value="@style.css" />
+    </stylesheets>
+</BorderPane>

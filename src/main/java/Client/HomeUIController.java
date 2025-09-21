@@ -24,6 +24,7 @@ public class HomeUIController {
     public void initialize() {
         leaderboardBtn.setOnAction(e -> openLeaderboard());
         logoutBtn.setOnAction(e -> logout());
+        multiplayerBtn.setOnAction(e ->openMultiplayer());
 
         addHoverEffect(multiplayerBtn, "#2980b9", "#3498db");
         addHoverEffect(vsBotBtn, "#2980b9", "#3498db");
@@ -38,14 +39,26 @@ public class HomeUIController {
                 .replace(hoverColor, normalColor)));
     }
 
+    @FXML
     private void openMultiplayer() {
-        System.out.println("Multiplayer selected");
-        // TODO: Load Multiplayer lobby screen
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/game/ChampSelect.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = (Stage) multiplayerBtn.getScene().getWindow();
+            stage.setScene(new Scene(root, 600, 400));
+            stage.setTitle("Character Select");
+            stage.show();
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
     }
 
+    @FXML
     private void openVsBot() {
         System.out.println("Vs Bot selected");
-        // TODO: Load game scene with AI logic
+
     }
 
     @FXML

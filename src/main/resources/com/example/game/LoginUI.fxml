@@ -4,57 +4,56 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.effect.ColorAdjust?>
+<?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.text.Font?>
-<?import javafx.scene.effect.ColorAdjust?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.text.Font?>
 
-<AnchorPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/24.0.1" fx:controller="Client.LoginUIController">
+<AnchorPane xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Client.LoginUIController">
 
     <ImageView fx:id="bgImage" fitHeight="400" fitWidth="600" preserveRatio="false">
         <image>
             <Image url="@../../../images/LogInBG.jpg" />
         </image>
         <effect>
-            <ColorAdjust brightness="0.3"/>
+            <ColorAdjust brightness="0.3" />
         </effect>
     </ImageView>
 
-    <VBox spacing="12" alignment="CENTER"
-          style="-fx-background-color: rgba(0,0,0,0.7); -fx-background-radius: 16; -fx-padding: 15;">
+    <VBox alignment="CENTER" spacing="12" style="-fx-background-color: rgba(0,0,0,0.7); -fx-background-radius: 16; -fx-padding: 15;">
         <effect>
-            <DropShadow radius="10" spread="0.2" color="black"/>
+            <DropShadow color="black" radius="10" spread="0.2" />
         </effect>
         <!-- Your fields/buttons here -->
     </VBox>
 
     <Label layoutX="200" layoutY="170.0" text="Username:" textFill="Black">
         <font>
-            <Font name="Roboto" size="13.0" />
+            <Font name="Candara Bold Italic" size="14.0" />
         </font>
     </Label>
 
-    <TextField fx:id="usernameField" layoutX="200" layoutY="190.0" prefWidth="200"
-               promptText="Enter username"
-               style="-fx-background-radius: 6; -fx-background-color: white; -fx-font-size: 13px;"/>
+    <TextField fx:id="usernameField" layoutX="200" layoutY="190.0" prefWidth="200" promptText="Enter username" style="-fx-background-radius: 6; -fx-background-color: white; -fx-font-size: 13px;">
+      <font>
+         <Font name="Candara" size="12.0" />
+      </font></TextField>
 
     <Label layoutX="200" layoutY="220.0" text="Password:">
         <font>
-            <Font name="Roboto" size="13.0" />
+            <Font name="Candara Bold Italic" size="14.0" />
         </font>
     </Label>
 
-    <PasswordField fx:id="passwordField" layoutX="200" layoutY="240.0" prefWidth="200"
-                   promptText="Enter password"
-                   style="-fx-background-radius: 6; -fx-background-color: white; -fx-font-size: 13px;"/>
+    <PasswordField fx:id="passwordField" layoutX="200" layoutY="240.0" prefWidth="200" promptText="Enter password" style="-fx-background-radius: 6; -fx-background-color: white; -fx-font-size: 13px;" />
 
-    <Button fx:id="loginBtn" layoutX="200" layoutY="275.0" prefHeight="30" prefWidth="200" text="Login"
-            style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 14px; -fx-background-radius: 8; -fx-cursor: hand;" />
+    <Button fx:id="loginBtn" layoutX="200" layoutY="275.0" prefHeight="30" prefWidth="200" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 14px; -fx-background-radius: 8; -fx-cursor: hand;" text="Login">
+      <font>
+         <Font name="Candara Bold Italic" size="14.0" />
+      </font></Button>
 
-    <Button fx:id="signupBtn" layoutX="200" layoutY="310.0" prefHeight="30" prefWidth="200" text="Sign Up"
-            style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 14px; -fx-background-radius: 8; -fx-cursor: hand;" />
+    <Button fx:id="signupBtn" layoutX="200" layoutY="310.0" prefHeight="30" prefWidth="200" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 14px; -fx-background-radius: 8; -fx-cursor: hand;" text="Sign Up" />
 
 </AnchorPane>

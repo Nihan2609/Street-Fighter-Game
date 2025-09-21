@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
+
+<StackPane xmlns:fx="http://javafx.com/fxml"
+           fx:controller="Client.GameController"
+           prefWidth="800" prefHeight="450">
+
+    <!-- Background (Stage/Map) -->
+    <ImageView fx:id="background"
+               fitWidth="800" fitHeight="450"
+               preserveRatio="false" />
+
+    <!-- UI Layer -->
+    <BorderPane>
+        <!-- Top HUD -->
+        <top>
+            <HBox alignment="CENTER" spacing="20" padding="10">
+                <!-- Player 1 HUD -->
+                <VBox alignment="CENTER_LEFT" spacing="5">
+                    <Label text="Player 1" style="-fx-text-fill: white; -fx-font-size: 14px;"/>
+                    <ProgressBar fx:id="p1Health" prefWidth="250" progress="1.0"/>
+                </VBox>
+
+                <!-- Round Counter -->
+                <VBox alignment="CENTER" spacing="5">
+                    <Label text="Rounds" style="-fx-text-fill: white; -fx-font-size: 16px;"/>
+                    <Label fx:id="roundCounter" text="0 - 0"
+                           style="-fx-text-fill: yellow; -fx-font-size: 18px; -fx-font-weight: bold;"/>
+                </VBox>
+
+                <!-- Player 2 HUD -->
+                <VBox alignment="CENTER_RIGHT" spacing="5">
+                    <Label text="Player 2" style="-fx-text-fill: white; -fx-font-size: 14px;"/>
+                    <ProgressBar fx:id="p2Health" prefWidth="250" progress="1.0"/>
+                </VBox>
+            </HBox>
+        </top>
+
+        <!-- Fighters Area -->
+        <center>
+            <Pane fx:id="arena" prefWidth="800" prefHeight="400">
+                <!-- Player 1 Fighter -->
+                <ImageView fx:id="p1Sprite" fitHeight="200" fitWidth="150"
+                           layoutX="100" layoutY="200"/>
+                <!-- Player 2 Fighter -->
+                <ImageView fx:id="p2Sprite" fitHeight="200" fitWidth="150"
+                           layoutX="550" layoutY="200"/>
+            </Pane>
+        </center>
+    </BorderPane>
+
+</StackPane>
