@@ -1,102 +1,187 @@
 package Client;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
-import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
-import javafx.scene.layout.AnchorPane;
-import javafx.stage.Stage;
-import javafx.scene.effect.ColorAdjust;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.fxml.FXMLLoader;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.control.Label;
+import javafx.stage.Stage;
+
+import java.io.IOException;
 
 public class MapSelectController {
 
-    @FXML private AnchorPane mainPane;
+    // Player choices from ChampSelectController
+    private String player1Choice;
+    private String player2Choice;
+
     @FXML private ImageView map1;
     @FXML private ImageView map2;
     @FXML private ImageView map3;
     @FXML private ImageView map4;
     @FXML private ImageView map5;
     @FXML private ImageView map6;
+    @FXML private Label titleLabel;
     @FXML private Label instructionsLabel;
 
-    private String p1Choice;
-    private String p2Choice;
-
-    private int selectedMapIndex = 0; // 0-5
-    private ImageView[] mapViews;
-    private String[] mapNames = {"Sunken Sanctuary", "City Street", "Hidden Dojo", "Jungle Judgement", "Night sky ", "Showdown"};
+    private String selectedMap = null;
 
     @FXML
-    public void initialize() {
-        mapViews = new ImageView[]{map1, map2, map3, map4, map5, map6};
+    private void initialize() {
+        // Set up click handlers for all maps
+        map1.setOnMouseClicked(this::handleMapSelection);
+        map2.setOnMouseClicked(this::handleMapSelection);
+        map3.setOnMouseClicked(this::handleMapSelection);
+        map4.setOnMouseClicked(this::handleMapSelection);
+        map5.setOnMouseClicked(this::handleMapSelection);
+        map6.setOnMouseClicked(this::handleMapSelection);
 
-        // Add a listener to handle key presses on the scene
-        mainPane.sceneProperty().addListener((obs, oldScene, newScene) -> {
-            if (newScene != null) {
-                newScene.setOnKeyPressed(e -> handleKeyPress(e.getCode()));
-            }
-        });
-
-        updateSelectionHighlight();
+        // Add hover effects
+        addHoverEffects();
     }
 
+    private void addHoverEffects() {
+        ImageView[] maps = {map1, map2, map3, map4, map5, map6};
+
+        for (ImageView map : maps) {
+            map.setOnMouseEntered(e -> {
+                map.setStyle("-fx-effect: dropshadow(gaussian, yellow, 10, 0.5, 0, 0); -fx-cursor: hand;");
+                map.setScaleX(1.1);
+                map.setScaleY(1.1);
+            });
+
+            map.setOnMouseExited(e -> {
+                if (!map.equals(getSelectedImageView())) {
+                    map.setStyle("-fx-effect: null;");
+                    map.setScaleX(1.0);
+                    map.setScaleY(1.0);
+                }
+            });
+        }
+    }
+
+    // Method called by ChampSelectController to set player choices
     public void setPlayerChoices(String p1, String p2) {
-        this.p1Choice = p1;
-        this.p2Choice = p2;
+        this.player1Choice = p1;
+        this.player2Choice = p2;
+        System.out.println("Received player choices: " + p1 + " vs " + p2);
     }
 
-    private void handleKeyPress(KeyCode code) {
-        if (code == KeyCode.A) {
-            selectedMapIndex = (selectedMapIndex - 1 + mapViews.length) % mapViews.length;
-        } else if (code == KeyCode.D) {
-            selectedMapIndex = (selectedMapIndex + 1) % mapViews.length;
-        } else if (code == KeyCode.ENTER) {
-            String mapChoice = getMapName(selectedMapIndex);
+    @FXML
+    private void handleMapSelection(MouseEvent event) {
+        // Reset all map styles first
+        resetMapStyles();
 
-            // Now we actually load the game scene and pass the data
-            loadGame(mapChoice);
+        // Determine which map was selected
+        ImageView selectedImageView = (ImageView) event.getSource();
+        String mapChoice = getMapName(selectedImageView);
+        String mapFile = getMapFile(selectedImageView);
+
+        // Highlight selected map
+        selectedImageView.setStyle("-fx-effect: dropshadow(gaussian, lime, 15, 0.8, 0, 0);");
+        selectedImageView.setScaleX(1.15);
+        selectedImageView.setScaleY(1.15);
+
+        this.selectedMap = mapFile;
+
+        // Update UI
+        instructionsLabel.setText("Selected: " + mapChoice + " - Click again to start fight!");
+        instructionsLabel.setStyle("-fx-text-fill: lime;");
+
+        System.out.println("✅ P1 selected: " + player1Choice);
+        System.out.println("✅ P2 selected: " + player2Choice);
+        System.out.println("✅ Map selected: " + mapChoice + " (" + mapFile + ")");
+
+        // Start the game immediately (or you can require double-click)
+        startFightScene(mapChoice, mapFile);
+    }
+
+    private void resetMapStyles() {
+        ImageView[] maps = {map1, map2, map3, map4, map5, map6};
+        for (ImageView map : maps) {
+            map.setStyle("-fx-effect: null;");
+            map.setScaleX(1.0);
+            map.setScaleY(1.0);
         }
-
-        updateSelectionHighlight();
     }
 
-    private void updateSelectionHighlight() {
-        for (int i = 0; i < mapViews.length; i++) {
-            ColorAdjust ca = new ColorAdjust();
-            if (i == selectedMapIndex) {
-                // Brighter highlight for the selected map
-                ca.setBrightness(0.5);
-            } else {
-                ca.setBrightness(0.0);
-            }
-            mapViews[i].setEffect(ca);
-        }
+    private String getMapName(ImageView imageView) {
+        if (imageView == map1) return "Dojo";
+        if (imageView == map2) return "Street";
+        if (imageView == map3) return "Beach";
+        if (imageView == map4) return "Mountain";
+        if (imageView == map5) return "Factory";
+        if (imageView == map6) return "Temple";
+        return "Unknown";
     }
 
-    private String getMapName(int index) {
-        if (index >= 0 && index < mapNames.length) {
-            return mapNames[index];
-        }
-        return "Unknown Map";
+    private String getMapFile(ImageView imageView) {
+        if (imageView == map1) return "map1";
+        if (imageView == map2) return "map2";
+        if (imageView == map3) return "map3";
+        if (imageView == map4) return "map4";
+        if (imageView == map5) return "map5";
+        if (imageView == map6) return "map6";
+        return "map1"; // default
     }
-    private void loadGame(String mapChoice) {
+
+    private ImageView getSelectedImageView() {
+        if ("map1".equals(selectedMap)) return map1;
+        if ("map2".equals(selectedMap)) return map2;
+        if ("map3".equals(selectedMap)) return map3;
+        if ("map4".equals(selectedMap)) return map4;
+        if ("map5".equals(selectedMap)) return map5;
+        if ("map6".equals(selectedMap)) return map6;
+        return null;
+    }
+
+    private void startFightScene(String mapName, String mapFile) {
         try {
+            // Load the GameScene.fxml
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/game/GameScene.fxml"));
             Parent root = loader.load();
 
-            GameScene controller = loader.getController();
-            controller.startGame(p1Choice, p2Choice, mapChoice);
+            // Get the controller and pass the game data
+            GameSceneController gameController = loader.getController();
 
-            Stage stage = (Stage) mainPane.getScene().getWindow();
-            stage.setScene(new Scene(root, 600, 400));
-            stage.setTitle("Street Fighter");
+            // Pass the selected characters and map to the fight scene
+            gameController.setGameData(player1Choice, player2Choice, mapFile);
+
+            // Create the scene
+            Scene gameScene = new Scene(root, 800, 600);
+
+            // Set up key event handling for the fight scene
+            gameScene.setOnKeyPressed(event -> {
+                // Forward key events to the game canvas
+                root.lookup("#gameCanvas").fireEvent(event);
+            });
+            gameScene.setOnKeyReleased(event -> {
+                // Forward key events to the game canvas
+                root.lookup("#gameCanvas").fireEvent(event);
+            });
+
+            // Get current stage and set the new scene
+            Stage stage = (Stage) map1.getScene().getWindow();
+            stage.setScene(gameScene);
+            stage.setTitle("Street Fighter - " + mapName + " (" + player1Choice + " vs " + player2Choice + ")");
             stage.show();
 
-        } catch (Exception ex) {
-            ex.printStackTrace();
+            // Important: Request focus on the canvas for input handling
+            javafx.application.Platform.runLater(() -> {
+                root.lookup("#gameCanvas").requestFocus();
+            });
+
+            System.out.println("🚀 Fight scene launched!");
+
+        } catch (IOException e) {
+            System.err.println("Error loading fight scene:");
+            e.printStackTrace();
+
+            // Fallback: show error message
+            instructionsLabel.setText("Error loading fight scene! Check console for details.");
+            instructionsLabel.setStyle("-fx-text-fill: red;");
         }
     }
 }

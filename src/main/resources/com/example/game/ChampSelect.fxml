@@ -7,14 +7,16 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane fx:id="mainPane" prefHeight="400" prefWidth="600" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Client.ChampSelectController">
+<?import javafx.scene.effect.DropShadow?>
+<AnchorPane fx:id="mainPane" prefHeight="400" prefWidth="600" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="Client.ChampSelectController">
 
     <ImageView fx:id="bgView" fitHeight="400" fitWidth="600" AnchorPane.leftAnchor="0" AnchorPane.topAnchor="0">
         <image>
             <Image url="@../../../images/charSelectBG.jpg" />
         </image>
         <effect>
-            <ColorAdjust brightness="0.3" />
+            <ColorAdjust brightness="-0.3" />
         </effect>
     </ImageView>
 
@@ -60,10 +62,15 @@
             <Font name="Arial" size="12" />
         </font>
     </Label>
-    <Label fx:id="statusLabel" alignment="CENTER" layoutX="57.0" layoutY="30.0" prefHeight="25.0" prefWidth="470.0" textFill="LIMEGREEN" AnchorPane.leftAnchor="57.0" AnchorPane.rightAnchor="57.39999999999998">
+    <Label fx:id="statusLabel" alignment="CENTER" layoutX="57.0" layoutY="30.0" prefHeight="25.0" prefWidth="470.0" textFill="LIMEGREEN" AnchorPane.leftAnchor="57.0" AnchorPane.rightAnchor="57.39999999999998"
+           style="-fx-font-size: 24px;
+              -fx-font-weight: bold;
+              -fx-text-fill: limegreen;
+              -fx-padding: 8;">
         <font>
             <Font name="Arial" size="20" />
         </font>
+
     </Label>
 
 </AnchorPane>
