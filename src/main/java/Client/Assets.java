@@ -6,28 +6,34 @@ public class Assets {
 
     // ============================================ SPRITE SHEETS: RYU ============================================
 
+    // Basic movement and stances
     public static Image[] idle = new Image[6],
             parry_f = new Image[8],
             parry_b = new Image[8],
             crouch = new Image[1];
 
+    // Ground attacks
     public static Image[] punch = new Image[6],
             quick_punch = new Image[3],
             crouch_punch = new Image[3],
             crouch_attack = new Image[8],
             uppercut = new Image[8];
 
+    // Kicks
     public static Image[] kick_low = new Image[5],
             upper_kick = new Image[9];
 
+    // Air attacks
     public static Image[] air_punch = new Image[6],
             air_kick = new Image[5],
             punch_down = new Image[4];
 
+    // Movement
     public static Image[] back_flip = new Image[8],
             front_flip = new Image[8],
             jump = new Image[11];
 
+    // Hit reactions and recovery
     public static Image[] crouch_hit = new Image[2],
             crouch_hit_back = new Image[4],
             hit_stand = new Image[2],
@@ -35,33 +41,40 @@ public class Assets {
             knockback = new Image[4],
             recover = new Image[5];
 
+    // Victory and defeat
     public static Image[] win = new Image[10],
             dead = new Image[1];
 
     // ============================================ SPRITE SHEETS: KEN ============================================
 
+    // Basic movement and stances
     public static Image[] idle1 = new Image[6],
             parry_f1 = new Image[8],
             parry_b1 = new Image[8],
             crouch1 = new Image[1];
 
+    // Ground attacks
     public static Image[] punch1 = new Image[8],
             quick_punch1 = new Image[4],
             crouch_punch1 = new Image[3],
             crouch_attack1 = new Image[5],
             uppercut1 = new Image[8];
 
+    // Kicks
     public static Image[] kick_low1 = new Image[5],
             upper_kick1 = new Image[10];
 
+    // Air attacks
     public static Image[] air_punch1 = new Image[7],
             air_kick1 = new Image[6],
             punch_down1 = new Image[4];
 
+    // Movement
     public static Image[] back_flip1 = new Image[8],
             front_flip1 = new Image[8],
             jump1 = new Image[11];
 
+    // Hit reactions and recovery
     public static Image[] crouch_hit1 = new Image[2],
             crouch_hit_back1 = new Image[4],
             hit_stand1 = new Image[2],
@@ -69,84 +82,345 @@ public class Assets {
             knockback1 = new Image[4],
             recover1 = new Image[5];
 
+    // Victory and defeat
     public static Image[] win1 = new Image[10],
             dead1 = new Image[1];
 
+    private static boolean initialized = false;
 
     public static void init() {
+        if (initialized) return;
 
-        // ============================================ SPRITE SHEETS: RYU ============================================
+        try {
+            System.out.println("Initializing Assets...");
+            loadRyuAssets();
+            loadKenAssets();
+            initialized = true;
+            System.out.println("Assets initialization complete - All " +
+                    (getRyuAnimationCount() + getKenAnimationCount()) + " animations loaded");
 
-        SpriteSheet ss_idle = new SpriteSheet("/images/ryu/idle.png");
-        SpriteSheet ss_parry_front = new SpriteSheet("/images/ryu/parry_f.png");
-        SpriteSheet ss_parry_back = new SpriteSheet("/images/ryu/parry_b.png");
-        SpriteSheet ss_crouch = new SpriteSheet("/images/ryu/crouch.png");
-        SpriteSheet ss_jump = new SpriteSheet("/images/ryu/jump.png");
-        SpriteSheet ss_front_flip = new SpriteSheet("/images/ryu/front_flip.png");
-        SpriteSheet ss_back_flip = new SpriteSheet("/images/ryu/back_flip.png");
-        SpriteSheet ss_punch = new SpriteSheet("/images/ryu/punch.png");
-        SpriteSheet ss_quick_punch = new SpriteSheet("/images/ryu/quick_punch.png");
-        SpriteSheet ss_crouch_punch = new SpriteSheet("/images/ryu/crouch_punch.png");
-        SpriteSheet ss_kick_low = new SpriteSheet("/images/ryu/kick_low.png");
-        SpriteSheet ss_upper_kick = new SpriteSheet("/images/ryu/upper_kick.png");
-        SpriteSheet ss_air_punch = new SpriteSheet("/images/ryu/air_punch.png");
-        SpriteSheet ss_air_kick = new SpriteSheet("/images/ryu/air_kick.png");
-        SpriteSheet ss_punch_down = new SpriteSheet("/images/ryu/punch_down.png");
+        } catch (Exception e) {
+            System.err.println("Error initializing assets: " + e.getMessage());
+            e.printStackTrace();
+            initialized = true; // Prevent infinite retry loops
+        }
+    }
 
-        // Basic movement
-        for (int i = 0; i < 6; i++) idle[i] = ss_idle.crop(57, 106, 57 * i, 0);
-        for (int i = 0; i < 8; i++) parry_f[i] = ss_parry_front.crop(70, 110, 70 * i, 0);
-        for (int i = 0; i < 8; i++) parry_b[i] = ss_parry_back.crop(70, 108, 70 * i, 0);
-        crouch[0] = ss_crouch.crop(54, 73, 0, 0);
+    private static void loadRyuAssets() {
+        System.out.println("Loading Ryu assets...");
 
-        // Jumping
-        jump[0] = ss_jump.crop(70, 154, 0, 0);
-        jump[1] = ss_jump.crop(70, 154, 0, 0);
-        jump[2] = ss_jump.crop(70, 154, 0, 0);
-        for (int i = 3; i < 11; i++) jump[i] = ss_jump.crop(70, 154, 70 * (i - 2), 0);
+        try {
+            // Load all Ryu sprite sheets
+            SpriteSheet ss_idle = loadSpriteSheet("/images/ryu/idle.png");
+            SpriteSheet ss_parry_f = loadSpriteSheet("/images/ryu/parry_f.png");
+            SpriteSheet ss_parry_b = loadSpriteSheet("/images/ryu/parry_b.png");
+            SpriteSheet ss_crouch = loadSpriteSheet("/images/ryu/crouch.png");
+            SpriteSheet ss_jump = loadSpriteSheet("/images/ryu/jump.png");
+            SpriteSheet ss_front_flip = loadSpriteSheet("/images/ryu/front_flip.png");
+            SpriteSheet ss_back_flip = loadSpriteSheet("/images/ryu/back_flip.png");
 
-        for (int i = 0; i < 8; i++) front_flip[i] = ss_front_flip.crop(88, 129, 88 * i, 0);
-        for (int i = 0; i < 8; i++) back_flip[i] = ss_back_flip.crop(88, 129, 88 * i, 0);
+            SpriteSheet ss_punch = loadSpriteSheet("/images/ryu/punch.png");
+            SpriteSheet ss_quick_punch = loadSpriteSheet("/images/ryu/quick_punch.png");
+            SpriteSheet ss_crouch_punch = loadSpriteSheet("/images/ryu/crouch_punch.png");
+            SpriteSheet ss_crouch_attack = loadSpriteSheet("/images/ryu/crouch_attack.png");
+            SpriteSheet ss_uppercut = loadSpriteSheet("/images/ryu/uppercut.png");
+            SpriteSheet ss_kick_low = loadSpriteSheet("/images/ryu/kick_low.png");
+            SpriteSheet ss_upper_kick = loadSpriteSheet("/images/ryu/upper_kick.png");
 
-        // Ground attacks
-        for (int i = 0; i < 6; i++) punch[i] = ss_punch.crop(101, 102, 101 * i, 0);
-        for (int i = 0; i < 3; i++) quick_punch[i] = ss_quick_punch.crop(94, 102, 94 * i, 0);
-        for (int i = 0; i < 3; i++) crouch_punch[i] = ss_crouch_punch.crop(86, 72, 86 * i, 0);
+            SpriteSheet ss_air_punch = loadSpriteSheet("/images/ryu/air_punch.png");
+            SpriteSheet ss_air_kick = loadSpriteSheet("/images/ryu/air_kick.png");
+            SpriteSheet ss_punch_down = loadSpriteSheet("/images/ryu/punch_down.png");
 
-        // Air attacks
-        for (int i = 0; i < 6; i++) air_punch[i] = ss_air_punch.crop(83, 95, 83 * i, 0);
-        for (int i = 0; i < 4; i++) punch_down[i] = ss_punch_down.crop(75, 90, 75 * i, 0);
-        for (int i = 0; i < 5; i++) air_kick[i] = ss_air_kick.crop(99, 94, 99 * i, 0);
+            SpriteSheet ss_crouch_hit = loadSpriteSheet("/images/ryu/crouch_hit.png");
+            SpriteSheet ss_crouch_hit_back = loadSpriteSheet("/images/ryu/crouch_hit_b.png");
+            SpriteSheet ss_hit_stand = loadSpriteSheet("/images/ryu/hit_stand.png");
+            SpriteSheet ss_hit_stand_back = loadSpriteSheet("/images/ryu/hit_stand_b.png");
+            SpriteSheet ss_knockback = loadSpriteSheet("/images/ryu/knockback.png");
+            SpriteSheet ss_recover = loadSpriteSheet("/images/ryu/recover.png");
 
-        // Ground kicks
-        for (int i = 0; i < 5; i++) kick_low[i] = ss_kick_low.crop(115, 111, 115 * i, 0);
-        for (int i = 0; i < 9; i++) upper_kick[i] = ss_upper_kick.crop(110, 111, 110 * i, 0);
+            SpriteSheet ss_win = loadSpriteSheet("/images/ryu/win.png");
+            SpriteSheet ss_dead = loadSpriteSheet("/images/ryu/dead.png");
 
-        // ============================================ KEN ============================================
-        SpriteSheet ss_idle1 = new SpriteSheet("/images/ken/idle.png");
-        SpriteSheet ss_jump1 = new SpriteSheet("/images/ken/jump.png");
-        SpriteSheet ss_front_flip1 = new SpriteSheet("/images/ken/front_flip.png");
-        SpriteSheet ss_back_flip1 = new SpriteSheet("/images/ken/back_flip.png");
-        SpriteSheet ss_punch1 = new SpriteSheet("/images/ken/punch.png");
-        SpriteSheet ss_quick_punch1 = new SpriteSheet("/images/ken/quick_punch.png");
-        SpriteSheet ss_crouch_punch1 = new SpriteSheet("/images/ken/crouch_punch.png");
-        SpriteSheet ss_kick_low1 = new SpriteSheet("/images/ken/kick_low.png");
-        SpriteSheet ss_upper_kick1 = new SpriteSheet("/images/ken/upper_kick.png");
-        SpriteSheet ss_air_punch1 = new SpriteSheet("/images/ken/air_punch.png");
-        SpriteSheet ss_air_kick1 = new SpriteSheet("/images/ken/air_kick.png");
-        SpriteSheet ss_punch_down1 = new SpriteSheet("/images/ken/punch_down.png");
+            // Basic movement and stances
+            loadSpriteFrames(ss_idle, idle, 57, 106);
+            loadSpriteFrames(ss_parry_f, parry_f, 70, 110);
+            loadSpriteFrames(ss_parry_b, parry_b, 70, 108);
+            if (ss_crouch != null) {
+                crouch[0] = ss_crouch.crop(54, 73, 0, 0);
+            }
 
-        for (int i = 0; i < 6; i++) idle1[i] = ss_idle1.crop(57, 106, 57 * i, 0);
-        for (int i = 0; i < 11; i++) jump1[i] = ss_jump1.crop(61, 124, (i < 3 ? 0 : 61 * (i - 2)), 0);
-        for (int i = 0; i < 8; i++) front_flip1[i] = ss_front_flip1.crop(83, 125, 83 * i, 0);
-        for (int i = 0; i < 8; i++) back_flip1[i] = ss_back_flip1.crop(83, 125, 83 * i, 0);
-        for (int i = 0; i < 8; i++) punch1[i] = ss_punch1.crop(103, 103, 103 * i, 0);
-        for (int i = 0; i < 4; i++) quick_punch1[i] = ss_quick_punch1.crop(95, 102, 95 * i, 0);
-        for (int i = 0; i < 3; i++) crouch_punch1[i] = ss_crouch_punch1.crop(89, 72, 89 * i, 0);
-        for (int i = 0; i < 5; i++) kick_low1[i] = ss_kick_low1.crop(118, 105, 118 * i, 0);
-        for (int i = 0; i < 10; i++) upper_kick1[i] = ss_upper_kick1.crop(135, 108, 135 * i, 0);
-        for (int i = 0; i < 7; i++) air_punch1[i] = ss_air_punch1.crop(84, 95, 84 * i, 0);
-        for (int i = 0; i < 4; i++) punch_down1[i] = ss_punch_down1.crop(68, 88, 68 * i, 0);
-        for (int i = 0; i < 6; i++) air_kick1[i] = ss_air_kick1.crop(106, 83, 106 * i, 0);
+            // Movement
+            loadRyuJumpFrames(ss_jump, jump, 70, 154);
+            loadSpriteFrames(ss_front_flip, front_flip, 88, 129);
+            loadSpriteFrames(ss_back_flip, back_flip, 88, 129);
+
+            // Ground attacks
+            loadSpriteFrames(ss_punch, punch, 101, 102);
+            loadSpriteFrames(ss_quick_punch, quick_punch, 94, 102);
+            loadSpriteFrames(ss_crouch_punch, crouch_punch, 86, 72);
+            loadSpriteFrames(ss_crouch_attack, crouch_attack, 92, 72);
+            loadSpriteFrames(ss_uppercut, uppercut, 82, 111);
+
+            // Kicks
+            loadSpriteFrames(ss_kick_low, kick_low, 115, 111);
+            loadSpriteFrames(ss_upper_kick, upper_kick, 110, 111);
+
+            // Air attacks
+            loadSpriteFrames(ss_air_punch, air_punch, 83, 95);
+            loadSpriteFrames(ss_air_kick, air_kick, 99, 94);
+            loadSpriteFrames(ss_punch_down, punch_down, 75, 90);
+
+            // Hit reactions and recovery
+            loadSpriteFrames(ss_crouch_hit, crouch_hit, 54, 73);
+            loadSpriteFrames(ss_crouch_hit_back, crouch_hit_back, 77, 73);
+            loadSpriteFrames(ss_hit_stand, hit_stand, 57, 104);
+            loadSpriteFrames(ss_hit_stand_back, hit_stand_back, 77, 104);
+            loadSpriteFrames(ss_knockback, knockback, 86, 104);
+            loadSpriteFrames(ss_recover, recover, 77, 104);
+
+            // Victory and defeat
+            loadSpriteFrames(ss_win, win, 64, 106);
+            if (ss_dead != null) {
+                dead[0] = ss_dead.crop(98, 49, 0, 0);
+            }
+
+            System.out.println("Ryu assets loaded successfully - " + getRyuAnimationCount() + " animations");
+
+        } catch (Exception e) {
+            System.err.println("Error loading Ryu assets: " + e.getMessage());
+        }
+    }
+
+    private static void loadKenAssets() {
+        System.out.println("Loading Ken assets...");
+
+        try {
+            // Load all Ken sprite sheets
+            SpriteSheet ss_idle1 = loadSpriteSheet("/images/ken/idle.png");
+            SpriteSheet ss_parry_f1 = loadSpriteSheet("/images/ken/parry_f.png");
+            SpriteSheet ss_parry_b1 = loadSpriteSheet("/images/ken/parry_b.png");
+            SpriteSheet ss_crouch1 = loadSpriteSheet("/images/ken/crouch.png");
+            SpriteSheet ss_jump1 = loadSpriteSheet("/images/ken/jump.png");
+            SpriteSheet ss_front_flip1 = loadSpriteSheet("/images/ken/front_flip.png");
+            SpriteSheet ss_back_flip1 = loadSpriteSheet("/images/ken/back_flip.png");
+
+            SpriteSheet ss_punch1 = loadSpriteSheet("/images/ken/punch.png");
+            SpriteSheet ss_quick_punch1 = loadSpriteSheet("/images/ken/quick_punch.png");
+            SpriteSheet ss_crouch_punch1 = loadSpriteSheet("/images/ken/crouch_punch.png");
+            SpriteSheet ss_crouch_attack1 = loadSpriteSheet("/images/ken/crouch_attack.png");
+            SpriteSheet ss_uppercut1 = loadSpriteSheet("/images/ken/uppercut.png");
+            SpriteSheet ss_kick_low1 = loadSpriteSheet("/images/ken/kick_low.png");
+            SpriteSheet ss_upper_kick1 = loadSpriteSheet("/images/ken/upper_kick.png");
+
+            SpriteSheet ss_air_punch1 = loadSpriteSheet("/images/ken/air_punch.png");
+            SpriteSheet ss_air_kick1 = loadSpriteSheet("/images/ken/air_kick.png");
+            SpriteSheet ss_punch_down1 = loadSpriteSheet("/images/ken/punch_down.png");
+
+            SpriteSheet ss_crouch_hit1 = loadSpriteSheet("/images/ken/crouch_hit.png");
+            SpriteSheet ss_crouch_hit_back1 = loadSpriteSheet("/images/ken/crouch_hit_b.png");
+            SpriteSheet ss_hit_stand1 = loadSpriteSheet("/images/ken/hit_stand.png");
+            SpriteSheet ss_hit_stand_back1 = loadSpriteSheet("/images/ken/hit_stand_b.png");
+            SpriteSheet ss_knockback1 = loadSpriteSheet("/images/ken/knockback.png");
+            SpriteSheet ss_recover1 = loadSpriteSheet("/images/ken/recover.png");
+
+            SpriteSheet ss_win1 = loadSpriteSheet("/images/ken/win.png");
+            SpriteSheet ss_dead1 = loadSpriteSheet("/images/ken/dead.png");
+
+            // Basic movement and stances
+            loadSpriteFrames(ss_idle1, idle1, 57, 106);
+            loadSpriteFrames(ss_parry_f1, parry_f1, 70, 110);
+            loadSpriteFrames(ss_parry_b1, parry_b1, 70, 110);
+            if (ss_crouch1 != null) {
+                crouch1[0] = ss_crouch1.crop(54, 73, 0, 0);
+            }
+
+            // Movement
+            loadKenJumpFrames(ss_jump1, jump1, 61, 124);
+            loadSpriteFrames(ss_front_flip1, front_flip1, 83, 125);
+            loadSpriteFrames(ss_back_flip1, back_flip1, 83, 125);
+
+            // Ground attacks
+            loadSpriteFrames(ss_punch1, punch1, 103, 103);
+            loadSpriteFrames(ss_quick_punch1, quick_punch1, 95, 102);
+            loadSpriteFrames(ss_crouch_punch1, crouch_punch1, 89, 72);
+            loadSpriteFrames(ss_crouch_attack1, crouch_attack1, 95, 72);
+            loadSpriteFrames(ss_uppercut1, uppercut1, 91, 108);
+
+            // Kicks
+            loadSpriteFrames(ss_kick_low1, kick_low1, 118, 105);
+            loadSpriteFrames(ss_upper_kick1, upper_kick1, 135, 108);
+
+            // Air attacks
+            loadSpriteFrames(ss_air_punch1, air_punch1, 84, 95);
+            loadSpriteFrames(ss_air_kick1, air_kick1, 106, 83);
+            loadSpriteFrames(ss_punch_down1, punch_down1, 68, 88);
+
+            // Hit reactions and recovery
+            loadSpriteFrames(ss_crouch_hit1, crouch_hit1, 54, 73);
+            loadSpriteFrames(ss_crouch_hit_back1, crouch_hit_back1, 79, 73);
+            loadSpriteFrames(ss_hit_stand1, hit_stand1, 57, 104);
+            loadSpriteFrames(ss_hit_stand_back1, hit_stand_back1, 79, 104);
+            loadSpriteFrames(ss_knockback1, knockback1, 86, 104);
+            loadSpriteFrames(ss_recover1, recover1, 79, 104);
+
+            // Victory and defeat
+            loadSpriteFrames(ss_win1, win1, 73, 106);
+            if (ss_dead1 != null) {
+                dead1[0] = ss_dead1.crop(108, 49, 0, 0);
+            }
+
+            System.out.println("Ken assets loaded successfully - " + getKenAnimationCount() + " animations");
+
+        } catch (Exception e) {
+            System.err.println("Error loading Ken assets: " + e.getMessage());
+        }
+    }
+
+    private static SpriteSheet loadSpriteSheet(String path) {
+        try {
+            return new SpriteSheet(path);
+        } catch (Exception e) {
+            System.err.println("Could not load sprite sheet: " + path + " - " + e.getMessage());
+            return null;
+        }
+    }
+
+    private static void loadSpriteFrames(SpriteSheet spriteSheet, Image[] frames, int frameWidth, int frameHeight) {
+        if (spriteSheet == null) return;
+
+        for (int i = 0; i < frames.length; i++) {
+            try {
+                frames[i] = spriteSheet.crop(frameWidth, frameHeight, frameWidth * i, 0);
+            } catch (Exception e) {
+                System.err.println("Error cropping frame " + i + " with dimensions " + frameWidth + "x" + frameHeight);
+            }
+        }
+    }
+
+    private static void loadRyuJumpFrames(SpriteSheet spriteSheet, Image[] frames, int frameWidth, int frameHeight) {
+        if (spriteSheet == null) return;
+
+        try {
+            // Ryu's jump has special frame timing - first 3 frames are the same (pre-jump)
+            for (int i = 0; i < 3; i++) {
+                frames[i] = spriteSheet.crop(frameWidth, frameHeight, 0, 0);
+            }
+            // Then load the actual jump sequence
+            for (int i = 3; i < frames.length; i++) {
+                frames[i] = spriteSheet.crop(frameWidth, frameHeight, frameWidth * (i - 2), 0);
+            }
+        } catch (Exception e) {
+            System.err.println("Error loading Ryu jump frames: " + e.getMessage());
+        }
+    }
+
+    private static void loadKenJumpFrames(SpriteSheet spriteSheet, Image[] frames, int frameWidth, int frameHeight) {
+        if (spriteSheet == null) return;
+
+        try {
+            // Ken's jump has similar timing to Ryu
+            for (int i = 0; i < 3; i++) {
+                frames[i] = spriteSheet.crop(frameWidth, frameHeight, 0, 0);
+            }
+            for (int i = 3; i < frames.length; i++) {
+                frames[i] = spriteSheet.crop(frameWidth, frameHeight, frameWidth * (i - 2), 0);
+            }
+        } catch (Exception e) {
+            System.err.println("Error loading Ken jump frames: " + e.getMessage());
+        }
+    }
+
+    public static boolean isInitialized() {
+        return initialized;
+    }
+
+    // Utility methods for getting character-specific assets
+    public static Image[] getIdleFrames(boolean isRyu) {
+        return isRyu ? idle : idle1;
+    }
+
+    public static Image[] getPunchFrames(boolean isRyu) {
+        return isRyu ? punch : punch1;
+    }
+
+    public static Image[] getKickFrames(boolean isRyu) {
+        return isRyu ? kick_low : kick_low1;
+    }
+
+    public static Image[] getJumpFrames(boolean isRyu) {
+        return isRyu ? jump : jump1;
+    }
+
+    public static Image[] getHitFrames(boolean isRyu) {
+        return isRyu ? hit_stand : hit_stand1;
+    }
+
+    public static Image[] getWinFrames(boolean isRyu) {
+        return isRyu ? win : win1;
+    }
+
+    public static Image getDeadFrame(boolean isRyu) {
+        return isRyu ? (dead[0] != null ? dead[0] : null) : (dead1[0] != null ? dead1[0] : null);
+    }
+
+    // Debug methods to count loaded animations
+    private static int getRyuAnimationCount() {
+        int count = 0;
+        if (idle != null && idle[0] != null) count++;
+        if (parry_f != null && parry_f[0] != null) count++;
+        if (parry_b != null && parry_b[0] != null) count++;
+        if (crouch != null && crouch[0] != null) count++;
+        if (jump != null && jump[0] != null) count++;
+        if (front_flip != null && front_flip[0] != null) count++;
+        if (back_flip != null && back_flip[0] != null) count++;
+        if (punch != null && punch[0] != null) count++;
+        if (quick_punch != null && quick_punch[0] != null) count++;
+        if (crouch_punch != null && crouch_punch[0] != null) count++;
+        if (crouch_attack != null && crouch_attack[0] != null) count++;
+        if (uppercut != null && uppercut[0] != null) count++;
+        if (kick_low != null && kick_low[0] != null) count++;
+        if (upper_kick != null && upper_kick[0] != null) count++;
+        if (air_punch != null && air_punch[0] != null) count++;
+        if (air_kick != null && air_kick[0] != null) count++;
+        if (punch_down != null && punch_down[0] != null) count++;
+        if (crouch_hit != null && crouch_hit[0] != null) count++;
+        if (crouch_hit_back != null && crouch_hit_back[0] != null) count++;
+        if (hit_stand != null && hit_stand[0] != null) count++;
+        if (hit_stand_back != null && hit_stand_back[0] != null) count++;
+        if (knockback != null && knockback[0] != null) count++;
+        if (recover != null && recover[0] != null) count++;
+        if (win != null && win[0] != null) count++;
+        if (dead != null && dead[0] != null) count++;
+        return count;
+    }
+
+    private static int getKenAnimationCount() {
+        int count = 0;
+        if (idle1 != null && idle1[0] != null) count++;
+        if (parry_f1 != null && parry_f1[0] != null) count++;
+        if (parry_b1 != null && parry_b1[0] != null) count++;
+        if (crouch1 != null && crouch1[0] != null) count++;
+        if (jump1 != null && jump1[0] != null) count++;
+        if (front_flip1 != null && front_flip1[0] != null) count++;
+        if (back_flip1 != null && back_flip1[0] != null) count++;
+        if (punch1 != null && punch1[0] != null) count++;
+        if (quick_punch1 != null && quick_punch1[0] != null) count++;
+        if (crouch_punch1 != null && crouch_punch1[0] != null) count++;
+        if (crouch_attack1 != null && crouch_attack1[0] != null) count++;
+        if (uppercut1 != null && uppercut1[0] != null) count++;
+        if (kick_low1 != null && kick_low1[0] != null) count++;
+        if (upper_kick1 != null && upper_kick1[0] != null) count++;
+        if (air_punch1 != null && air_punch1[0] != null) count++;
+        if (air_kick1 != null && air_kick1[0] != null) count++;
+        if (punch_down1 != null && punch_down1[0] != null) count++;
+        if (crouch_hit1 != null && crouch_hit1[0] != null) count++;
+        if (crouch_hit_back1 != null && crouch_hit_back1[0] != null) count++;
+        if (hit_stand1 != null && hit_stand1[0] != null) count++;
+        if (hit_stand_back1 != null && hit_stand_back1[0] != null) count++;
+        if (knockback1 != null && knockback1[0] != null) count++;
+        if (recover1 != null && recover1[0] != null) count++;
+        if (win1 != null && win1[0] != null) count++;
+        if (dead1 != null && dead1[0] != null) count++;
+        return count;
     }
 }

@@ -24,7 +24,6 @@ public class MapSelectController {
     @FXML private ImageView map5;
     @FXML private ImageView map6;
     @FXML private Label titleLabel;
-    @FXML private Label instructionsLabel;
 
     private String selectedMap = null;
 
@@ -86,10 +85,6 @@ public class MapSelectController {
 
         this.selectedMap = mapFile;
 
-        // Update UI
-        instructionsLabel.setText("Selected: " + mapChoice + " - Click again to start fight!");
-        instructionsLabel.setStyle("-fx-text-fill: lime;");
-
         System.out.println("✅ P1 selected: " + player1Choice);
         System.out.println("✅ P2 selected: " + player2Choice);
         System.out.println("✅ Map selected: " + mapChoice + " (" + mapFile + ")");
@@ -108,11 +103,11 @@ public class MapSelectController {
     }
 
     private String getMapName(ImageView imageView) {
-        if (imageView == map1) return "Dojo";
-        if (imageView == map2) return "Street";
-        if (imageView == map3) return "Beach";
-        if (imageView == map4) return "Mountain";
-        if (imageView == map5) return "Factory";
+        if (imageView == map1) return "Forest";
+        if (imageView == map2) return "Apocalypse";
+        if (imageView == map3) return "Autumn";
+        if (imageView == map4) return "Moon Blessed";
+        if (imageView == map5) return "Revenge";
         if (imageView == map6) return "Temple";
         return "Unknown";
     }
@@ -149,39 +144,28 @@ public class MapSelectController {
             // Pass the selected characters and map to the fight scene
             gameController.setGameData(player1Choice, player2Choice, mapFile);
 
-            // Create the scene
-            Scene gameScene = new Scene(root, 800, 600);
-
-            // Set up key event handling for the fight scene
-            gameScene.setOnKeyPressed(event -> {
-                // Forward key events to the game canvas
-                root.lookup("#gameCanvas").fireEvent(event);
-            });
-            gameScene.setOnKeyReleased(event -> {
-                // Forward key events to the game canvas
-                root.lookup("#gameCanvas").fireEvent(event);
-            });
+            // Create the scene with exactly 800x400 dimensions
+            Scene gameScene = new Scene(root, 800, 400);
 
             // Get current stage and set the new scene
             Stage stage = (Stage) map1.getScene().getWindow();
             stage.setScene(gameScene);
             stage.setTitle("Street Fighter - " + mapName + " (" + player1Choice + " vs " + player2Choice + ")");
+
+            // Ensure the stage is properly sized and not resizable for consistent 800x400 display
+            stage.setResizable(false);
+            stage.sizeToScene(); // This ensures the window fits the scene size exactly
+            stage.centerOnScreen(); // Center the window on screen
             stage.show();
 
-            // Important: Request focus on the canvas for input handling
-            javafx.application.Platform.runLater(() -> {
-                root.lookup("#gameCanvas").requestFocus();
-            });
+            // REMOVED: The problematic lookup calls that were causing StackOverflow
+            // The GameSceneController handles input internally now
 
-            System.out.println("🚀 Fight scene launched!");
+            System.out.println("🚀 Fight scene launched with 800x400 dimensions!");
 
         } catch (IOException e) {
             System.err.println("Error loading fight scene:");
             e.printStackTrace();
-
-            // Fallback: show error message
-            instructionsLabel.setText("Error loading fight scene! Check console for details.");
-            instructionsLabel.setStyle("-fx-text-fill: red;");
         }
     }
 }

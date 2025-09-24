@@ -56,15 +56,10 @@
                 </ImageView>
                 <ImageView fx:id="map6" fitHeight="80.0" fitWidth="150.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
                     <image>
-                        <Image url="@../../../images/map6.png" />
+                        <Image url="@../../../images/map6.gif" />
                     </image>
                 </ImageView>
             </children>
         </GridPane>
-        <Label fx:id="instructionsLabel" alignment="CENTER" layoutX="10.0" layoutY="350.0" prefHeight="25.0" prefWidth="580.0" text="Use A and D to navigate, ENTER to confirm" textFill="YELLOW" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0">
-            <font>
-                <Font name="Arial" size="14.0" />
-            </font>
-        </Label>
     </children>
 </AnchorPane>

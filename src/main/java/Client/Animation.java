@@ -55,6 +55,6 @@ public class Animation {
     }
 
     public void setPlayed() {
-        this.playedOnce = false;
+        this.playedOnce = true;
     }
 }
