@@ -128,7 +128,7 @@
                 <Font name="Candara" size="10.0" />
             </font>
         </Label>
-        <Label text="J - Punch, K - Kick, L - Block" textFill="WHITE">
+        <Label text="F, G - Punch, H, R - Kick, T - Block" textFill="WHITE">
             <font>
                 <Font name="Candara" size="10.0" />
             </font>
@@ -144,7 +144,7 @@
                 <Font name="Candara" size="10.0" />
             </font>
         </Label>
-        <Label text="1 - Punch, 2 - Kick, 3 - Block" textFill="WHITE">
+        <Label text="J, K - Punch, L, U - Kick, I - Block" textFill="WHITE">
             <font>
                 <Font name="Candara" size="10.0" />
             </font>

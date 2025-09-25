@@ -118,7 +118,7 @@ public class AnimationStateMachine {
             // Flips
             case FRONT_FLIP:
             case BACK_FLIP:
-                AnimationState flip = new AnimationState(type, actualFrameCount, 100, false, false);
+                AnimationState flip = new AnimationState(type, actualFrameCount, 120, false, false);
                 flip.nextState = AnimationType.IDLE;
                 return flip;
 
@@ -144,7 +144,7 @@ public class AnimationStateMachine {
                 return cAttack;
 
             case UPPERCUT:
-                AnimationState uppercut = new AnimationState(type, actualFrameCount, 100, false, false);
+                AnimationState uppercut = new AnimationState(type, actualFrameCount, 120, false, false);
                 uppercut.nextState = AnimationType.IDLE;
                 return uppercut;
 
@@ -154,23 +154,23 @@ public class AnimationStateMachine {
                 return lowKick;
 
             case UPPER_KICK:
-                AnimationState upperKick = new AnimationState(type, actualFrameCount, 90, false, false);
+                AnimationState upperKick = new AnimationState(type, actualFrameCount, 100, false, false);
                 upperKick.nextState = AnimationType.IDLE;
                 return upperKick;
 
             // Air attacks
             case AIR_PUNCH:
-                AnimationState airPunch = new AnimationState(type, actualFrameCount, 90, false, false);
+                AnimationState airPunch = new AnimationState(type, actualFrameCount, 100, false, false);
                 airPunch.nextState = AnimationType.JUMP;
                 return airPunch;
 
             case AIR_KICK:
-                AnimationState airKick = new AnimationState(type, actualFrameCount, 100, false, false);
+                AnimationState airKick = new AnimationState(type, actualFrameCount, 120, false, false);
                 airKick.nextState = AnimationType.JUMP;
                 return airKick;
 
             case PUNCH_DOWN:
-                AnimationState punchDown = new AnimationState(type, actualFrameCount, 80, false, false);
+                AnimationState punchDown = new AnimationState(type, actualFrameCount, 120, false, false);
                 punchDown.nextState = AnimationType.JUMP;
                 return punchDown;
 

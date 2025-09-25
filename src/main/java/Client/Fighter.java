@@ -59,8 +59,6 @@ public class Fighter extends Entity {
 
         // Position on ground
         this.y = (float) GROUND_Y;
-
-        System.out.println("Fighter created: " + this.characterName + " at " + startX + ", " + startY);
     }
 
     @Override
@@ -72,6 +70,11 @@ public class Fighter extends Entity {
     }
 
     private void updatePhysics() {
+        // Don't update physics for dead or winning characters - they should stay in place
+        if (isDead() || animationSM.getCurrentAnimationType() == AnimationStateMachine.AnimationType.WIN) {
+            return;
+        }
+
         // Apply movement
         x += (float) velX;
         y += (float) velY;
@@ -164,8 +167,11 @@ public class Fighter extends Entity {
     }
 
     private void processInput() {
-        // Don't process input during hitstun, blockstun, or death
-        if (hitstunTimer > 0 || blockstunTimer > 0 || isDead()) return;
+        // Don't process input during hitstun or blockstun
+        if (hitstunTimer > 0 || blockstunTimer > 0) return;
+
+        // Dead characters can't move but stay in their state
+        if (isDead()) return;
 
         AnimationStateMachine.AnimationType currentAnim = animationSM.getCurrentAnimationType();
 
@@ -366,7 +372,6 @@ public class Fighter extends Entity {
             }
 
             animationSM.transition(AnimationStateMachine.AnimationType.JUMP, true);
-            System.out.println(characterName + " jumped!");
         }
     }
 
@@ -376,7 +381,6 @@ public class Fighter extends Entity {
             velX = facingRight ? 6 : -6;
             velY = Math.min(velY, -5); // Add slight upward boost
             canPerformAirAction = false;
-            System.out.println(characterName + " performed front flip!");
         }
     }
 
@@ -386,7 +390,6 @@ public class Fighter extends Entity {
             velX = facingRight ? -6 : 6;
             velY = Math.min(velY, -5); // Add slight upward boost
             canPerformAirAction = false;
-            System.out.println(characterName + " performed back flip!");
         }
     }
 
@@ -400,15 +403,18 @@ public class Fighter extends Entity {
             if (attackType == AnimationStateMachine.AnimationType.PUNCH_DOWN) {
                 velY = Math.max(velY, 3); // Accelerate downward
             }
-
-            System.out.println(characterName + " performed " + attackType);
         }
     }
 
     private void crouch() {
         velX = 0;
-        if (animationSM.getCurrentAnimationType() != AnimationStateMachine.AnimationType.CROUCH) {
-            animationSM.transition(AnimationStateMachine.AnimationType.CROUCH, true);
+        velY = 30;
+        // Ensure we're on the ground when crouching
+        if (onGround) {
+            y = (float) GROUND_Y;
+            if (animationSM.getCurrentAnimationType() != AnimationStateMachine.AnimationType.CROUCH) {
+                animationSM.transition(AnimationStateMachine.AnimationType.CROUCH, true);
+            }
         }
     }
 
@@ -428,8 +434,6 @@ public class Fighter extends Entity {
 
         CombatSystem.AttackData attackData = CombatSystem.getAttackData(attackType);
         canCancelAttack = attackData != null && attackData.canCancel;
-
-        System.out.println(characterName + " performed " + attackType);
     }
 
     @Override
@@ -437,34 +441,13 @@ public class Fighter extends Entity {
         Image currentFrame = animationSM.getCurrentFrame();
 
         if (currentFrame == null) {
-            // Fallback rendering
-            Color characterColor = characterName.equals("RYU") ? Color.RED : Color.BLUE;
-            g.setFill(characterColor);
-            g.fillRect(x, y, 60, 100);
-            g.setFill(Color.WHITE);
-            g.fillText(characterName, x, y - 10);
+            // Don't render anything if no sprite available
             return;
         }
 
         // Draw shadow
         g.setFill(Color.rgb(0, 0, 0, 0.3));
-        g.fillOval(x + 10, GROUND_Y + 50, 40, 8);
-
-        // Flash effects for different states
-        if (invulnerable || hitstunTimer > 0 || blockstunTimer > 0) {
-            g.setGlobalAlpha(0.7);
-
-            if (invulnerable) {
-                g.setFill(Color.CYAN);
-            } else if (hitstunTimer > 0) {
-                g.setFill(Color.RED);
-            } else if (blockstunTimer > 0) {
-                g.setFill(Color.YELLOW);
-            }
-
-            g.fillRect(x - 2, y - 2, currentFrame.getWidth() + 4, currentFrame.getHeight() + 4);
-            g.setGlobalAlpha(1.0);
-        }
+        g.fillOval(x + 10, GROUND_Y + 90, 40, 8);
 
         // Draw character sprite (flip if facing left)
         if (!facingRight) {
@@ -475,23 +458,6 @@ public class Fighter extends Entity {
         } else {
             g.drawImage(currentFrame, x, y);
         }
-
-        // Debug info
-        renderDebugInfo(g);
-    }
-
-    private void renderDebugInfo(GraphicsContext g) {
-        g.setFill(Color.YELLOW);
-        g.fillText(animationSM.getCurrentAnimationType().toString(), x, y - 20);
-
-        // Show frame info
-        g.fillText("F:" + animationSM.getCurrentFrameIndex(), x, y - 35);
-
-        // Show combat state
-        if (hitstunTimer > 0) g.fillText("HITSTUN:" + hitstunTimer, x, y - 50);
-        if (blockstunTimer > 0) g.fillText("BLOCKSTUN:" + blockstunTimer, x, y - 50);
-        if (canCancelAttack) g.fillText("CANCEL", x + 70, y - 20);
-        if (!onGround && canPerformAirAction) g.fillText("AIR OK", x, y - 65);
     }
 
     // Combat methods
@@ -505,7 +471,6 @@ public class Fighter extends Entity {
             // Blocking reduces damage and causes blockstun
             damage = (int)(damage * 0.25);
             blockstunTimer = attackData != null ? attackData.blockstun : 10;
-            System.out.println(characterName + " blocked for " + damage + " chip damage");
         } else {
             // Normal hit
             damage = CombatSystem.calculateScaledDamage(damage, comboCount);
@@ -538,8 +503,6 @@ public class Fighter extends Entity {
             if (!onGround) {
                 canPerformAirAction = false;
             }
-
-            System.out.println(characterName + " took " + damage + " damage (combo: " + comboCount + ")");
         }
 
         health -= damage;
@@ -550,8 +513,7 @@ public class Fighter extends Entity {
     }
 
     private void die() {
-        animationSM.transition(AnimationStateMachine.AnimationType.KNOCKBACK, true);
-        System.out.println(characterName + " has been defeated!");
+        animationSM.transition(AnimationStateMachine.AnimationType.DEAD, true);
     }
 
     public boolean isAttacking() {
@@ -603,7 +565,6 @@ public class Fighter extends Entity {
     // Win condition
     public void performWin() {
         animationSM.transition(AnimationStateMachine.AnimationType.WIN, true);
-        System.out.println(characterName + " wins!");
     }
 
     // Reset for new round
