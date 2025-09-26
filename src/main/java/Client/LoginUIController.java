@@ -22,6 +22,8 @@ public class LoginUIController {
 
         addHoverEffect(loginBtn, "#2980b9", "#3498db");
         addHoverEffect(signupBtn, "#2980b9", "#3498db");
+
+        AudioManager.playBGM("home.wav");
     }
 
     private void addHoverEffect(Button button, String hoverColor, String normalColor) {
@@ -41,7 +43,8 @@ public class LoginUIController {
         }
         if (DatabaseManager.loginPlayer(user, pass)) {
             try {
-                // Load HomeUI
+
+                AudioManager.playSelectSound();
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/game/HomeUI.fxml"));
                 Parent root = loader.load();
 

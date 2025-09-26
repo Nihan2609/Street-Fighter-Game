@@ -111,14 +111,14 @@ public class AnimationStateMachine {
                 return new AnimationState(type, 1, 100, true, true);
 
             case JUMP:
-                AnimationState jump = new AnimationState(type, actualFrameCount, 80, false, false);
+                AnimationState jump = new AnimationState(type, actualFrameCount, 150, false, false);
                 jump.nextState = AnimationType.IDLE;
                 return jump;
 
             // Flips
             case FRONT_FLIP:
             case BACK_FLIP:
-                AnimationState flip = new AnimationState(type, actualFrameCount, 120, false, false);
+                AnimationState flip = new AnimationState(type, actualFrameCount, 150, false, false);
                 flip.nextState = AnimationType.IDLE;
                 return flip;
 
@@ -154,23 +154,23 @@ public class AnimationStateMachine {
                 return lowKick;
 
             case UPPER_KICK:
-                AnimationState upperKick = new AnimationState(type, actualFrameCount, 100, false, false);
+                AnimationState upperKick = new AnimationState(type, actualFrameCount, 120, false, false);
                 upperKick.nextState = AnimationType.IDLE;
                 return upperKick;
 
             // Air attacks
             case AIR_PUNCH:
-                AnimationState airPunch = new AnimationState(type, actualFrameCount, 100, false, false);
+                AnimationState airPunch = new AnimationState(type, actualFrameCount, 150, false, false);
                 airPunch.nextState = AnimationType.JUMP;
                 return airPunch;
 
             case AIR_KICK:
-                AnimationState airKick = new AnimationState(type, actualFrameCount, 120, false, false);
+                AnimationState airKick = new AnimationState(type, actualFrameCount, 150, false, false);
                 airKick.nextState = AnimationType.JUMP;
                 return airKick;
 
             case PUNCH_DOWN:
-                AnimationState punchDown = new AnimationState(type, actualFrameCount, 120, false, false);
+                AnimationState punchDown = new AnimationState(type, actualFrameCount, 150, false, false);
                 punchDown.nextState = AnimationType.JUMP;
                 return punchDown;
 
@@ -207,21 +207,19 @@ public class AnimationStateMachine {
 
             // End states
             case WIN:
-                AnimationState win = new AnimationState(type, actualFrameCount, 150, false, false);
-                win.nextState = null; // Stay in win state
+                AnimationState win = new AnimationState(type, actualFrameCount, 200, false, false); // Slower frames, non-looping
+                win.nextState = null; // Stay in win state permanently
                 return win;
 
             case DEAD:
-                return new AnimationState(type, 1, 100, false, true);
+                AnimationState dead = new AnimationState(type, actualFrameCount, 150, false, false); // Non-looping death animation
+                dead.nextState = null; // Stay dead permanently
+                return dead;
 
             default:
                 return new AnimationState(AnimationType.IDLE, getActualFrameCount(AnimationType.IDLE), 150, true, true);
         }
     }
-
-    /**
-     * Gets the actual frame count from the loaded sprites
-     */
     private int getActualFrameCount(AnimationType type) {
         String animName = getAnimationName(type);
         Image[] animation = assetManager.getAnimation(characterName, animName);

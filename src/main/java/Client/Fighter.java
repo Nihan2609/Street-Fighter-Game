@@ -372,6 +372,8 @@ public class Fighter extends Entity {
             }
 
             animationSM.transition(AnimationStateMachine.AnimationType.JUMP, true);
+
+            AudioManager.playJumpSound();
         }
     }
 
@@ -409,7 +411,6 @@ public class Fighter extends Entity {
     private void crouch() {
         velX = 0;
         velY = 30;
-        // Ensure we're on the ground when crouching
         if (onGround) {
             y = (float) GROUND_Y;
             if (animationSM.getCurrentAnimationType() != AnimationStateMachine.AnimationType.CROUCH) {
@@ -434,6 +435,23 @@ public class Fighter extends Entity {
 
         CombatSystem.AttackData attackData = CombatSystem.getAttackData(attackType);
         canCancelAttack = attackData != null && attackData.canCancel;
+
+        switch (attackType) {
+            case PUNCH:
+            case QUICK_PUNCH:
+                AudioManager.playPunchSound();
+                break;
+            case KICK_LOW:
+            case UPPER_KICK:
+                AudioManager.playKickSound();
+                break;
+            case UPPERCUT:
+                AudioManager.playUppercutSound();
+                break;
+            default:
+                AudioManager.playPunchSound(); // Default sound
+                break;
+        }
     }
 
     @Override
@@ -565,6 +583,12 @@ public class Fighter extends Entity {
     // Win condition
     public void performWin() {
         animationSM.transition(AnimationStateMachine.AnimationType.WIN, true);
+
+        if (playerId.equals("P1")) {
+            AudioManager.playP1WinSound();
+        } else {
+            AudioManager.playP2WinSound();
+        }
     }
 
     // Reset for new round

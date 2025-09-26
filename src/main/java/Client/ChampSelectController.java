@@ -72,9 +72,6 @@ public class ChampSelectController {
             String p1Choice = (p1Index == 0 ? "Ryu" : "Ken");
             String p2Choice = (p2Index == 0 ? "Ryu" : "Ken");
 
-            System.out.println("✅ P1 selected: " + p1Choice);
-            System.out.println("✅ P2 selected: " + p2Choice);
-
             loadMap(p1Choice, p2Choice);
         }
 

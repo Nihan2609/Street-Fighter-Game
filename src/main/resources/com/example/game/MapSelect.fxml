@@ -61,5 +61,16 @@
                 </ImageView>
             </children>
         </GridPane>
+        <Label layoutX="10.0" layoutY="350.0" prefWidth="580.0" alignment="CENTER"
+               text="Use A/D to move • SPACE to select" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0">
+            <font>
+                <Font name="Candara Bold" size="16.0" />
+            </font>
+            <style>
+                -fx-text-fill: linear-gradient(to right, #00ffea, #ff00ff, #ffff00);
+                -fx-font-weight: bold;
+            </style>
+        </Label>
+
     </children>
 </AnchorPane>

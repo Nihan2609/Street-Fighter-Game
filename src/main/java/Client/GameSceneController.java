@@ -93,6 +93,8 @@ public class GameSceneController {
         if (controlsInfo != null) {
             controlsInfo.setVisible(false);
         }
+
+        AudioManager.playBGM("fight_theme.wav");
     }
 
     public void setGameData(String player1Char, String player2Char, String mapFile) {
@@ -100,15 +102,9 @@ public class GameSceneController {
         this.selectedPlayer2 = player2Char != null ? player2Char.toUpperCase() : "KEN";
         this.selectedMapFile = mapFile != null ? mapFile : "map1";
 
-        System.out.println("Game data set:");
-        System.out.println("- Player 1: " + this.selectedPlayer1);
-        System.out.println("- Player 2: " + this.selectedPlayer2);
-        System.out.println("- Map: " + this.selectedMapFile);
 
-        // Load background image after setting map file
         loadBackgroundImage();
 
-        // Initialize game if canvas is ready
         if (gc != null) {
             initializeGame();
             startGameLoop();
@@ -117,45 +113,36 @@ public class GameSceneController {
 
     private void loadBackgroundImage() {
         try {
-            // Try loading as resource stream first
             InputStream stream = getClass().getResourceAsStream("/images/" + selectedMapFile + ".gif");
             if (stream != null) {
                 backgroundImage = new Image(stream);
                 if (!backgroundImage.isError()) {
-                    System.out.println("Background loaded: " + selectedMapFile);
                     stream.close();
                     return;
                 }
                 stream.close();
             }
 
-            // Fallback to direct URL loading
             backgroundImage = new Image("/images/" + selectedMapFile + ".gif");
             if (backgroundImage.isError()) {
-                System.err.println("Could not load background: " + selectedMapFile);
                 backgroundImage = null;
             }
 
         } catch (Exception e) {
-            System.err.println("Error loading background: " + e.getMessage());
             backgroundImage = null;
         }
     }
 
     private void initializeGame() {
-        // Create fighters using your Fighter class
         player1 = new Fighter(selectedPlayer1, 150, 270, "P1", true);
         player2 = new Fighter(selectedPlayer2, 550, 270, "P2", false);
 
-        // Reset game state
         roundTimer = 99;
         currentGameState = GameState.READY;
         lastSecond = System.currentTimeMillis();
 
         updateUI();
         showGameMessage("READY? FIGHT!", 2000);
-
-        System.out.println("Game initialized: " + selectedPlayer1 + " vs " + selectedPlayer2);
     }
 
     private void setupInputHandling() {
@@ -214,14 +201,12 @@ public class GameSceneController {
             player1.faceOpponent(player2);
             player2.faceOpponent(player1);
 
-            // Check combat
             checkCombat();
 
             // Check win conditions
             checkWinConditions();
         }
 
-        // Update UI
         updateUI();
     }
 
@@ -245,7 +230,6 @@ public class GameSceneController {
             CombatSystem.AttackData attackData = CombatSystem.getAttackData(player1.getCurrentAnimation());
             if (attackData != null) {
                 player2.takeDamage(attackData.damage, player1.getCurrentAnimation());
-                System.out.println("P1 hit P2 for " + attackData.damage + " damage!");
             }
         }
 
@@ -254,7 +238,6 @@ public class GameSceneController {
             CombatSystem.AttackData attackData = CombatSystem.getAttackData(player2.getCurrentAnimation());
             if (attackData != null) {
                 player1.takeDamage(attackData.damage, player2.getCurrentAnimation());
-                System.out.println("P2 hit P1 for " + attackData.damage + " damage!");
             }
         }
     }
@@ -325,9 +308,6 @@ public class GameSceneController {
         // Draw fighters
         player1.render(gc);
         player2.render(gc);
-
-        // Draw debug info
-        drawDebugInfo();
     }
 
     private void drawMapBackground() {
@@ -343,13 +323,6 @@ public class GameSceneController {
             gc.setFill(Color.BROWN);
             gc.fillRect(0, 320, 800, 80);
         }
-    }
-
-    private void drawDebugInfo() {
-        gc.setFill(Color.WHITE);
-        gc.fillText("P1: " + player1.getCurrentAnimation(), 10, 390);
-        gc.fillText("P2: " + player2.getCurrentAnimation(), 400, 390);
-        gc.fillText("State: " + currentGameState, 10, 20);
     }
 
     private void updateUI() {
@@ -418,7 +391,7 @@ public class GameSceneController {
 
             Stage stage = (Stage) gameCanvas.getScene().getWindow();
             stage.setScene(new Scene(root));
-            stage.setTitle("Street Fighter - Home");
+            stage.setTitle("Street Fighter");
             stage.show();
 
         } catch (Exception e) {
