@@ -34,9 +34,9 @@
                 prefWidth="200" prefHeight="40"
                 style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 18px; -fx-background-radius: 8; -fx-cursor: hand;"/>
 
-        <Button text="Vs Bot" fx:id="vsBotBtn"
+        <Button text="Network Multiplayer" fx:id="networkMultiplayerBtn"
                 prefWidth="200" prefHeight="40"
-                style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 18px; -fx-background-radius: 8; -fx-cursor: hand;"/>
+                style="-fx-background-color: #9b59b6; -fx-text-fill: white; -fx-font-size: 18px; -fx-background-radius: 8; -fx-cursor: hand;"/>
 
         <Button text="Leaderboard" fx:id="leaderboardBtn"
                 onAction="#openLeaderboard"

@@ -1,6 +1,7 @@
 package Client;
 
 import javafx.animation.AnimationTimer;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -18,11 +19,13 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import java.io.InputStream;
 
+/**
+ * Unified Game Scene Controller
+ * Supports both local (same device) and network (LAN) modes
+ */
 public class GameSceneController {
 
     @FXML private Canvas gameCanvas;
-
-    // UI Elements
     @FXML private Label roundLabel;
     @FXML private Label timerLabel;
     @FXML private Label player1NameLabel;
@@ -31,19 +34,15 @@ public class GameSceneController {
     @FXML private Label player2HealthLabel;
     @FXML private ProgressBar player1HealthBar;
     @FXML private ProgressBar player2HealthBar;
-
-    // Game State UI
     @FXML private VBox messageBox;
     @FXML private Label gameStateLabel;
     @FXML private Button continueButton;
-
-    // Pause Menu
     @FXML private VBox pauseMenu;
     @FXML private Button resumeButton;
     @FXML private Button mainMenuButton;
     @FXML private VBox controlsInfo;
+    @FXML private Label networkStatusLabel; // Optional - for network status
 
-    // Game systems
     private Fighter player1;
     private Fighter player2;
     private InputManager inputManager;
@@ -52,12 +51,10 @@ public class GameSceneController {
     private AnimationTimer gameLoop;
     private Image backgroundImage;
 
-    // Game data
     private String selectedMapFile = "map1";
     private String selectedPlayer1 = "RYU";
     private String selectedPlayer2 = "KEN";
 
-    // Game state
     private GameState currentGameState = GameState.READY;
     private int roundTimer = 99;
     private long lastSecond = System.currentTimeMillis();
@@ -65,31 +62,33 @@ public class GameSceneController {
     private int player1Wins = 0;
     private int player2Wins = 0;
 
+    // Network mode components (null = local mode)
+    private NetworkClient networkClient = null;
+    private String localPlayerId = null;
+    private boolean isNetworkMode = false;
+    private int stateUpdateCounter = 0;
+
+
     public enum GameState {
         READY, FIGHTING, ROUND_OVER, GAME_OVER, PAUSED
     }
 
     @FXML
     private void initialize() {
-        // Initialize canvas
         gc = gameCanvas.getGraphicsContext2D();
         gameCanvas.setFocusTraversable(true);
         gameCanvas.setWidth(800);
         gameCanvas.setHeight(400);
 
-        // Initialize systems
         assetManager = AssetManager.getInstance();
         inputManager = InputManager.getInstance();
 
-        // Setup input handling
         setupInputHandling();
 
-        // Initialize button actions
-        continueButton.setOnAction(e -> nextRound());
-        resumeButton.setOnAction(e -> resumeGame());
-        mainMenuButton.setOnAction(e -> returnToMainMenu());
+        if (continueButton != null) continueButton.setOnAction(e -> nextRound());
+        if (resumeButton != null) resumeButton.setOnAction(e -> resumeGame());
+        if (mainMenuButton != null) mainMenuButton.setOnAction(e -> returnToMainMenu());
 
-        // Hide controls info by default
         if (controlsInfo != null) {
             controlsInfo.setVisible(false);
         }
@@ -97,11 +96,73 @@ public class GameSceneController {
         AudioManager.playBGM("fight_theme.wav");
     }
 
+    public void setNetworkMode(NetworkClient client, String playerId) {
+        this.networkClient = client;
+        this.localPlayerId = playerId;
+        this.isNetworkMode = true;
+
+        // Set up network callback for game inputs
+        if (networkClient != null) {
+            networkClient.setCallback(new NetworkClient.NetworkCallback() {
+                @Override
+                public void onConnected() {
+                    Platform.runLater(() -> updateNetworkStatus("Connected"));
+                }
+
+                @Override
+                public void onDisconnected() {
+                    Platform.runLater(() -> {
+                        updateNetworkStatus("Disconnected!");
+                        pauseGame();
+                        gameStateLabel.setText("Connection Lost!");
+                    });
+                }
+
+                @Override
+                public void onGameStart() {
+                    Platform.runLater(() -> {
+                        currentGameState = GameState.READY;
+                        showGameMessage("READY? FIGHT!", 2000);
+                    });
+                }
+
+                @Override
+                public void onInputReceived(String playerId, long frameNumber, short inputBits) {
+                    // Apply remote player's input
+                    String remotePlayerId = playerId.equals(localPlayerId) ? null : playerId;
+                    if (remotePlayerId != null) {
+                        inputManager.setPlayerNetworkControlled(remotePlayerId, true);
+                        NetworkClient.InputPacker.applyInputs(inputBits, inputManager, remotePlayerId);
+                    }
+                }
+
+                @Override
+                public void onPlayerDisconnected(String playerId) {
+                    Platform.runLater(() -> {
+                        updateNetworkStatus("Opponent left");
+                        showGameMessage("OPPONENT LEFT THE GAME", 5000);
+                        currentGameState = GameState.GAME_OVER;
+                    });
+                }
+            });
+
+            // Set network control flags
+            if (localPlayerId.equals("P1")) {
+                inputManager.setPlayerNetworkControlled("P1", false); // Local
+                inputManager.setPlayerNetworkControlled("P2", true);  // Network
+            } else {
+                inputManager.setPlayerNetworkControlled("P1", true);  // Network
+                inputManager.setPlayerNetworkControlled("P2", false); // Local
+            }
+
+            updateNetworkStatus("Connected");
+        }
+    }
+
     public void setGameData(String player1Char, String player2Char, String mapFile) {
         this.selectedPlayer1 = player1Char != null ? player1Char.toUpperCase() : "RYU";
         this.selectedPlayer2 = player2Char != null ? player2Char.toUpperCase() : "KEN";
         this.selectedMapFile = mapFile != null ? mapFile : "map1";
-
 
         loadBackgroundImage();
 
@@ -122,12 +183,10 @@ public class GameSceneController {
                 }
                 stream.close();
             }
-
             backgroundImage = new Image("/images/" + selectedMapFile + ".gif");
             if (backgroundImage.isError()) {
                 backgroundImage = null;
             }
-
         } catch (Exception e) {
             backgroundImage = null;
         }
@@ -143,6 +202,7 @@ public class GameSceneController {
 
         updateUI();
         showGameMessage("READY? FIGHT!", 2000);
+        AudioManager.playFightSound();
     }
 
     private void setupInputHandling() {
@@ -155,6 +215,12 @@ public class GameSceneController {
         KeyCode key = event.getCode();
         inputManager.handleKeyPressed(key);
 
+        // Send input to network if in network mode
+        if (isNetworkMode && networkClient != null && networkClient.isConnected()) {
+            short inputBits = NetworkClient.InputPacker.packInputs(inputManager, localPlayerId);
+            networkClient.sendInput(inputBits);
+        }
+
         if (key == KeyCode.ESCAPE) {
             if (currentGameState == GameState.FIGHTING) {
                 pauseGame();
@@ -163,18 +229,24 @@ public class GameSceneController {
             }
         }
 
-        if (key == KeyCode.M) {
+        if (key == KeyCode.M && controlsInfo != null) {
             controlsInfo.setVisible(!controlsInfo.isVisible());
         }
     }
 
     private void handleKeyReleased(KeyEvent event) {
         inputManager.handleKeyReleased(event.getCode());
+
+        // Send updated input state to network
+        if (isNetworkMode && networkClient != null && networkClient.isConnected()) {
+            short inputBits = NetworkClient.InputPacker.packInputs(inputManager, localPlayerId);
+            networkClient.sendInput(inputBits);
+        }
     }
 
     private void startGameLoop() {
         if (gameLoop != null) {
-            gameLoop.stop(); // Stop existing loop if any
+            gameLoop.stop();
         }
 
         gameLoop = new AnimationTimer() {
@@ -193,18 +265,30 @@ public class GameSceneController {
         updateTimer();
 
         if (currentGameState == GameState.FIGHTING) {
-            // Update fighters
             player1.tick();
             player2.tick();
 
-            // Make fighters face each other
             player1.faceOpponent(player2);
             player2.faceOpponent(player1);
 
             checkCombat();
-
-            // Check win conditions
             checkWinConditions();
+
+            // Network mode: Send periodic state updates
+            if (isNetworkMode && networkClient != null) {
+                stateUpdateCounter++;
+                if (stateUpdateCounter >= 5) {
+                    Fighter localFighter = localPlayerId.equals("P1") ? player1 : player2;
+                    networkClient.sendStateUpdate(
+                            localFighter.x,
+                            localFighter.y,
+                            localFighter.getHealth(),
+                            localFighter.getCurrentAnimation().toString(),
+                            localFighter.animationSM.getCurrentFrameIndex()
+                    );
+                    stateUpdateCounter = 0;
+                }
+            }
         }
 
         updateUI();
@@ -277,10 +361,15 @@ public class GameSceneController {
             currentGameState = GameState.GAME_OVER;
             String winner = player1Wins >= 2 ? selectedPlayer1 : selectedPlayer2;
             showGameMessage(winner + " WINS THE MATCH!", 5000);
-            continueButton.setText("New Game");
+            if (continueButton != null) {
+                continueButton.setText("New Game");
+                continueButton.setVisible(true);
+            }
         } else {
-            continueButton.setText("Next Round");
-            continueButton.setVisible(true);
+            if (continueButton != null) {
+                continueButton.setText("Next Round");
+                continueButton.setVisible(true);
+            }
         }
     }
 
@@ -294,39 +383,32 @@ public class GameSceneController {
         }
 
         initializeGame();
-        messageBox.setVisible(false);
-        continueButton.setVisible(false);
+        if (messageBox != null) messageBox.setVisible(false);
+        if (continueButton != null) continueButton.setVisible(false);
     }
 
     private void render() {
-        // Clear canvas
         gc.clearRect(0, 0, gameCanvas.getWidth(), gameCanvas.getHeight());
-
-        // Draw background
         drawMapBackground();
 
-        // Draw fighters
-        player1.render(gc);
-        player2.render(gc);
+        if (player1 != null) player1.render(gc);
+        if (player2 != null) player2.render(gc);
     }
 
     private void drawMapBackground() {
         if (backgroundImage != null && !backgroundImage.isError()) {
-            // Draw background image stretched to fill entire 800x400 canvas
             gc.drawImage(backgroundImage, 0, 0, 800, 400);
         } else {
-            // Fallback background - gradient sky and ground
             gc.setFill(Color.LIGHTBLUE);
             gc.fillRect(0, 0, 800, 320);
-
-            // Ground
             gc.setFill(Color.BROWN);
             gc.fillRect(0, 320, 800, 80);
         }
     }
 
     private void updateUI() {
-        // Update health bars
+        if (player1 == null || player2 == null) return;
+
         double p1HealthPercent = (double) player1.getHealth() / player1.getMaxHealth();
         double p2HealthPercent = (double) player2.getHealth() / player2.getMaxHealth();
 
@@ -336,28 +418,32 @@ public class GameSceneController {
         player1HealthLabel.setText(player1.getHealth() + "/" + player1.getMaxHealth());
         player2HealthLabel.setText(player2.getHealth() + "/" + player2.getMaxHealth());
 
-        // Update timer
         timerLabel.setText(String.valueOf(roundTimer));
-
-        // Update round info
         roundLabel.setText("ROUND " + currentRound);
 
-        // Update player names with win count
         player1NameLabel.setText(player1.getName() + " (Wins: " + player1Wins + ")");
         player2NameLabel.setText(player2.getName() + " (Wins: " + player2Wins + ")");
     }
 
-    private void showGameMessage(String message, long duration) {
-        gameStateLabel.setText(message);
-        messageBox.setVisible(true);
+    private void updateNetworkStatus(String status) {
+        if (networkStatusLabel != null) {
+            networkStatusLabel.setText("Network: " + status);
+            networkStatusLabel.setVisible(true);
+        }
+    }
 
-        // Auto-hide message and start fighting
+    private void showGameMessage(String message, long duration) {
+        if (gameStateLabel != null) gameStateLabel.setText(message);
+        if (messageBox != null) messageBox.setVisible(true);
+
         new Thread(() -> {
             try {
                 Thread.sleep(duration);
                 if (currentGameState == GameState.READY) {
                     currentGameState = GameState.FIGHTING;
-                    javafx.application.Platform.runLater(() -> messageBox.setVisible(false));
+                    Platform.runLater(() -> {
+                        if (messageBox != null) messageBox.setVisible(false);
+                    });
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -368,14 +454,14 @@ public class GameSceneController {
     private void pauseGame() {
         if (currentGameState == GameState.FIGHTING) {
             currentGameState = GameState.PAUSED;
-            pauseMenu.setVisible(true);
+            if (pauseMenu != null) pauseMenu.setVisible(true);
         }
     }
 
     private void resumeGame() {
         if (currentGameState == GameState.PAUSED) {
             currentGameState = GameState.FIGHTING;
-            pauseMenu.setVisible(false);
+            if (pauseMenu != null) pauseMenu.setVisible(false);
             gameCanvas.requestFocus();
         }
     }
@@ -384,6 +470,11 @@ public class GameSceneController {
         try {
             if (gameLoop != null) {
                 gameLoop.stop();
+            }
+
+            // Disconnect network if in network mode
+            if (isNetworkMode && networkClient != null) {
+                networkClient.disconnect();
             }
 
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/game/HomeUI.fxml"));

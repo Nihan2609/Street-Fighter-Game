@@ -148,6 +148,10 @@ public class AudioManager {
         playSFX("death");
     }
 
+    public static void playFightSound() {
+        playSFX("fightFX");
+    }
+
     // Volume and Settings Control
     public static void setBGMVolume(double volume) {
         bgmVolume = Math.max(0.0, Math.min(1.0, volume));

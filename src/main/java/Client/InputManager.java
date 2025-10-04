@@ -8,6 +8,10 @@ public class InputManager {
     private Set<KeyCode> pressedKeys = new HashSet<>();
     private Map<String, Map<String, KeyCode>> playerBindings = new HashMap<>();
 
+    // Network input state for remote players
+    private Map<String, Map<String, Boolean>> networkInputState = new HashMap<>();
+    private Map<String, Boolean> isNetworkPlayer = new HashMap<>();
+
     InputManager() {
         setupDefaultBindings();
     }
@@ -45,6 +49,12 @@ public class InputManager {
         p2Bindings.put("heavy_kick", KeyCode.U);
         p2Bindings.put("block", KeyCode.I);
         playerBindings.put("P2", p2Bindings);
+
+        // Initialize network state maps
+        networkInputState.put("P1", new HashMap<>());
+        networkInputState.put("P2", new HashMap<>());
+        isNetworkPlayer.put("P1", false);
+        isNetworkPlayer.put("P2", false);
     }
 
     public void handleKeyPressed(KeyCode key) {
@@ -56,6 +66,13 @@ public class InputManager {
     }
 
     public boolean isActionPressed(String playerId, String action) {
+        // Check if this player is controlled by network
+        if (Boolean.TRUE.equals(isNetworkPlayer.get(playerId))) {
+            Map<String, Boolean> networkState = networkInputState.get(playerId);
+            return networkState != null && Boolean.TRUE.equals(networkState.get(action));
+        }
+
+        // Local player - check keyboard
         Map<String, KeyCode> bindings = playerBindings.get(playerId);
         if (bindings == null) return false;
 
@@ -63,14 +80,44 @@ public class InputManager {
         return key != null && pressedKeys.contains(key);
     }
 
+    // Network input methods
+    public void setNetworkInput(String playerId, String action, boolean pressed) {
+        Map<String, Boolean> state = networkInputState.get(playerId);
+        if (state == null) {
+            state = new HashMap<>();
+            networkInputState.put(playerId, state);
+        }
+        state.put(action, pressed);
+    }
+
+    public void setPlayerNetworkControlled(String playerId, boolean isNetwork) {
+        isNetworkPlayer.put(playerId, isNetwork);
+        if (isNetwork) {
+            // Clear network input state when switching to network control
+            Map<String, Boolean> state = networkInputState.get(playerId);
+            if (state != null) {
+                state.clear();
+            }
+        }
+    }
+
+    public boolean isPlayerNetworkControlled(String playerId) {
+        return Boolean.TRUE.equals(isNetworkPlayer.get(playerId));
+    }
+
     public void clearAllInput() {
         pressedKeys.clear();
+        for (Map<String, Boolean> state : networkInputState.values()) {
+            state.clear();
+        }
     }
 
     public void clearBuffer(String playerId) {
-        // For future use with special move buffers
-        // Currently just clears all input
         pressedKeys.clear();
+        Map<String, Boolean> state = networkInputState.get(playerId);
+        if (state != null) {
+            state.clear();
+        }
     }
 
     // Debug method

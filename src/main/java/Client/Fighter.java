@@ -22,7 +22,7 @@ public class Fighter extends Entity {
     private boolean onGround = true;
 
     // Systems
-    private AnimationStateMachine animationSM;
+    AnimationStateMachine animationSM;
     private InputManager inputManager;
     private String playerId;
 
