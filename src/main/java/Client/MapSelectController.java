@@ -1,6 +1,5 @@
 package Client;
 
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -9,8 +8,6 @@ import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
-
-import java.io.IOException;
 
 public class MapSelectController {
 
@@ -25,15 +22,9 @@ public class MapSelectController {
     @FXML private ImageView map6;
     @FXML private Label titleLabel;
 
-    private String selectedMap = null;
     private int currentIndex = 0;
     private ImageView[] maps;
-
-    // Network components
     private NetworkClient networkClient = null;
-    private String localPlayerId = null;
-    private boolean isNetworkMode = false;
-    private boolean mapConfirmed = false;
 
     @FXML
     private void initialize() {
@@ -42,98 +33,22 @@ public class MapSelectController {
 
         titleLabel.sceneProperty().addListener((obs, oldScene, newScene) -> {
             if (newScene != null) {
-                newScene.setOnKeyPressed(event -> handleKeyPress(event.getCode()));
+                newScene.setOnKeyPressed(event -> {
+                    if (event.getCode() == KeyCode.A) {
+                        moveLeft();
+                    } else if (event.getCode() == KeyCode.D) {
+                        moveRight();
+                    } else if (event.getCode() == KeyCode.SPACE) {
+                        AudioManager.playSelectSound();
+                        selectMap(maps[currentIndex]);
+                    }
+                });
             }
         });
     }
 
-    public void setNetworkMode(NetworkClient client, String playerId) {
+    public void setNetworkClient(NetworkClient client) {
         this.networkClient = client;
-        this.localPlayerId = playerId;
-        this.isNetworkMode = true;
-
-        // P2 just waits - update UI to show this
-        if (playerId.equals("P2")) {
-            titleLabel.setText("Host is selecting map...");
-        }
-
-        if (networkClient != null) {
-            networkClient.setCallback(new NetworkClient.NetworkCallback() {
-                @Override
-                public void onConnected() {}
-
-                @Override
-                public void onDisconnected() {}
-
-                @Override
-                public void onGameStart() {}
-
-                @Override
-                public void onInputReceived(String pid, long frameNumber, short inputBits) {
-                    handleNetworkMapSelection(inputBits);
-                }
-
-                @Override
-                public void onPlayerDisconnected(String pid) {}
-            });
-        }
-    }
-
-    private void handleKeyPress(KeyCode code) {
-        // Only P1 (host) can select in network mode
-        if (isNetworkMode && localPlayerId.equals("P2")) {
-            return; // P2 does nothing
-        }
-
-        if (code == KeyCode.A) {
-            moveLeft();
-            if (isNetworkMode) sendMapSelection(false);
-        } else if (code == KeyCode.D) {
-            moveRight();
-            if (isNetworkMode) sendMapSelection(false);
-        } else if (code == KeyCode.SPACE) {
-            AudioManager.playSelectSound();
-            if (isNetworkMode) {
-                sendMapSelection(true); // Send confirmed selection
-            }
-            selectMap(maps[currentIndex]);
-        }
-    }
-
-    private void sendMapSelection(boolean confirmed) {
-        if (networkClient != null && networkClient.isConnected()) {
-            short mapData = (short) ((currentIndex & 0x0F) | (confirmed ? 1 : 0) << 4);
-            networkClient.sendInput(mapData);
-        }
-    }
-
-    private void handleNetworkMapSelection(short mapData) {
-        Platform.runLater(() -> {
-            int receivedIndex = mapData & 0x0F;
-            boolean confirmed = ((mapData >> 4) & 0x01) == 1;
-
-            System.out.println("P2 received: index=" + receivedIndex + ", confirmed=" + confirmed);
-
-            // Bounds check
-            if (receivedIndex < 0 || receivedIndex >= maps.length) {
-                System.out.println("Invalid index, ignoring");
-                return;
-            }
-
-            // Update display
-            if (receivedIndex != currentIndex) {
-                currentIndex = receivedIndex;
-                highlightMap(maps[currentIndex]);
-                System.out.println("Updated to map " + receivedIndex);
-            }
-
-            // If confirmed, proceed
-            if (confirmed && !mapConfirmed) {
-                System.out.println("Map confirmed! Proceeding to fight...");
-                mapConfirmed = true;
-                selectMap(maps[currentIndex]);
-            }
-        });
     }
 
     private void highlightMap(ImageView map) {
@@ -162,24 +77,12 @@ public class MapSelectController {
     }
 
     private void selectMap(ImageView selectedImageView) {
-
-        System.out.println("selectMap called, mapConfirmed=" + mapConfirmed);
-
-        if (mapConfirmed) {
-            System.out.println("Already confirmed, returning");
-            return;
-        }
-
-        mapConfirmed = true;
-
-        if (mapConfirmed) return;
-        mapConfirmed = true;
-
-        resetMapStyles();
-        highlightMap(selectedImageView);
-
         String mapFile = getMapFile(selectedImageView);
-        this.selectedMap = mapFile;
+
+        // If network mode, send config to server
+        if (networkClient != null) {
+            networkClient.sendGameConfig(player1Choice, player2Choice, mapFile);
+        }
 
         startFightScene(mapFile);
     }
@@ -207,21 +110,20 @@ public class MapSelectController {
             GameSceneController gameController = loader.getController();
             gameController.setGameData(player1Choice, player2Choice, mapFile);
 
-            // Pass network mode
-            if (isNetworkMode && networkClient != null) {
-                gameController.setNetworkMode(networkClient, localPlayerId);
+            if (networkClient != null) {
+                gameController.setNetworkMode(networkClient, "P1");
             }
 
             Scene gameScene = new Scene(root, 800, 400);
             Stage stage = (Stage) map1.getScene().getWindow();
             stage.setScene(gameScene);
-            stage.setTitle("Street Fighter - " + (isNetworkMode ? "Network Match" : "Local"));
+            stage.setTitle("Street Fighter - Network Match");
             stage.setResizable(false);
             stage.sizeToScene();
             stage.centerOnScreen();
             stage.show();
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

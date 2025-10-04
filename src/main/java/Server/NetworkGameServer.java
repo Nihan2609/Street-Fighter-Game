@@ -5,19 +5,16 @@ import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.*;
 
-
 public class NetworkGameServer {
     private static final int PORT = 5555;
     private static final int BUFFER_SIZE = 1024;
-    private static final int TICK_RATE = 60; // Match game FPS
+    private static final int TICK_RATE = 60;
     private static final long TICK_DURATION_MS = 1000 / TICK_RATE;
 
     private DatagramSocket socket;
     private volatile boolean running = false;
     private Map<String, PlayerConnection> players = new ConcurrentHashMap<>();
     private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
-
-    // Game state validation
     private Map<String, GameState> playerStates = new ConcurrentHashMap<>();
 
     private static class PlayerConnection {
@@ -50,20 +47,18 @@ public class NetworkGameServer {
 
     public NetworkGameServer() throws SocketException {
         socket = new DatagramSocket(PORT);
-        socket.setSoTimeout(0); // Non-blocking
+        socket.setSoTimeout(0);
     }
 
     public void start() {
         running = true;
-        System.out.println("🎮 Game Server started on port " + PORT);
-        System.out.println("📡 Waiting for Player 2 to connect...");
+        System.out.println("Game Server started on port " + PORT);
+        System.out.println("Waiting for players to connect...");
 
-        // Start receiver thread
         Thread receiverThread = new Thread(this::receiveLoop);
         receiverThread.setDaemon(false);
         receiverThread.start();
 
-        // Start heartbeat checker
         scheduler.scheduleAtFixedRate(this::checkHeartbeats, 1, 1, TimeUnit.SECONDS);
     }
 
@@ -74,11 +69,9 @@ public class NetworkGameServer {
             try {
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                 socket.receive(packet);
-
                 handlePacket(packet);
-
             } catch (SocketTimeoutException e) {
-                // Normal timeout, continue
+                // Normal timeout
             } catch (Exception e) {
                 if (running) {
                     System.err.println("Error receiving packet: " + e.getMessage());
@@ -96,27 +89,24 @@ public class NetworkGameServer {
                 case PacketType.CONNECT:
                     handleConnect(packet, bb);
                     break;
-
                 case PacketType.INPUT:
                     handleInput(packet, bb);
                     break;
-
                 case PacketType.STATE_UPDATE:
                     handleStateUpdate(packet, bb);
                     break;
-
                 case PacketType.HEARTBEAT:
                     handleHeartbeat(packet, bb);
                     break;
-
                 case PacketType.DISCONNECT:
                     handleDisconnect(packet, bb);
                     break;
-
+                case PacketType.GAME_CONFIG:
+                    handleGameConfig(packet, bb);
+                    break;
                 default:
                     System.err.println("Unknown packet type: " + packetType);
             }
-
         } catch (Exception e) {
             System.err.println("Error handling packet: " + e.getMessage());
         }
@@ -133,21 +123,14 @@ public class NetworkGameServer {
             return;
         }
 
-        PlayerConnection pc = new PlayerConnection(
-                packet.getAddress(),
-                packet.getPort(),
-                playerId
-        );
+        PlayerConnection pc = new PlayerConnection(packet.getAddress(), packet.getPort(), playerId);
         players.put(clientKey, pc);
 
-        System.out.println("✅ Player connected: " + playerId + " (" + playerName + ")");
-
-        // Send acceptance
+        System.out.println("Player connected: " + playerId + " (" + playerName + ")");
         sendResponse(packet, PacketType.CONNECT_ACCEPTED, playerId);
 
-        // If we have 2 players, start game
         if (players.size() == 2) {
-            System.out.println("🎮 Both players connected. Starting game...");
+            System.out.println("Both players connected. Starting game...");
             broadcastGameStart();
         }
     }
@@ -155,16 +138,14 @@ public class NetworkGameServer {
     private void handleInput(DatagramPacket packet, ByteBuffer bb) {
         String playerId = readString(bb);
         long frameNumber = bb.getLong();
-        short inputBits = bb.getShort(); // Packed input flags
+        short inputBits = bb.getShort();
 
-        // Update heartbeat
         String clientKey = packet.getAddress().toString() + ":" + packet.getPort();
         PlayerConnection pc = players.get(clientKey);
         if (pc != null) {
             pc.lastHeartbeat = System.currentTimeMillis();
         }
 
-        // Broadcast input to all players (including sender for confirmation)
         broadcastInput(playerId, frameNumber, inputBits);
     }
 
@@ -181,14 +162,12 @@ public class NetworkGameServer {
 
         playerStates.put(playerId, state);
 
-        // Update heartbeat
         String clientKey = packet.getAddress().toString() + ":" + packet.getPort();
         PlayerConnection pc = players.get(clientKey);
         if (pc != null) {
             pc.lastHeartbeat = System.currentTimeMillis();
         }
 
-        // Validate critical events (like health changes)
         validateGameState(playerId, state);
     }
 
@@ -209,10 +188,35 @@ public class NetworkGameServer {
         players.remove(clientKey);
         playerStates.remove(playerId);
 
-        System.out.println("👋 Player disconnected: " + playerId);
-
-        // Notify other player
+        System.out.println("Player disconnected: " + playerId);
         broadcastPlayerDisconnected(playerId);
+    }
+
+    private void handleGameConfig(DatagramPacket packet, ByteBuffer bb) {
+        String p1Char = readString(bb);
+        String p2Char = readString(bb);
+        String mapFile = readString(bb);
+
+        System.out.println("Broadcasting game config: " + p1Char + " vs " + p2Char + " on " + mapFile);
+
+        ByteBuffer outBb = ByteBuffer.allocate(256);
+        outBb.put(PacketType.GAME_CONFIG);
+        writeString(outBb, p1Char);
+        writeString(outBb, p2Char);
+        writeString(outBb, mapFile);
+
+        byte[] data = new byte[outBb.position()];
+        outBb.flip();
+        outBb.get(data);
+
+        for (PlayerConnection pc : players.values()) {
+            try {
+                DatagramPacket sendPacket = new DatagramPacket(data, data.length, pc.address, pc.port);
+                socket.send(sendPacket);
+            } catch (Exception e) {
+                System.err.println("Error broadcasting game config: " + e.getMessage());
+            }
+        }
     }
 
     private void broadcastInput(String playerId, long frameNumber, short inputBits) {
@@ -226,12 +230,9 @@ public class NetworkGameServer {
         bb.flip();
         bb.get(data);
 
-        // Send to all connected players
         for (PlayerConnection pc : players.values()) {
             try {
-                DatagramPacket packet = new DatagramPacket(
-                        data, data.length, pc.address, pc.port
-                );
+                DatagramPacket packet = new DatagramPacket(data, data.length, pc.address, pc.port);
                 socket.send(packet);
             } catch (Exception e) {
                 System.err.println("Error broadcasting input: " + e.getMessage());
@@ -244,7 +245,6 @@ public class NetworkGameServer {
         bb.put(PacketType.GAME_START);
         bb.putInt(players.size());
 
-        // Add player IDs
         for (PlayerConnection pc : players.values()) {
             writeString(bb, pc.playerId);
         }
@@ -255,9 +255,7 @@ public class NetworkGameServer {
 
         for (PlayerConnection pc : players.values()) {
             try {
-                DatagramPacket packet = new DatagramPacket(
-                        data, data.length, pc.address, pc.port
-                );
+                DatagramPacket packet = new DatagramPacket(data, data.length, pc.address, pc.port);
                 socket.send(packet);
             } catch (Exception e) {
                 System.err.println("Error broadcasting game start: " + e.getMessage());
@@ -277,9 +275,7 @@ public class NetworkGameServer {
         for (PlayerConnection pc : players.values()) {
             if (!pc.playerId.equals(playerId)) {
                 try {
-                    DatagramPacket packet = new DatagramPacket(
-                            data, data.length, pc.address, pc.port
-                    );
+                    DatagramPacket packet = new DatagramPacket(data, data.length, pc.address, pc.port);
                     socket.send(packet);
                 } catch (Exception e) {
                     System.err.println("Error broadcasting disconnect: " + e.getMessage());
@@ -289,11 +285,8 @@ public class NetworkGameServer {
     }
 
     private void validateGameState(String playerId, GameState state) {
-        // Basic sanity checks to prevent cheating
         if (state.health < 0) state.health = 0;
         if (state.health > 1000) state.health = 1000;
-
-        // Position bounds
         if (state.x < 0) state.x = 0;
         if (state.x > 740) state.x = 740;
         if (state.y < 0) state.y = 0;
@@ -306,7 +299,7 @@ public class NetworkGameServer {
         for (Map.Entry<String, PlayerConnection> entry : players.entrySet()) {
             if (!entry.getValue().isAlive()) {
                 toRemove.add(entry.getKey());
-                System.out.println("⚠️ Player timeout: " + entry.getValue().playerId);
+                System.out.println("Player timeout: " + entry.getValue().playerId);
             }
         }
 
@@ -328,11 +321,7 @@ public class NetworkGameServer {
             bb.flip();
             bb.get(data);
 
-            DatagramPacket response = new DatagramPacket(
-                    data, data.length,
-                    originalPacket.getAddress(),
-                    originalPacket.getPort()
-            );
+            DatagramPacket response = new DatagramPacket(data, data.length, originalPacket.getAddress(), originalPacket.getPort());
             socket.send(response);
         } catch (Exception e) {
             System.err.println("Error sending response: " + e.getMessage());
@@ -358,14 +347,13 @@ public class NetworkGameServer {
         if (socket != null && !socket.isClosed()) {
             socket.close();
         }
-        System.out.println("🛑 Server stopped");
+        System.out.println("Server stopped");
     }
 
     public int getPlayerCount() {
         return players.size();
     }
 
-    // Packet type constants
     public static class PacketType {
         public static final byte CONNECT = 0x01;
         public static final byte CONNECT_ACCEPTED = 0x02;
@@ -377,15 +365,14 @@ public class NetworkGameServer {
         public static final byte GAME_START = 0x30;
         public static final byte HEARTBEAT = 0x40;
         public static final byte PLAYER_DISCONNECTED = 0x50;
+        public static final byte GAME_CONFIG = 0x60;
     }
 
-    // For Player 1 (host) to run both server and client
     public static void main(String[] args) {
         try {
             NetworkGameServer server = new NetworkGameServer();
             server.start();
 
-            // Keep server running
             System.out.println("Press Enter to stop server...");
             Scanner scanner = new Scanner(System.in);
             scanner.nextLine();
