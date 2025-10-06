@@ -200,7 +200,7 @@ public class NetworkLobbyController {
 
             Stage stage = (Stage) hostButton.getScene().getWindow();
             stage.setScene(new Scene(root, 600, 400));
-            stage.setTitle("Character Select - Host");
+            stage.setTitle("Character Select");
             stage.show();
 
         } catch (Exception e) {
@@ -222,7 +222,7 @@ public class NetworkLobbyController {
 
                 Stage stage = (Stage) statusLabel.getScene().getWindow();
                 stage.setScene(new Scene(root, 800, 400));
-                stage.setTitle("Street Fighter - Network Match");
+                stage.setTitle("Street Fighter");
                 stage.setResizable(false);
                 stage.sizeToScene();
                 stage.centerOnScreen();

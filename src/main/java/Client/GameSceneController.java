@@ -62,7 +62,7 @@ public class GameSceneController {
     private int player1Wins = 0;
     private int player2Wins = 0;
 
-    // Network mode components (null = local mode)
+    // Network mode components
     private NetworkClient networkClient = null;
     private String localPlayerId = null;
     private boolean isNetworkMode = false;
@@ -101,7 +101,7 @@ public class GameSceneController {
         this.localPlayerId = playerId;
         this.isNetworkMode = true;
 
-        // Set up network callback for game inputs
+        //network callback
         if (networkClient != null) {
             networkClient.setCallback(new NetworkClient.NetworkCallback() {
                 @Override
@@ -146,13 +146,13 @@ public class GameSceneController {
                 }
             });
 
-            // Set network control flags
+            // flags
             if (localPlayerId.equals("P1")) {
-                inputManager.setPlayerNetworkControlled("P1", false); // Local
+                inputManager.setPlayerNetworkControlled("P1", false);
                 inputManager.setPlayerNetworkControlled("P2", true);  // Network
             } else {
                 inputManager.setPlayerNetworkControlled("P1", true);  // Network
-                inputManager.setPlayerNetworkControlled("P2", false); // Local
+                inputManager.setPlayerNetworkControlled("P2", false);
             }
 
             updateNetworkStatus("Connected");

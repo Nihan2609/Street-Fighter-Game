@@ -34,7 +34,7 @@ public class CombatSystem {
         }
     }
 
-    // Frame data matching your animation system
+    // Frame data
     private static final java.util.Map<AnimationStateMachine.AnimationType, AttackData> ATTACK_DATA =
             new java.util.HashMap<AnimationStateMachine.AnimationType, AttackData>() {{
 
@@ -152,7 +152,7 @@ public class CombatSystem {
         return new Rectangle2D(hitboxX, hitboxY, hitboxWidth, hitboxHeight);
     }
 
-    // Check if an attack can be canceled into another attack
+    // Attack can be canceled into another attack -> CHECK
     public static boolean canCancelInto(AnimationStateMachine.AnimationType currentAttack,
                                         AnimationStateMachine.AnimationType newAttack) {
         AttackData currentData = getAttackData(currentAttack);
@@ -169,25 +169,25 @@ public class CombatSystem {
         return false;
     }
 
-    // Calculate damage scaling for combos
+    // Calculate damage and combo
     public static int calculateScaledDamage(int baseDamage, int comboCount) {
         if (comboCount <= 1) return baseDamage;
 
-        // Damage scaling: each hit reduces damage
+        // Damage scaling
         double scalingFactor = Math.max(0.3, 1.0 - (comboCount - 1) * 0.15);
         return (int) (baseDamage * scalingFactor);
     }
 
-    // Get the priority of an attack (higher priority beats lower priority)
+    // Attack priority
     public static int getAttackPriority(AnimationStateMachine.AnimationType attackType) {
         switch (attackType) {
             case QUICK_PUNCH:
             case KICK_LOW:
-                return 1; // Fast, low priority
+                return 1; // low priority
 
             case PUNCH:
             case UPPER_KICK:
-                return 2; // Heavy, medium priority
+                return 2; // medium priority
 
             case CROUCH_PUNCH:
                 return 1; // Low attacks
@@ -202,25 +202,25 @@ public class CombatSystem {
         }
     }
 
-    // Calculate knockback force based on attack
+    // Knockback
     public static double getKnockbackForce(AnimationStateMachine.AnimationType attackType) {
         AttackData data = getAttackData(attackType);
         return data != null ? data.knockback : 0;
     }
 
-    // Get hitstun duration for an attack
+    // Hitstun
     public static int getHitstunFrames(AnimationStateMachine.AnimationType attackType) {
         AttackData data = getAttackData(attackType);
         return data != null ? data.hitstun : 10;
     }
 
-    // Get blockstun duration for an attack
+    // Blockstun
     public static int getBlockstunFrames(AnimationStateMachine.AnimationType attackType) {
         AttackData data = getAttackData(attackType);
         return data != null ? data.blockstun : 5;
     }
 
-    // Check if we're in the startup frames of an attack
+    // Startup frames -> CHECK
     public static boolean isInStartup(AnimationStateMachine.AnimationType attackType,
                                       long animationStartTime) {
         AttackData data = getAttackData(attackType);
@@ -232,7 +232,7 @@ public class CombatSystem {
         return frameTime < data.startupFrames;
     }
 
-    // Check if we're in recovery frames
+    // Recovery frames -> CHECK
     public static boolean isInRecovery(AnimationStateMachine.AnimationType attackType,
                                        long animationStartTime) {
         AttackData data = getAttackData(attackType);

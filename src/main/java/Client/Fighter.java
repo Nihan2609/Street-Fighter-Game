@@ -33,11 +33,11 @@ public class Fighter extends Entity {
     private long invulnerabilityEnd = 0;
     private int comboCount = 0;
 
-    // Special move state
+    // Special move
     private boolean canCancelAttack = false;
     private long lastAttackTime = 0;
 
-    // Jump state tracking
+    // Jump state
     private boolean jumpInitiated = false;
     private boolean canPerformAirAction = true;
 
@@ -48,7 +48,6 @@ public class Fighter extends Entity {
         this.facingRight = facingRight;
         this.health = maxHealth;
 
-        // Initialize systems
         AssetManager assetManager = AssetManager.getInstance();
         if (!assetManager.isInitialized()) {
             assetManager.initialize();
@@ -70,7 +69,6 @@ public class Fighter extends Entity {
     }
 
     private void updatePhysics() {
-        // Don't update physics for dead or winning characters - they should stay in place
         if (isDead() || animationSM.getCurrentAnimationType() == AnimationStateMachine.AnimationType.WIN) {
             return;
         }
@@ -93,7 +91,7 @@ public class Fighter extends Entity {
                 jumpInitiated = false;
                 canPerformAirAction = true;
 
-                // Return to idle after landing from various air states
+                // Return to idle
                 AnimationStateMachine.AnimationType currentAnim = animationSM.getCurrentAnimationType();
                 if (currentAnim == AnimationStateMachine.AnimationType.JUMP ||
                         currentAnim == AnimationStateMachine.AnimationType.AIR_PUNCH ||
@@ -106,18 +104,16 @@ public class Fighter extends Entity {
             }
         }
 
-        // Apply air resistance for smoother movement
+        //AIR
         if (!onGround) {
             velX *= 0.98;
         } else {
-            // Ground friction - only apply when no input
-            if (!isMovementInputPressed()) {
+            if (!isMovementInputPressed()) { //GROUND
                 velX *= 0.85;
                 if (Math.abs(velX) < 0.1) velX = 0;
             }
         }
 
-        // Screen boundaries
         if (x < 0) {
             x = 0;
             velX = Math.max(0, velX);
@@ -129,7 +125,8 @@ public class Fighter extends Entity {
     }
 
     private void updateCombatState() {
-        // Update timers
+
+
         if (blockstunTimer > 0) {
             blockstunTimer--;
             if (blockstunTimer == 0) {
@@ -145,19 +142,19 @@ public class Fighter extends Entity {
             }
         }
 
-        // Update invulnerability
+
         if (invulnerable && System.currentTimeMillis() > invulnerabilityEnd) {
             invulnerable = false;
         }
 
-        // Update attack canceling window
+
         if (canCancelAttack && (System.currentTimeMillis() - lastAttackTime) > 300) {
             canCancelAttack = false;
         }
     }
 
     private void updateAnimations() {
-        // Let the animation state machine handle transitions and auto-progressions
+
         animationSM.getCurrentFrame();
     }
 
@@ -167,32 +164,28 @@ public class Fighter extends Entity {
     }
 
     private void processInput() {
-        // Don't process input during hitstun or blockstun
+
         if (hitstunTimer > 0 || blockstunTimer > 0) return;
 
-        // Dead characters can't move but stay in their state
         if (isDead()) return;
 
         AnimationStateMachine.AnimationType currentAnim = animationSM.getCurrentAnimationType();
 
-        // Handle air state inputs first (highest priority when airborne)
         if (!onGround) {
             handleAirborneInput();
         } else {
-            // Ground state inputs
             handleGroundInput(currentAnim);
         }
     }
 
     private void handleAirborneInput() {
-        // Check for flip inputs first (these override normal air attacks)
         boolean upPressed = inputManager.isActionPressed(playerId, "up");
         boolean forwardPressed = inputManager.isActionPressed(playerId, facingRight ? "right" : "left");
         boolean backwardPressed = inputManager.isActionPressed(playerId, facingRight ? "left" : "right");
 
         AnimationStateMachine.AnimationType currentAnim = animationSM.getCurrentAnimationType();
 
-        // Only allow flips if we haven't already performed an air action
+
         if (canPerformAirAction && jumpInitiated && currentAnim == AnimationStateMachine.AnimationType.JUMP) {
             if (forwardPressed) {
                 performFrontFlip();
@@ -203,7 +196,7 @@ public class Fighter extends Entity {
             }
         }
 
-        // Air attacks (only if we haven't performed a flip)
+        // Air attacks
         if (canPerformAirAction && (currentAnim == AnimationStateMachine.AnimationType.JUMP ||
                 currentAnim == AnimationStateMachine.AnimationType.FRONT_FLIP ||
                 currentAnim == AnimationStateMachine.AnimationType.BACK_FLIP)) {
@@ -225,7 +218,6 @@ public class Fighter extends Entity {
             }
         }
 
-        // Air movement control (subtle control during jump)
         if (inputManager.isActionPressed(playerId, "left")) {
             velX -= 0.3;
             velX = Math.max(-MOVE_SPEED * 1.2, velX);
@@ -236,7 +228,7 @@ public class Fighter extends Entity {
     }
 
     private void handleGroundInput(AnimationStateMachine.AnimationType currentAnim) {
-        // Jump input (highest priority on ground)
+
         if (inputManager.isActionPressed(playerId, "up") && animationSM.canInterrupt()) {
             jump();
             return;
@@ -364,7 +356,7 @@ public class Fighter extends Entity {
             jumpInitiated = true;
             canPerformAirAction = true;
 
-            // Add horizontal momentum based on current movement
+
             if (inputManager.isActionPressed(playerId, "left")) {
                 velX = -MOVE_SPEED * 0.8;
             } else if (inputManager.isActionPressed(playerId, "right")) {
@@ -410,9 +402,9 @@ public class Fighter extends Entity {
 
     private void crouch() {
         velX = 0;
-        velY = 30;
         if (onGround) {
             y = (float) GROUND_Y;
+            velY = 0;
             if (animationSM.getCurrentAnimationType() != AnimationStateMachine.AnimationType.CROUCH) {
                 animationSM.transition(AnimationStateMachine.AnimationType.CROUCH, true);
             }
@@ -459,7 +451,6 @@ public class Fighter extends Entity {
         Image currentFrame = animationSM.getCurrentFrame();
 
         if (currentFrame == null) {
-            // Don't render anything if no sprite available
             return;
         }
 
@@ -467,7 +458,7 @@ public class Fighter extends Entity {
         g.setFill(Color.rgb(0, 0, 0, 0.3));
         g.fillOval(x + 10, GROUND_Y + 90, 40, 8);
 
-        // Draw character sprite (flip if facing left)
+
         if (!facingRight) {
             g.save();
             g.scale(-1, 1);
@@ -486,7 +477,6 @@ public class Fighter extends Entity {
         AnimationStateMachine.AnimationType currentAnim = animationSM.getCurrentAnimationType();
 
         if (currentAnim == AnimationStateMachine.AnimationType.PARRY_B) {
-            // Blocking reduces damage and causes blockstun
             damage = (int)(damage * 0.25);
             blockstunTimer = attackData != null ? attackData.blockstun : 10;
         } else {
@@ -494,7 +484,6 @@ public class Fighter extends Entity {
             damage = CombatSystem.calculateScaledDamage(damage, comboCount);
             comboCount++;
 
-            // Choose hit animation based on damage and current state
             AnimationStateMachine.AnimationType hitAnim;
             if (damage >= 100) { // Heavy hit
                 if (currentAnim == AnimationStateMachine.AnimationType.CROUCH) {
@@ -517,7 +506,6 @@ public class Fighter extends Entity {
             double knockback = CombatSystem.getKnockbackForce(attackType);
             velX += facingRight ? -knockback : knockback;
 
-            // Reset air action if hit while airborne
             if (!onGround) {
                 canPerformAirAction = false;
             }
@@ -634,7 +622,7 @@ public class Fighter extends Entity {
     public double getVelY() { return velY; }
     public String getPlayerId() { return playerId; }
 
-    // Setters for external control
+    // Setters
     public void setInvulnerable(boolean invulnerable, long duration) {
         this.invulnerable = invulnerable;
         if (invulnerable && duration > 0) {

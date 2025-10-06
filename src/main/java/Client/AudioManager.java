@@ -32,9 +32,9 @@ public class AudioManager {
             bgmPlayer.setVolume(bgmVolume);
             bgmPlayer.play();
 
-            System.out.println("Playing BGM: " + filename);
+            //System.out.println("Playing BGM: " + filename);
         } catch (Exception e) {
-            System.err.println("Could not play BGM: " + filename);
+            //System.err.println("Could not play BGM: " + filename);
             e.printStackTrace();
         }
     }
@@ -90,7 +90,7 @@ public class AudioManager {
             player.play();
 
         } catch (Exception e) {
-            System.err.println("Could not play SFX: " + soundName);
+            //System.err.println("Could not play SFX: " + soundName);
             // Don't print full stack trace for missing sounds as it's not critical
         }
     }

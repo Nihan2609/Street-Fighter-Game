@@ -354,9 +354,8 @@ public class AnimationStateMachine {
                 currentState.currentFrame <= endFrame;
     }
 
-    /**
-     * Check if the animation is in active attack frames (for combat system integration)
-     */
+
+    // check
     public boolean isInActiveFrames() {
         if (currentState == null) return false;
 
@@ -366,26 +365,20 @@ public class AnimationStateMachine {
         return CombatSystem.isAttackActive(currentState.type, currentState.frameStartTime);
     }
 
-    /**
-     * Get the current animation's total duration in milliseconds
-     */
+    // get
     public long getAnimationDuration() {
         if (currentState == null) return 0;
         return (long) currentState.frameCount * currentState.frameDelay;
     }
 
-    /**
-     * Reset current animation to frame 0
-     */
+    // reset
     public void resetCurrentAnimation() {
         if (currentState != null) {
             currentState.reset();
         }
     }
 
-    /**
-     * Force finish current animation
-     */
+
     public void finishCurrentAnimation() {
         if (currentState != null && !currentState.loops) {
             currentState.currentFrame = currentState.frameCount - 1;

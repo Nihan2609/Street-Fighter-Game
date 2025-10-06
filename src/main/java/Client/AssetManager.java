@@ -22,9 +22,7 @@ public class AssetManager {
         return instance;
     }
 
-    /**
-     * Initialize the asset manager and load all character assets
-     */
+
     public void initialize() {
         if (initialized) return;
 
@@ -48,7 +46,7 @@ public class AssetManager {
         Map<String, Image[]> animations = new HashMap<>();
         String name = characterName.toUpperCase();
 
-        System.out.println("Mapping animations for: " + name);
+        //System.out.println("Mapping animations for: " + name);
 
         try {
             if (name.equals("RYU")) {
@@ -56,16 +54,16 @@ public class AssetManager {
             } else if (name.equals("KEN")) {
                 mapKenAnimations(animations);
             } else {
-                System.err.println("Unknown character: " + characterName);
+               // System.err.println("Unknown character: " + characterName);
                 createPlaceholderAnimations(name);
                 return;
             }
 
             characterAnimations.put(name, animations);
-            System.out.println("Successfully mapped " + animations.size() + " animations for " + name);
+            //System.out.println("Successfully mapped " + animations.size() + " animations for " + name);
 
         } catch (Exception e) {
-            System.err.println("Error mapping assets for " + characterName + ": " + e.getMessage());
+           //System.err.println("Error mapping assets for " + characterName + ": " + e.getMessage());
             e.printStackTrace();
             createPlaceholderAnimations(name);
         }
@@ -222,7 +220,7 @@ public class AssetManager {
             animations.put("punch_down", Assets.punch_down1);
         }
 
-        // Hit reactions - with fallbacks to Ryu if Ken versions missing
+        // Hit reactions
         Image[] hitStand = (Assets.hit_stand1 != null && Assets.hit_stand1[0] != null) ?
                 Assets.hit_stand1 : Assets.hit_stand;
         if (hitStand != null && hitStand[0] != null) {
@@ -410,7 +408,6 @@ public class AssetManager {
         return initialized;
     }
 
-    // Debug method to verify asset integrity
     public void validateAssets() {
         System.out.println("=== Asset Validation Report ===");
         for (String character : characterAnimations.keySet()) {

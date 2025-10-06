@@ -117,7 +117,7 @@ public class MapSelectController {
             Scene gameScene = new Scene(root, 800, 400);
             Stage stage = (Stage) map1.getScene().getWindow();
             stage.setScene(gameScene);
-            stage.setTitle("Street Fighter - Network Match");
+            stage.setTitle("Street Fighter");
             stage.setResizable(false);
             stage.sizeToScene();
             stage.centerOnScreen();

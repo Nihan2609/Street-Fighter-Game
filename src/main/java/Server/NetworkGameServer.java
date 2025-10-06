@@ -197,7 +197,7 @@ public class NetworkGameServer {
         String p2Char = readString(bb);
         String mapFile = readString(bb);
 
-        System.out.println("Broadcasting game config: " + p1Char + " vs " + p2Char + " on " + mapFile);
+        //System.out.println("Broadcasting game config: " + p1Char + " vs " + p2Char + " on " + mapFile);
 
         ByteBuffer outBb = ByteBuffer.allocate(256);
         outBb.put(PacketType.GAME_CONFIG);
@@ -214,7 +214,7 @@ public class NetworkGameServer {
                 DatagramPacket sendPacket = new DatagramPacket(data, data.length, pc.address, pc.port);
                 socket.send(sendPacket);
             } catch (Exception e) {
-                System.err.println("Error broadcasting game config: " + e.getMessage());
+                //System.err.println("Error broadcasting game config: " + e.getMessage());
             }
         }
     }
@@ -235,7 +235,7 @@ public class NetworkGameServer {
                 DatagramPacket packet = new DatagramPacket(data, data.length, pc.address, pc.port);
                 socket.send(packet);
             } catch (Exception e) {
-                System.err.println("Error broadcasting input: " + e.getMessage());
+                //System.err.println("Error broadcasting input: " + e.getMessage());
             }
         }
     }
@@ -258,7 +258,7 @@ public class NetworkGameServer {
                 DatagramPacket packet = new DatagramPacket(data, data.length, pc.address, pc.port);
                 socket.send(packet);
             } catch (Exception e) {
-                System.err.println("Error broadcasting game start: " + e.getMessage());
+                //System.err.println("Error broadcasting game start: " + e.getMessage());
             }
         }
     }
@@ -278,7 +278,7 @@ public class NetworkGameServer {
                     DatagramPacket packet = new DatagramPacket(data, data.length, pc.address, pc.port);
                     socket.send(packet);
                 } catch (Exception e) {
-                    System.err.println("Error broadcasting disconnect: " + e.getMessage());
+                    //System.err.println("Error broadcasting disconnect: " + e.getMessage());
                 }
             }
         }

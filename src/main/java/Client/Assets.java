@@ -269,10 +269,10 @@ public class Assets {
                 dead1[0] = ss_dead1.crop(108, 49, 0, 0);
             }
 
-            System.out.println("Ken assets loaded successfully - " + getKenAnimationCount() + " animations");
+            //System.out.println("Ken assets loaded successfully - " + getKenAnimationCount() + " animations");
 
         } catch (Exception e) {
-            System.err.println("Error loading Ken assets: " + e.getMessage());
+            //System.err.println("Error loading Ken assets: " + e.getMessage());
         }
     }
 
@@ -280,7 +280,7 @@ public class Assets {
         try {
             return new SpriteSheet(path);
         } catch (Exception e) {
-            System.err.println("Could not load sprite sheet: " + path + " - " + e.getMessage());
+           // System.err.println("Could not load sprite sheet: " + path + " - " + e.getMessage());
             return null;
         }
     }
@@ -292,7 +292,7 @@ public class Assets {
             try {
                 frames[i] = spriteSheet.crop(frameWidth, frameHeight, frameWidth * i, 0);
             } catch (Exception e) {
-                System.err.println("Error cropping frame " + i + " with dimensions " + frameWidth + "x" + frameHeight);
+                //System.err.println("Error cropping frame " + i + " with dimensions " + frameWidth + "x" + frameHeight);
             }
         }
     }
@@ -310,7 +310,7 @@ public class Assets {
                 frames[i] = spriteSheet.crop(frameWidth, frameHeight, frameWidth * (i - 2), 0);
             }
         } catch (Exception e) {
-            System.err.println("Error loading Ryu jump frames: " + e.getMessage());
+            //System.err.println("Error loading Ryu jump frames: " + e.getMessage());
         }
     }
 
@@ -326,7 +326,7 @@ public class Assets {
                 frames[i] = spriteSheet.crop(frameWidth, frameHeight, frameWidth * (i - 2), 0);
             }
         } catch (Exception e) {
-            System.err.println("Error loading Ken jump frames: " + e.getMessage());
+            //System.err.println("Error loading Ken jump frames: " + e.getMessage());
         }
     }
 
@@ -334,7 +334,7 @@ public class Assets {
         return initialized;
     }
 
-    // Utility methods for getting character-specific assets
+
     public static Image[] getIdleFrames(boolean isRyu) {
         return isRyu ? idle : idle1;
     }
@@ -363,7 +363,7 @@ public class Assets {
         return isRyu ? (dead[0] != null ? dead[0] : null) : (dead1[0] != null ? dead1[0] : null);
     }
 
-    // Debug methods to count loaded animations
+
     private static int getRyuAnimationCount() {
         int count = 0;
         if (idle != null && idle[0] != null) count++;

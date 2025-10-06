@@ -8,7 +8,6 @@ public class SpriteSheet {
 
     private final Image sheet;
 
-    // Constructor now accepts String path
     public SpriteSheet(String imagePath) {
         this.sheet = ImageLoader.loadImage(imagePath);
         if (this.sheet == null) {
@@ -16,7 +15,7 @@ public class SpriteSheet {
         }
     }
 
-    // Alternative constructor if you already have an Image
+
     public SpriteSheet(Image sheet) {
         this.sheet = sheet;
     }
