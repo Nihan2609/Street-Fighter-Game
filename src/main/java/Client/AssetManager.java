@@ -82,9 +82,6 @@ public class AssetManager {
             animations.put("parry_b", Assets.parry_b);
             animations.put("parry_backward", Assets.parry_b);
         }
-        if (Assets.crouch != null && Assets.crouch[0] != null) {
-            animations.put("crouch", Assets.crouch);
-        }
         if (Assets.jump != null && Assets.jump[0] != null) {
             animations.put("jump", Assets.jump);
         }
@@ -101,12 +98,6 @@ public class AssetManager {
         }
         if (Assets.quick_punch != null && Assets.quick_punch[0] != null) {
             animations.put("quick_punch", Assets.quick_punch);
-        }
-        if (Assets.crouch_punch != null && Assets.crouch_punch[0] != null) {
-            animations.put("crouch_punch", Assets.crouch_punch);
-        }
-        if (Assets.crouch_attack != null && Assets.crouch_attack[0] != null) {
-            animations.put("crouch_attack", Assets.crouch_attack);
         }
         if (Assets.uppercut != null && Assets.uppercut[0] != null) {
             animations.put("uppercut", Assets.uppercut);
@@ -135,12 +126,6 @@ public class AssetManager {
         }
         if (Assets.hit_stand_back != null && Assets.hit_stand_back[0] != null) {
             animations.put("hit_stand_back", Assets.hit_stand_back);
-        }
-        if (Assets.crouch_hit != null && Assets.crouch_hit[0] != null) {
-            animations.put("crouch_hit", Assets.crouch_hit);
-        }
-        if (Assets.crouch_hit_back != null && Assets.crouch_hit_back[0] != null) {
-            animations.put("crouch_hit_back", Assets.crouch_hit_back);
         }
         if (Assets.knockback != null && Assets.knockback[0] != null) {
             animations.put("knockback", Assets.knockback);
@@ -173,9 +158,6 @@ public class AssetManager {
             animations.put("parry_b", Assets.parry_b1);
             animations.put("parry_backward", Assets.parry_b1);
         }
-        if (Assets.crouch1 != null && Assets.crouch1[0] != null) {
-            animations.put("crouch", Assets.crouch1);
-        }
         if (Assets.jump1 != null && Assets.jump1[0] != null) {
             animations.put("jump", Assets.jump1);
         }
@@ -192,12 +174,6 @@ public class AssetManager {
         }
         if (Assets.quick_punch1 != null && Assets.quick_punch1[0] != null) {
             animations.put("quick_punch", Assets.quick_punch1);
-        }
-        if (Assets.crouch_punch1 != null && Assets.crouch_punch1[0] != null) {
-            animations.put("crouch_punch", Assets.crouch_punch1);
-        }
-        if (Assets.crouch_attack1 != null && Assets.crouch_attack1[0] != null) {
-            animations.put("crouch_attack", Assets.crouch_attack1);
         }
         if (Assets.uppercut1 != null && Assets.uppercut1[0] != null) {
             animations.put("uppercut", Assets.uppercut1);
@@ -231,18 +207,6 @@ public class AssetManager {
                 Assets.hit_stand_back1 : Assets.hit_stand_back;
         if (hitStandBack != null && hitStandBack[0] != null) {
             animations.put("hit_stand_back", hitStandBack);
-        }
-
-        Image[] crouchHit = (Assets.crouch_hit1 != null && Assets.crouch_hit1[0] != null) ?
-                Assets.crouch_hit1 : Assets.crouch_hit;
-        if (crouchHit != null && crouchHit[0] != null) {
-            animations.put("crouch_hit", crouchHit);
-        }
-
-        Image[] crouchHitBack = (Assets.crouch_hit_back1 != null && Assets.crouch_hit_back1[0] != null) ?
-                Assets.crouch_hit_back1 : Assets.crouch_hit_back;
-        if (crouchHitBack != null && crouchHitBack[0] != null) {
-            animations.put("crouch_hit_back", crouchHitBack);
         }
 
         Image[] knockback = (Assets.knockback1 != null && Assets.knockback1[0] != null) ?
@@ -280,7 +244,6 @@ public class AssetManager {
         animations.put("idle", createPlaceholderFrames(6, 60, 100, Color.LIGHTBLUE));
         animations.put("parry_f", createPlaceholderFrames(8, 60, 100, Color.GREEN));
         animations.put("parry_b", createPlaceholderFrames(8, 60, 100, Color.DARKGREEN));
-        animations.put("crouch", createPlaceholderFrames(1, 60, 80, Color.ORANGE));
         animations.put("jump", createPlaceholderFrames(11, 60, 120, Color.YELLOW));
         animations.put("front_flip", createPlaceholderFrames(8, 80, 120, Color.PURPLE));
         animations.put("back_flip", createPlaceholderFrames(8, 80, 120, Color.VIOLET));
@@ -288,8 +251,6 @@ public class AssetManager {
         // Attack animations
         animations.put("punch", createPlaceholderFrames(6, 80, 100, Color.RED));
         animations.put("quick_punch", createPlaceholderFrames(3, 80, 100, Color.PINK));
-        animations.put("crouch_punch", createPlaceholderFrames(3, 80, 80, Color.DARKRED));
-        animations.put("crouch_attack", createPlaceholderFrames(8, 80, 80, Color.MAROON));
         animations.put("uppercut", createPlaceholderFrames(8, 80, 110, Color.CRIMSON));
         animations.put("kick_low", createPlaceholderFrames(5, 100, 100, Color.BLUE));
         animations.put("upper_kick", createPlaceholderFrames(9, 100, 120, Color.NAVY));
@@ -302,8 +263,6 @@ public class AssetManager {
         // Hit reactions
         animations.put("hit_stand", createPlaceholderFrames(2, 60, 100, Color.GRAY));
         animations.put("hit_stand_back", createPlaceholderFrames(4, 60, 100, Color.DARKGRAY));
-        animations.put("crouch_hit", createPlaceholderFrames(2, 60, 80, Color.LIGHTGRAY));
-        animations.put("crouch_hit_back", createPlaceholderFrames(4, 60, 80, Color.SILVER));
         animations.put("knockback", createPlaceholderFrames(4, 100, 100, Color.BLACK));
         animations.put("recover", createPlaceholderFrames(5, 80, 100, Color.WHITE));
 

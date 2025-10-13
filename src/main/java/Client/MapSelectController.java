@@ -25,6 +25,7 @@ public class MapSelectController {
     private int currentIndex = 0;
     private ImageView[] maps;
     private NetworkClient networkClient = null;
+    private boolean isHost = false;
 
     @FXML
     private void initialize() {
@@ -33,29 +34,45 @@ public class MapSelectController {
 
         titleLabel.sceneProperty().addListener((obs, oldScene, newScene) -> {
             if (newScene != null) {
-                newScene.setOnKeyPressed(event -> {
-                    if (event.getCode() == KeyCode.A) {
-                        moveLeft();
-                    } else if (event.getCode() == KeyCode.D) {
-                        moveRight();
-                    } else if (event.getCode() == KeyCode.SPACE) {
-                        AudioManager.playSelectSound();
-                        selectMap(maps[currentIndex]);
-                    }
-                });
+                newScene.setOnKeyPressed(event -> handleKeyPress(event.getCode()));
             }
         });
     }
 
     public void setNetworkClient(NetworkClient client) {
         this.networkClient = client;
+        this.isHost = client != null && client.isHost();
+
+        if (!isHost && networkClient != null) {
+            // Client can't select map
+            titleLabel.setText("HOST is selecting the map...");
+            titleLabel.setStyle("-fx-text-fill: yellow; -fx-font-size: 18px; -fx-font-weight: bold;");
+        }
+    }
+
+    private void handleKeyPress(KeyCode code) {
+        // In network mode, only host can select
+        if (networkClient != null && !isHost) {
+            return;
+        }
+
+        if (code == KeyCode.A || code == KeyCode.LEFT) {
+            moveLeft();
+            AudioManager.playSelectSound();
+        } else if (code == KeyCode.D || code == KeyCode.RIGHT) {
+            moveRight();
+            AudioManager.playSelectSound();
+        } else if (code == KeyCode.SPACE || code == KeyCode.ENTER) {
+            AudioManager.playConfirmSound();
+            selectMap(maps[currentIndex]);
+        }
     }
 
     private void highlightMap(ImageView map) {
         resetMapStyles();
-        map.setStyle("-fx-effect: dropshadow(gaussian, yellow, 10, 0.5, 0, 0); -fx-cursor: hand;");
-        map.setScaleX(1.1);
-        map.setScaleY(1.1);
+        map.setStyle("-fx-effect: dropshadow(gaussian, yellow, 15, 0.8, 0, 0); -fx-cursor: hand;");
+        map.setScaleX(1.15);
+        map.setScaleY(1.15);
     }
 
     private void resetMapStyles() {
@@ -79,8 +96,8 @@ public class MapSelectController {
     private void selectMap(ImageView selectedImageView) {
         String mapFile = getMapFile(selectedImageView);
 
-        // If network mode, send config to server
-        if (networkClient != null) {
+        // If network mode and host, send config to server
+        if (networkClient != null && isHost) {
             networkClient.sendGameConfig(player1Choice, player2Choice, mapFile);
         }
 
@@ -111,13 +128,14 @@ public class MapSelectController {
             gameController.setGameData(player1Choice, player2Choice, mapFile);
 
             if (networkClient != null) {
-                gameController.setNetworkMode(networkClient, "P1");
+                String playerId = isHost ? "P1" : "P2";
+                gameController.setNetworkMode(networkClient, playerId);
             }
 
             Scene gameScene = new Scene(root, 800, 400);
             Stage stage = (Stage) map1.getScene().getWindow();
             stage.setScene(gameScene);
-            stage.setTitle("Street Fighter");
+            stage.setTitle("Street Fighter" + (networkClient != null ? " - Network Mode" : ""));
             stage.setResizable(false);
             stage.sizeToScene();
             stage.centerOnScreen();

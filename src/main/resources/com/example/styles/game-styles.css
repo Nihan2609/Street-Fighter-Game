@@ -1,0 +1,280 @@
+/* Street Fighter Game - Custom Styles */
+
+@font-face {
+    font-family: 'Press Start 2P';
+    src: url('../fonts/PressStart2P-Regular.ttf');
+}
+
+/* Root styles */
+.root {
+    -fx-font-family: 'Press Start 2P';
+    -fx-font-size: 14px;
+}
+
+/* =========================== */
+/*      GENERAL ELEMENTS       */
+/* =========================== */
+
+.label {
+    -fx-font-family: 'Press Start 2P';
+    -fx-text-fill: white;
+}
+
+.button {
+    -fx-font-family: 'Press Start 2P';
+    -fx-font-size: 14px;
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+    -fx-background-radius: 5;
+    -fx-padding: 10 20;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: #2980b9;
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+.button:pressed {
+    -fx-background-color: #1c5a85;
+}
+
+.text-field {
+    -fx-font-family: 'Press Start 2P';
+    -fx-font-size: 12px;
+    -fx-background-color: rgba(255, 255, 255, 0.9);
+    -fx-background-radius: 5;
+    -fx-padding: 10;
+}
+
+/* =========================== */
+/*        TITLE STYLES         */
+/* =========================== */
+
+.title-large {
+    -fx-font-family: 'Press Start 2P';
+    -fx-font-size: 32px;
+    -fx-text-fill: #FFD700;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 10, 0, 2, 2);
+}
+
+.title-medium {
+    -fx-font-family: 'Press Start 2P';
+    -fx-font-size: 24px;
+    -fx-text-fill: white;
+}
+
+.title-small {
+    -fx-font-family: 'Press Start 2P';
+    -fx-font-size: 18px;
+    -fx-text-fill: white;
+}
+
+/* =========================== */
+/*       GAME UI STYLES        */
+/* =========================== */
+
+.health-bar {
+    -fx-accent: #e74c3c;
+}
+
+.health-bar .bar {
+    -fx-background-color: linear-gradient(to right, #e74c3c, #c0392b);
+    -fx-background-radius: 0;
+}
+
+.health-bar .track {
+    -fx-background-color: rgba(0, 0, 0, 0.5);
+    -fx-background-radius: 0;
+}
+
+.round-label {
+    -fx-font-family: 'Press Start 2P';
+    -fx-font-size: 20px;
+    -fx-text-fill: #FFD700;
+    -fx-effect: dropshadow(gaussian, black, 5, 0, 1, 1);
+}
+
+.timer-label {
+    -fx-font-family: 'Press Start 2P';
+    -fx-font-size: 32px;
+    -fx-text-fill: #FF0000;
+    -fx-effect: dropshadow(gaussian, black, 10, 0, 2, 2);
+}
+
+.player-name {
+    -fx-font-family: 'Press Start 2P';
+    -fx-font-size: 14px;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, black, 3, 0, 1, 1);
+}
+
+.health-label {
+    -fx-font-family: 'Press Start 2P';
+    -fx-font-size: 12px;
+    -fx-text-fill: white;
+}
+
+/* =========================== */
+/*       MESSAGE BOX           */
+/* =========================== */
+
+.message-box {
+    -fx-background-color: rgba(0, 0, 0, 0.8);
+    -fx-background-radius: 10;
+    -fx-padding: 20;
+}
+
+.game-message {
+    -fx-font-family: 'Press Start 2P';
+    -fx-font-size: 28px;
+    -fx-text-fill: #FFD700;
+    -fx-effect: dropshadow(gaussian, black, 15, 0, 3, 3);
+}
+
+/* =========================== */
+/*        PAUSE MENU           */
+/* =========================== */
+
+.pause-menu {
+    -fx-background-color: rgba(0, 0, 0, 0.9);
+    -fx-background-radius: 10;
+    -fx-padding: 30;
+}
+
+.pause-title {
+    -fx-font-family: 'Press Start 2P';
+    -fx-font-size: 24px;
+    -fx-text-fill: #FFD700;
+}
+
+.pause-label {
+    -fx-font-family: 'Press Start 2P';
+    -fx-font-size: 14px;
+    -fx-text-fill: white;
+}
+
+/* =========================== */
+/*      CHARACTER SELECT       */
+/* =========================== */
+
+.character-name {
+    -fx-font-family: 'Press Start 2P';
+    -fx-font-size: 16px;
+    -fx-text-fill: #FFD700;
+    -fx-effect: dropshadow(gaussian, black, 5, 0, 1, 1);
+}
+
+.status-label {
+    -fx-font-family: 'Press Start 2P';
+    -fx-font-size: 14px;
+    -fx-text-fill: #00FF00;
+}
+
+/* =========================== */
+/*       MAP SELECT            */
+/* =========================== */
+
+.map-title {
+    -fx-font-family: 'Press Start 2P';
+    -fx-font-size: 24px;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, black, 10, 0, 2, 2);
+}
+
+/* =========================== */
+/*       LEADERBOARD           */
+/* =========================== */
+
+.table-view {
+    -fx-font-family: 'Press Start 2P';
+    -fx-font-size: 12px;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #2c3e50;
+}
+
+.table-view .column-header {
+    -fx-font-family: 'Press Start 2P';
+    -fx-text-fill: white;
+    -fx-font-size: 12px;
+}
+
+.table-row-cell {
+    -fx-background-color: rgba(44, 62, 80, 0.8);
+}
+
+.table-row-cell:odd {
+    -fx-background-color: rgba(52, 73, 94, 0.8);
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+}
+
+.table-cell {
+    -fx-text-fill: white;
+    -fx-alignment: center;
+}
+
+/* =========================== */
+/*      NETWORK LOBBY          */
+/* =========================== */
+
+.network-status {
+    -fx-font-family: 'Press Start 2P';
+    -fx-font-size: 12px;
+    -fx-text-fill: #00FF00;
+}
+
+.network-status-error {
+    -fx-font-family: 'Press Start 2P';
+    -fx-font-size: 12px;
+    -fx-text-fill: #FF0000;
+}
+
+.network-status-warning {
+    -fx-font-family: 'Press Start 2P';
+    -fx-font-size: 12px;
+    -fx-text-fill: #FFA500;
+}
+
+.ip-label {
+    -fx-font-family: 'Press Start 2P';
+    -fx-font-size: 14px;
+    -fx-text-fill: #FFD700;
+}
+
+/* =========================== */
+/*        SCROLLBARS           */
+/* =========================== */
+
+.scroll-bar {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: #3498db;
+    -fx-background-radius: 5;
+}
+
+.scroll-bar .track {
+    -fx-background-color: rgba(0, 0, 0, 0.3);
+}
+
+/* =========================== */
+/*       ANIMATIONS            */
+/* =========================== */
+
+.fade-in {
+    -fx-opacity: 0;
+}
+
+@keyframes pulse {
+    0% { -fx-scale-x: 1; -fx-scale-y: 1; }
+    50% { -fx-scale-x: 1.1; -fx-scale-y: 1.1; }
+    100% { -fx-scale-x: 1; -fx-scale-y: 1; }
+}

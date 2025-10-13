@@ -52,10 +52,6 @@ public class CombatSystem {
                 put(AnimationStateMachine.AnimationType.UPPER_KICK,
                         new AttackData(12, 6, 15, 35, false)); // Uppercut kick
 
-                // Crouch attacks
-                put(AnimationStateMachine.AnimationType.CROUCH_PUNCH,
-                        new AttackData(4, 2, 7, 15, true)); // Crouch punch
-
                 // Air attacks
                 put(AnimationStateMachine.AnimationType.AIR_PUNCH,
                         new AttackData(5, 3, 8, 20, false));
@@ -123,12 +119,6 @@ public class CombatSystem {
                 hitboxX = facingRight ? attacker.x + 60 : attacker.x - hitboxWidth - 20;
                 break;
 
-            case CROUCH_PUNCH:
-                hitboxWidth = 35;
-                hitboxHeight = 20;
-                hitboxY = attacker.y + 60;
-                break;
-
             case AIR_PUNCH:
                 hitboxWidth = 40;
                 hitboxHeight = 35;
@@ -158,10 +148,8 @@ public class CombatSystem {
         AttackData currentData = getAttackData(currentAttack);
         if (currentData == null || !currentData.canCancel) return false;
 
-        // Light attacks can cancel into heavy attacks
         if (currentAttack == AnimationStateMachine.AnimationType.QUICK_PUNCH ||
-                currentAttack == AnimationStateMachine.AnimationType.KICK_LOW ||
-                currentAttack == AnimationStateMachine.AnimationType.CROUCH_PUNCH) {
+                currentAttack == AnimationStateMachine.AnimationType.KICK_LOW) {
             return newAttack == AnimationStateMachine.AnimationType.PUNCH ||
                     newAttack == AnimationStateMachine.AnimationType.UPPER_KICK;
         }
@@ -189,8 +177,6 @@ public class CombatSystem {
             case UPPER_KICK:
                 return 2; // medium priority
 
-            case CROUCH_PUNCH:
-                return 1; // Low attacks
 
             case AIR_PUNCH:
             case AIR_KICK:

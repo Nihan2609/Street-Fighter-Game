@@ -29,7 +29,6 @@ public class InputManager {
         p1Bindings.put("left", KeyCode.A);
         p1Bindings.put("right", KeyCode.D);
         p1Bindings.put("up", KeyCode.W);
-        p1Bindings.put("down", KeyCode.S);
         p1Bindings.put("light_punch", KeyCode.F);
         p1Bindings.put("heavy_punch", KeyCode.G);
         p1Bindings.put("light_kick", KeyCode.H);
@@ -42,7 +41,6 @@ public class InputManager {
         p2Bindings.put("left", KeyCode.LEFT);
         p2Bindings.put("right", KeyCode.RIGHT);
         p2Bindings.put("up", KeyCode.UP);
-        p2Bindings.put("down", KeyCode.DOWN);
         p2Bindings.put("light_punch", KeyCode.J);
         p2Bindings.put("heavy_punch", KeyCode.K);
         p2Bindings.put("light_kick", KeyCode.L);
