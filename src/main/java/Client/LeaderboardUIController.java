@@ -23,14 +23,12 @@ public class LeaderboardUIController {
     @FXML private TableColumn<PlayerStats, Integer> winsCol;
     @FXML private TableColumn<PlayerStats, Integer> lossesCol;
     @FXML private TableColumn<PlayerStats, Double> winRateCol;
-
     @FXML private Button backBtn;
 
     private ObservableList<PlayerStats> playerList = FXCollections.observableArrayList();
 
     @FXML
     private void initialize() {
-        // Set up columns
         usernameCol.setCellValueFactory(new PropertyValueFactory<>("username"));
         winsCol.setCellValueFactory(new PropertyValueFactory<>("wins"));
         lossesCol.setCellValueFactory(new PropertyValueFactory<>("losses"));
