@@ -237,9 +237,6 @@ public class Fighter extends Entity {
         // Movement
         handleMovementInput(currentAnim);
 
-        // Crouch
-        handleCrouchInput(currentAnim);
-
         // Block
         handleBlockInput(currentAnim);
 
@@ -260,15 +257,6 @@ public class Fighter extends Entity {
         }
     }
 
-    private void handleCrouchInput(AnimationStateMachine.AnimationType currentAnim) {
-        boolean crouchPressed = inputManager.isActionPressed(playerId, "down");
-
-        if (crouchPressed && onGround && animationSM.canInterrupt()) {
-            crouch();
-        } else if (!crouchPressed && currentAnim == AnimationStateMachine.AnimationType.CROUCH) {
-            stand();
-        }
-    }
 
     private void handleBlockInput(AnimationStateMachine.AnimationType currentAnim) {
         boolean blockPressed = inputManager.isActionPressed(playerId, "block");
@@ -281,32 +269,19 @@ public class Fighter extends Entity {
     }
 
     private void handleGroundAttackInput() {
-        AnimationStateMachine.AnimationType currentAnim = animationSM.getCurrentAnimationType();
-
-        // Check attacks in priority order
-        if (inputManager.isActionPressed(playerId, "light_punch")) {
-            if (currentAnim == AnimationStateMachine.AnimationType.CROUCH) {
-                performAttack(AnimationStateMachine.AnimationType.CROUCH_PUNCH);
-            } else if (animationSM.canInterrupt()) {
+        if (animationSM.canInterrupt()) {
+            if (inputManager.isActionPressed(playerId, "light_punch")) {
                 performAttack(AnimationStateMachine.AnimationType.QUICK_PUNCH);
-            }
-        } else if (inputManager.isActionPressed(playerId, "heavy_punch")) {
-            if (currentAnim == AnimationStateMachine.AnimationType.CROUCH) {
-                performAttack(AnimationStateMachine.AnimationType.CROUCH_ATTACK);
-            } else if (animationSM.canInterrupt()) {
-                // Check for uppercut (down + heavy punch while standing)
+            } else if (inputManager.isActionPressed(playerId, "heavy_punch")) {
+                // Keep uppercut with down key
                 if (inputManager.isActionPressed(playerId, "down")) {
                     performAttack(AnimationStateMachine.AnimationType.UPPERCUT);
                 } else {
                     performAttack(AnimationStateMachine.AnimationType.PUNCH);
                 }
-            }
-        } else if (inputManager.isActionPressed(playerId, "light_kick")) {
-            if (animationSM.canInterrupt()) {
+            } else if (inputManager.isActionPressed(playerId, "light_kick")) {
                 performAttack(AnimationStateMachine.AnimationType.KICK_LOW);
-            }
-        } else if (inputManager.isActionPressed(playerId, "heavy_kick")) {
-            if (animationSM.canInterrupt()) {
+            } else if (inputManager.isActionPressed(playerId, "heavy_kick")) {
                 performAttack(AnimationStateMachine.AnimationType.UPPER_KICK);
             }
         }
@@ -400,16 +375,6 @@ public class Fighter extends Entity {
         }
     }
 
-    private void crouch() {
-        velX = 0;
-        if (onGround) {
-            y = (float) GROUND_Y;
-            velY = 0;
-            if (animationSM.getCurrentAnimationType() != AnimationStateMachine.AnimationType.CROUCH) {
-                animationSM.transition(AnimationStateMachine.AnimationType.CROUCH, true);
-            }
-        }
-    }
 
     private void stand() {
         if (animationSM.canInterrupt()) {
@@ -485,18 +450,10 @@ public class Fighter extends Entity {
             comboCount++;
 
             AnimationStateMachine.AnimationType hitAnim;
-            if (damage >= 100) { // Heavy hit
-                if (currentAnim == AnimationStateMachine.AnimationType.CROUCH) {
-                    hitAnim = AnimationStateMachine.AnimationType.CROUCH_HIT_BACK;
-                } else {
-                    hitAnim = AnimationStateMachine.AnimationType.HIT_STAND_BACK;
-                }
-            } else { // Light hit
-                if (currentAnim == AnimationStateMachine.AnimationType.CROUCH) {
-                    hitAnim = AnimationStateMachine.AnimationType.CROUCH_HIT;
-                } else {
-                    hitAnim = AnimationStateMachine.AnimationType.HIT_STAND;
-                }
+            if (damage >= 100) {
+                hitAnim = AnimationStateMachine.AnimationType.HIT_STAND_BACK;
+            } else {
+                hitAnim = AnimationStateMachine.AnimationType.HIT_STAND;
             }
 
             animationSM.transition(hitAnim, true);
@@ -539,9 +496,7 @@ public class Fighter extends Entity {
     public Rectangle2D getHurtbox() {
         AnimationStateMachine.AnimationType currentAnim = animationSM.getCurrentAnimationType();
 
-        if (currentAnim == AnimationStateMachine.AnimationType.CROUCH) {
-            return new Rectangle2D(x + 10, y + 40, 40, 60);
-        } else if (currentAnim == AnimationStateMachine.AnimationType.JUMP) {
+        if (currentAnim == AnimationStateMachine.AnimationType.JUMP) {
             return new Rectangle2D(x + 10, y + 10, 40, 80);
         }
 

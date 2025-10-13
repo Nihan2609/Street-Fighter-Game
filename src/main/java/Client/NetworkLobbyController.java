@@ -67,7 +67,7 @@ public class NetworkLobbyController {
                     hostButton.setDisable(false);
                     joinButton.setDisable(false);
                 });
-                e.printStackTrace();
+                System.err.println("Error starting host: " + e.getMessage());
             }
         }).start();
     }
@@ -88,7 +88,7 @@ public class NetworkLobbyController {
         new Thread(() -> {
             try {
                 networkClient = new NetworkClient("P2", "Player 2");
-                networkClient.setLobbyController(this); // ADD THIS LINE
+                networkClient.setLobbyController(this);
                 setupClientCallback();
                 networkClient.connect(serverIP, 5555);
 
@@ -115,7 +115,7 @@ public class NetworkLobbyController {
                     hostButton.setDisable(false);
                     joinButton.setDisable(false);
                 });
-                e.printStackTrace();
+                System.err.println("Error joining game: " + e.getMessage());
             }
         }).start();
     }
@@ -144,7 +144,7 @@ public class NetworkLobbyController {
                             Thread.sleep(1500);
                             Platform.runLater(() -> proceedToCharacterSelect());
                         } catch (InterruptedException e) {
-                            e.printStackTrace();
+                            Thread.currentThread().interrupt();
                         }
                     }).start();
                 });
@@ -155,6 +155,31 @@ public class NetworkLobbyController {
 
             @Override
             public void onPlayerDisconnected(String playerId) {}
+
+            @Override
+            public void onGameConfig(String p1Char, String p2Char, String mapFile) {
+                // Host doesn't need this callback in lobby
+            }
+
+            @Override
+            public void onPauseGame(String pausedBy) {
+                // Not used in lobby
+            }
+
+            @Override
+            public void onResumeGame() {
+                // Not used in lobby
+            }
+
+            @Override
+            public void onRematchRequest() {
+                // Not used in lobby
+            }
+
+            @Override
+            public void onWaitingForHost() {
+                // Not used in lobby
+            }
         });
     }
 
@@ -187,6 +212,26 @@ public class NetworkLobbyController {
                 System.out.println("Client callback received game config");
                 // launchGame will be called via reflection from NetworkClient
             }
+
+            @Override
+            public void onPauseGame(String pausedBy) {
+                // Not used in lobby
+            }
+
+            @Override
+            public void onResumeGame() {
+                // Not used in lobby
+            }
+
+            @Override
+            public void onRematchRequest() {
+                // Not used in lobby
+            }
+
+            @Override
+            public void onWaitingForHost() {
+                // Not used in lobby
+            }
         });
     }
 
@@ -204,7 +249,7 @@ public class NetworkLobbyController {
             stage.show();
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error loading character select: " + e.getMessage());
         }
     }
 
@@ -229,7 +274,7 @@ public class NetworkLobbyController {
                 stage.show();
 
             } catch (Exception e) {
-                e.printStackTrace();
+                System.err.println("Error launching game: " + e.getMessage());
             }
         });
     }
@@ -248,7 +293,7 @@ public class NetworkLobbyController {
             stage.show();
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error returning to main menu: " + e.getMessage());
         }
     }
 }

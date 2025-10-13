@@ -9,14 +9,11 @@ public class Assets {
     // Basic movement and stances
     public static Image[] idle = new Image[6],
             parry_f = new Image[8],
-            parry_b = new Image[8],
-            crouch = new Image[1];
+            parry_b = new Image[8];
 
     // Ground attacks
     public static Image[] punch = new Image[6],
             quick_punch = new Image[3],
-            crouch_punch = new Image[3],
-            crouch_attack = new Image[8],
             uppercut = new Image[8];
 
     // Kicks
@@ -34,9 +31,7 @@ public class Assets {
             jump = new Image[11];
 
     // Hit reactions and recovery
-    public static Image[] crouch_hit = new Image[2],
-            crouch_hit_back = new Image[4],
-            hit_stand = new Image[2],
+    public static Image[] hit_stand = new Image[2],
             hit_stand_back = new Image[4],
             knockback = new Image[4],
             recover = new Image[5];
@@ -114,15 +109,12 @@ public class Assets {
             SpriteSheet ss_idle = loadSpriteSheet("/images/ryu/idle.png");
             SpriteSheet ss_parry_f = loadSpriteSheet("/images/ryu/parry_f.png");
             SpriteSheet ss_parry_b = loadSpriteSheet("/images/ryu/parry_b.png");
-            SpriteSheet ss_crouch = loadSpriteSheet("/images/ryu/crouch.png");
             SpriteSheet ss_jump = loadSpriteSheet("/images/ryu/jump.png");
             SpriteSheet ss_front_flip = loadSpriteSheet("/images/ryu/front_flip.png");
             SpriteSheet ss_back_flip = loadSpriteSheet("/images/ryu/back_flip.png");
 
             SpriteSheet ss_punch = loadSpriteSheet("/images/ryu/punch.png");
             SpriteSheet ss_quick_punch = loadSpriteSheet("/images/ryu/quick_punch.png");
-            SpriteSheet ss_crouch_punch = loadSpriteSheet("/images/ryu/crouch_punch.png");
-            SpriteSheet ss_crouch_attack = loadSpriteSheet("/images/ryu/crouch_attack.png");
             SpriteSheet ss_uppercut = loadSpriteSheet("/images/ryu/uppercut.png");
             SpriteSheet ss_kick_low = loadSpriteSheet("/images/ryu/kick_low.png");
             SpriteSheet ss_upper_kick = loadSpriteSheet("/images/ryu/upper_kick.png");
@@ -131,8 +123,6 @@ public class Assets {
             SpriteSheet ss_air_kick = loadSpriteSheet("/images/ryu/air_kick.png");
             SpriteSheet ss_punch_down = loadSpriteSheet("/images/ryu/punch_down.png");
 
-            SpriteSheet ss_crouch_hit = loadSpriteSheet("/images/ryu/crouch_hit.png");
-            SpriteSheet ss_crouch_hit_back = loadSpriteSheet("/images/ryu/crouch_hit_b.png");
             SpriteSheet ss_hit_stand = loadSpriteSheet("/images/ryu/hit_stand.png");
             SpriteSheet ss_hit_stand_back = loadSpriteSheet("/images/ryu/hit_stand_b.png");
             SpriteSheet ss_knockback = loadSpriteSheet("/images/ryu/knockback.png");
@@ -145,9 +135,6 @@ public class Assets {
             loadSpriteFrames(ss_idle, idle, 57, 106);
             loadSpriteFrames(ss_parry_f, parry_f, 70, 110);
             loadSpriteFrames(ss_parry_b, parry_b, 70, 108);
-            if (ss_crouch != null) {
-                crouch[0] = ss_crouch.crop(54, 73, 0, 0);
-            }
 
             // Movement
             loadRyuJumpFrames(ss_jump, jump, 70, 154);
@@ -157,8 +144,6 @@ public class Assets {
             // Ground attacks
             loadSpriteFrames(ss_punch, punch, 101, 102);
             loadSpriteFrames(ss_quick_punch, quick_punch, 94, 102);
-            loadSpriteFrames(ss_crouch_punch, crouch_punch, 86, 72);
-            loadSpriteFrames(ss_crouch_attack, crouch_attack, 92, 72);
             loadSpriteFrames(ss_uppercut, uppercut, 82, 111);
 
             // Kicks
@@ -171,8 +156,6 @@ public class Assets {
             loadSpriteFrames(ss_punch_down, punch_down, 75, 90);
 
             // Hit reactions and recovery
-            loadSpriteFrames(ss_crouch_hit, crouch_hit, 54, 73);
-            loadSpriteFrames(ss_crouch_hit_back, crouch_hit_back, 77, 73);
             loadSpriteFrames(ss_hit_stand, hit_stand, 57, 104);
             loadSpriteFrames(ss_hit_stand_back, hit_stand_back, 77, 104);
             loadSpriteFrames(ss_knockback, knockback, 86, 104);
@@ -199,15 +182,12 @@ public class Assets {
             SpriteSheet ss_idle1 = loadSpriteSheet("/images/ken/idle.png");
             SpriteSheet ss_parry_f1 = loadSpriteSheet("/images/ken/parry_f.png");
             SpriteSheet ss_parry_b1 = loadSpriteSheet("/images/ken/parry_b.png");
-            SpriteSheet ss_crouch1 = loadSpriteSheet("/images/ken/crouch.png");
             SpriteSheet ss_jump1 = loadSpriteSheet("/images/ken/jump.png");
             SpriteSheet ss_front_flip1 = loadSpriteSheet("/images/ken/front_flip.png");
             SpriteSheet ss_back_flip1 = loadSpriteSheet("/images/ken/back_flip.png");
 
             SpriteSheet ss_punch1 = loadSpriteSheet("/images/ken/punch.png");
             SpriteSheet ss_quick_punch1 = loadSpriteSheet("/images/ken/quick_punch.png");
-            SpriteSheet ss_crouch_punch1 = loadSpriteSheet("/images/ken/crouch_punch.png");
-            SpriteSheet ss_crouch_attack1 = loadSpriteSheet("/images/ken/crouch_attack.png");
             SpriteSheet ss_uppercut1 = loadSpriteSheet("/images/ken/uppercut.png");
             SpriteSheet ss_kick_low1 = loadSpriteSheet("/images/ken/kick_low.png");
             SpriteSheet ss_upper_kick1 = loadSpriteSheet("/images/ken/upper_kick.png");
@@ -216,8 +196,6 @@ public class Assets {
             SpriteSheet ss_air_kick1 = loadSpriteSheet("/images/ken/air_kick.png");
             SpriteSheet ss_punch_down1 = loadSpriteSheet("/images/ken/punch_down.png");
 
-            SpriteSheet ss_crouch_hit1 = loadSpriteSheet("/images/ken/crouch_hit.png");
-            SpriteSheet ss_crouch_hit_back1 = loadSpriteSheet("/images/ken/crouch_hit_b.png");
             SpriteSheet ss_hit_stand1 = loadSpriteSheet("/images/ken/hit_stand.png");
             SpriteSheet ss_hit_stand_back1 = loadSpriteSheet("/images/ken/hit_stand_b.png");
             SpriteSheet ss_knockback1 = loadSpriteSheet("/images/ken/knockback.png");
@@ -230,9 +208,6 @@ public class Assets {
             loadSpriteFrames(ss_idle1, idle1, 57, 106);
             loadSpriteFrames(ss_parry_f1, parry_f1, 70, 110);
             loadSpriteFrames(ss_parry_b1, parry_b1, 70, 110);
-            if (ss_crouch1 != null) {
-                crouch1[0] = ss_crouch1.crop(54, 73, 0, 0);
-            }
 
             // Movement
             loadKenJumpFrames(ss_jump1, jump1, 61, 124);
@@ -242,8 +217,6 @@ public class Assets {
             // Ground attacks
             loadSpriteFrames(ss_punch1, punch1, 103, 103);
             loadSpriteFrames(ss_quick_punch1, quick_punch1, 95, 102);
-            loadSpriteFrames(ss_crouch_punch1, crouch_punch1, 89, 72);
-            loadSpriteFrames(ss_crouch_attack1, crouch_attack1, 95, 72);
             loadSpriteFrames(ss_uppercut1, uppercut1, 91, 108);
 
             // Kicks
@@ -256,8 +229,6 @@ public class Assets {
             loadSpriteFrames(ss_punch_down1, punch_down1, 68, 88);
 
             // Hit reactions and recovery
-            loadSpriteFrames(ss_crouch_hit1, crouch_hit1, 54, 73);
-            loadSpriteFrames(ss_crouch_hit_back1, crouch_hit_back1, 79, 73);
             loadSpriteFrames(ss_hit_stand1, hit_stand1, 57, 104);
             loadSpriteFrames(ss_hit_stand_back1, hit_stand_back1, 79, 104);
             loadSpriteFrames(ss_knockback1, knockback1, 86, 104);
@@ -369,22 +340,17 @@ public class Assets {
         if (idle != null && idle[0] != null) count++;
         if (parry_f != null && parry_f[0] != null) count++;
         if (parry_b != null && parry_b[0] != null) count++;
-        if (crouch != null && crouch[0] != null) count++;
         if (jump != null && jump[0] != null) count++;
         if (front_flip != null && front_flip[0] != null) count++;
         if (back_flip != null && back_flip[0] != null) count++;
         if (punch != null && punch[0] != null) count++;
         if (quick_punch != null && quick_punch[0] != null) count++;
-        if (crouch_punch != null && crouch_punch[0] != null) count++;
-        if (crouch_attack != null && crouch_attack[0] != null) count++;
         if (uppercut != null && uppercut[0] != null) count++;
         if (kick_low != null && kick_low[0] != null) count++;
         if (upper_kick != null && upper_kick[0] != null) count++;
         if (air_punch != null && air_punch[0] != null) count++;
         if (air_kick != null && air_kick[0] != null) count++;
         if (punch_down != null && punch_down[0] != null) count++;
-        if (crouch_hit != null && crouch_hit[0] != null) count++;
-        if (crouch_hit_back != null && crouch_hit_back[0] != null) count++;
         if (hit_stand != null && hit_stand[0] != null) count++;
         if (hit_stand_back != null && hit_stand_back[0] != null) count++;
         if (knockback != null && knockback[0] != null) count++;
@@ -399,22 +365,17 @@ public class Assets {
         if (idle1 != null && idle1[0] != null) count++;
         if (parry_f1 != null && parry_f1[0] != null) count++;
         if (parry_b1 != null && parry_b1[0] != null) count++;
-        if (crouch1 != null && crouch1[0] != null) count++;
         if (jump1 != null && jump1[0] != null) count++;
         if (front_flip1 != null && front_flip1[0] != null) count++;
         if (back_flip1 != null && back_flip1[0] != null) count++;
         if (punch1 != null && punch1[0] != null) count++;
         if (quick_punch1 != null && quick_punch1[0] != null) count++;
-        if (crouch_punch1 != null && crouch_punch1[0] != null) count++;
-        if (crouch_attack1 != null && crouch_attack1[0] != null) count++;
         if (uppercut1 != null && uppercut1[0] != null) count++;
         if (kick_low1 != null && kick_low1[0] != null) count++;
         if (upper_kick1 != null && upper_kick1[0] != null) count++;
         if (air_punch1 != null && air_punch1[0] != null) count++;
         if (air_kick1 != null && air_kick1[0] != null) count++;
         if (punch_down1 != null && punch_down1[0] != null) count++;
-        if (crouch_hit1 != null && crouch_hit1[0] != null) count++;
-        if (crouch_hit_back1 != null && crouch_hit_back1[0] != null) count++;
         if (hit_stand1 != null && hit_stand1[0] != null) count++;
         if (hit_stand_back1 != null && hit_stand_back1[0] != null) count++;
         if (knockback1 != null && knockback1[0] != null) count++;

@@ -33,6 +33,7 @@ public class ChampSelectController {
     private FadeTransition fadeTransition;
 
     private NetworkClient networkClient = null;
+    private boolean isHost = false;
 
     @FXML
     public void initialize() {
@@ -56,23 +57,41 @@ public class ChampSelectController {
 
     public void setNetworkClient(NetworkClient client) {
         this.networkClient = client;
+        this.isHost = client != null && client.isHost();
+
+        if (!isHost && networkClient != null) {
+            // Client can't select - show waiting message
+            statusLabel.setText("HOST is selecting characters...");
+            statusLabel.setStyle("-fx-text-fill: yellow; -fx-font-size: 16px;");
+            statusLabel.setOpacity(1.0);
+            fadeTransition.stop();
+        }
     }
 
     private void handleKeyPress(KeyCode code) {
+        // In network mode, only host can select
+        if (networkClient != null && !isHost) {
+            return;
+        }
+
         // Local mode controls (both players on same keyboard)
         if (!p1Locked) {
             if (code == KeyCode.A || code == KeyCode.D) {
                 p1Index = (p1Index == 0) ? 1 : 0;
+                AudioManager.playSelectSound();
             } else if (code == KeyCode.Q) {
                 p1Locked = true;
+                AudioManager.playConfirmSound();
             }
         }
 
         if (!p2Locked) {
             if (code == KeyCode.LEFT || code == KeyCode.RIGHT) {
                 p2Index = (p2Index == 0) ? 1 : 0;
+                AudioManager.playSelectSound();
             } else if (code == KeyCode.ENTER) {
                 p2Locked = true;
+                AudioManager.playConfirmSound();
             }
         }
 
@@ -93,13 +112,17 @@ public class ChampSelectController {
         String p2Status = p2Locked ? " ✓" : "";
         p2NameLabel.setText("Player 2: " + (p2Index == 0 ? "Ryu" : "Ken") + p2Status);
 
-        if (p1Locked && p2Locked) {
-            statusLabel.setText("Both Players Ready! Press SPACE to Start");
-            fadeTransition.play();
-        } else {
-            statusLabel.setText("");
-            fadeTransition.stop();
-            statusLabel.setOpacity(1.0);
+        if (networkClient == null || isHost) {
+            if (p1Locked && p2Locked) {
+                statusLabel.setText("Both Characters Selected! Press SPACE to Continue");
+                statusLabel.setStyle("-fx-text-fill: lime; -fx-font-size: 16px;");
+                fadeTransition.play();
+            } else {
+                statusLabel.setText("Select Characters | P1: A/D + Q | P2: ←/→ + Enter");
+                statusLabel.setStyle("-fx-text-fill: white; -fx-font-size: 14px;");
+                fadeTransition.stop();
+                statusLabel.setOpacity(1.0);
+            }
         }
     }
 

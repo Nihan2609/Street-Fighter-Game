@@ -1,5 +1,7 @@
 package Client;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
@@ -11,6 +13,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.sql.*;
 import java.util.Objects;
 
 public class LeaderboardUIController {
@@ -20,16 +23,22 @@ public class LeaderboardUIController {
     @FXML private TableColumn<PlayerStats, Integer> winsCol;
     @FXML private TableColumn<PlayerStats, Integer> lossesCol;
     @FXML private TableColumn<PlayerStats, Double> winRateCol;
-
     @FXML private Button backBtn;
+
+    private ObservableList<PlayerStats> playerList = FXCollections.observableArrayList();
 
     @FXML
     private void initialize() {
-        // Set up columns
         usernameCol.setCellValueFactory(new PropertyValueFactory<>("username"));
         winsCol.setCellValueFactory(new PropertyValueFactory<>("wins"));
         lossesCol.setCellValueFactory(new PropertyValueFactory<>("losses"));
         winRateCol.setCellValueFactory(new PropertyValueFactory<>("winRate"));
+
+        // 🔹 Load data from database
+        loadLeaderboardFromDB();
+
+        // 🔹 Set data to table
+        leaderboardTable.setItems(playerList);
 
         backBtn.setOnAction(e -> goBack());
     }
@@ -37,7 +46,7 @@ public class LeaderboardUIController {
     private void loadLeaderboardFromDB() {
         String url = "jdbc:mysql://localhost:3306/street_fighter_game";
         String user = "root";     // change if you have another username
-        String password = "1122";     // your MySQL password here
+        String password = "212001";     // your MySQL password here
 
         String query = "SELECT username, wins, losses, " +
                 "ROUND((wins / NULLIF((wins + losses), 0)) * 100, 2) AS win_rate " +
@@ -77,10 +86,10 @@ public class LeaderboardUIController {
 
     // Class to hold player stats
     public static class PlayerStats {
-        private String username;
-        private int wins;
-        private int losses;
-        private double winRate;
+        private final String username;
+        private final int wins;
+        private final int losses;
+        private final double winRate;
 
         public PlayerStats(String username, int wins, int losses, double winRate) {
             this.username = username;

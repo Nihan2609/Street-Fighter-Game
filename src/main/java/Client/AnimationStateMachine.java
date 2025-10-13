@@ -5,10 +5,10 @@ import javafx.scene.image.Image;
 public class AnimationStateMachine {
     public enum AnimationType {
         // Basic states
-        IDLE, PARRY_FORWARD, PARRY_BACKWARD, PARRY_F, PARRY_B, CROUCH, JUMP,
+        IDLE, PARRY_FORWARD, PARRY_BACKWARD, PARRY_F, PARRY_B, JUMP,
 
         // Ground attacks
-        PUNCH, QUICK_PUNCH, CROUCH_PUNCH, CROUCH_ATTACK, UPPERCUT, KICK_LOW, UPPER_KICK,
+        PUNCH, QUICK_PUNCH, UPPERCUT, KICK_LOW, UPPER_KICK,
 
         // Air attacks
         AIR_PUNCH, AIR_KICK, PUNCH_DOWN,
@@ -17,7 +17,7 @@ public class AnimationStateMachine {
         FRONT_FLIP, BACK_FLIP,
 
         // Defensive/Hurt states
-        HIT_STAND, HIT_STAND_BACK, CROUCH_HIT, CROUCH_HIT_BACK,
+        HIT_STAND, HIT_STAND_BACK,
         KNOCKBACK, RECOVER, WIN, DEAD
     }
 
@@ -107,8 +107,6 @@ public class AnimationStateMachine {
             case PARRY_B:
                 return new AnimationState(type, actualFrameCount, 120, true, true);
 
-            case CROUCH:
-                return new AnimationState(type, 1, 100, true, true);
 
             case JUMP:
                 AnimationState jump = new AnimationState(type, actualFrameCount, 150, false, false);
@@ -133,15 +131,6 @@ public class AnimationStateMachine {
                 qPunch.nextState = AnimationType.IDLE;
                 return qPunch;
 
-            case CROUCH_PUNCH:
-                AnimationState cPunch = new AnimationState(type, actualFrameCount, 80, false, false);
-                cPunch.nextState = AnimationType.CROUCH;
-                return cPunch;
-
-            case CROUCH_ATTACK:
-                AnimationState cAttack = new AnimationState(type, actualFrameCount, 90, false, false);
-                cAttack.nextState = AnimationType.CROUCH;
-                return cAttack;
 
             case UPPERCUT:
                 AnimationState uppercut = new AnimationState(type, actualFrameCount, 120, false, false);
@@ -185,15 +174,6 @@ public class AnimationStateMachine {
                 hitStandBack.nextState = AnimationType.IDLE;
                 return hitStandBack;
 
-            case CROUCH_HIT:
-                AnimationState crouchHit = new AnimationState(type, actualFrameCount, 150, false, false);
-                crouchHit.nextState = AnimationType.CROUCH;
-                return crouchHit;
-
-            case CROUCH_HIT_BACK:
-                AnimationState crouchHitBack = new AnimationState(type, actualFrameCount, 120, false, false);
-                crouchHitBack.nextState = AnimationType.CROUCH;
-                return crouchHitBack;
 
             case KNOCKBACK:
                 AnimationState knockback = new AnimationState(type, actualFrameCount, 150, false, false);
@@ -235,14 +215,11 @@ public class AnimationStateMachine {
             case PARRY_BACKWARD:
             case PARRY_F:
             case PARRY_B: return 8;
-            case CROUCH: return 1;
             case JUMP: return 11;
             case FRONT_FLIP:
             case BACK_FLIP: return 8;
             case PUNCH: return isRyu ? 6 : 8;
             case QUICK_PUNCH: return isRyu ? 3 : 4;
-            case CROUCH_PUNCH: return 3;
-            case CROUCH_ATTACK: return isRyu ? 8 : 5;
             case UPPERCUT: return 8;
             case KICK_LOW: return 5;
             case UPPER_KICK: return isRyu ? 9 : 10;
@@ -251,8 +228,6 @@ public class AnimationStateMachine {
             case PUNCH_DOWN: return 4;
             case HIT_STAND: return 2;
             case HIT_STAND_BACK: return 4;
-            case CROUCH_HIT: return 2;
-            case CROUCH_HIT_BACK: return 4;
             case KNOCKBACK: return 4;
             case RECOVER: return 5;
             case WIN: return 10;
@@ -306,14 +281,11 @@ public class AnimationStateMachine {
             case PARRY_F: return "parry_f";
             case PARRY_BACKWARD:
             case PARRY_B: return "parry_b";
-            case CROUCH: return "crouch";
             case JUMP: return "jump";
             case FRONT_FLIP: return "front_flip";
             case BACK_FLIP: return "back_flip";
             case PUNCH: return "punch";
             case QUICK_PUNCH: return "quick_punch";
-            case CROUCH_PUNCH: return "crouch_punch";
-            case CROUCH_ATTACK: return "crouch_attack";
             case UPPERCUT: return "uppercut";
             case KICK_LOW: return "kick_low";
             case UPPER_KICK: return "upper_kick";
@@ -322,8 +294,6 @@ public class AnimationStateMachine {
             case PUNCH_DOWN: return "punch_down";
             case HIT_STAND: return "hit_stand";
             case HIT_STAND_BACK: return "hit_stand_back";
-            case CROUCH_HIT: return "crouch_hit";
-            case CROUCH_HIT_BACK: return "crouch_hit_back";
             case KNOCKBACK: return "knockback";
             case RECOVER: return "recover";
             case WIN: return "win";

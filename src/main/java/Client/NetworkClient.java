@@ -14,12 +14,18 @@ public class NetworkClient {
 
     private String playerId;
     private String playerName;
+    private boolean isHost; // NEW: Track if this client is the host
 
     private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
     private NetworkCallback callback;
 
     private long frameNumber = 0;
     private static final int BUFFER_SIZE = 1024;
+
+    // Smoothing and interpolation
+    private static final int INPUT_BUFFER_SIZE = 3; // Buffer inputs for smoother gameplay
+    private long lastInputSendTime = 0;
+    private static final long INPUT_SEND_INTERVAL = 16; // ~60 FPS
 
     // Store reference to lobby controller for client
     private Object lobbyController = null;
@@ -30,12 +36,17 @@ public class NetworkClient {
         void onGameStart();
         void onInputReceived(String playerId, long frameNumber, short inputBits);
         void onPlayerDisconnected(String playerId);
-        default void onGameConfig(String p1Char, String p2Char, String mapFile) {}
+        void onGameConfig(String p1Char, String p2Char, String mapFile);
+        void onPauseGame(String pausedBy); // NEW
+        void onResumeGame(); // NEW
+        void onRematchRequest(); // NEW
+        void onWaitingForHost(); // NEW
     }
 
     public NetworkClient(String playerId, String playerName) {
         this.playerId = playerId;
         this.playerName = playerName;
+        this.isHost = playerId.equals("P1"); // P1 is always the host
     }
 
     public void setLobbyController(Object controller) {
@@ -64,6 +75,7 @@ public class NetworkClient {
             bb.put(PacketType.CONNECT);
             writeString(bb, playerId);
             writeString(bb, playerName);
+            bb.put((byte) (isHost ? 1 : 0)); // Send host flag
 
             byte[] data = new byte[bb.position()];
             bb.flip();
@@ -72,7 +84,7 @@ public class NetworkClient {
             DatagramPacket packet = new DatagramPacket(data, data.length, serverAddress, serverPort);
             socket.send(packet);
 
-            System.out.println("Connection request sent to " + serverAddress + ":" + serverPort);
+            System.out.println("Connection request sent to " + serverAddress + ":" + serverPort + " as " + (isHost ? "HOST" : "CLIENT"));
         } catch (Exception e) {
             System.err.println("Error sending connect request: " + e.getMessage());
         }
@@ -120,6 +132,18 @@ public class NetworkClient {
                 case PacketType.PLAYER_DISCONNECTED:
                     handlePlayerDisconnected(bb);
                     break;
+                case PacketType.PAUSE_GAME:
+                    handlePauseGame(bb);
+                    break;
+                case PacketType.RESUME_GAME:
+                    handleResumeGame(bb);
+                    break;
+                case PacketType.REMATCH:
+                    handleRematch(bb);
+                    break;
+                case PacketType.WAITING_FOR_HOST:
+                    handleWaitingForHost(bb);
+                    break;
                 default:
                     System.err.println("Unknown packet type: " + packetType);
             }
@@ -131,7 +155,7 @@ public class NetworkClient {
     private void handleConnectAccepted(ByteBuffer bb) {
         String assignedId = readString(bb);
         connected = true;
-        System.out.println("Connected to server! Player ID: " + assignedId);
+        System.out.println("Connected to server! Player ID: " + assignedId + (isHost ? " (HOST)" : " (CLIENT)"));
         if (callback != null) {
             callback.onConnected();
         }
@@ -176,7 +200,7 @@ public class NetworkClient {
         }
 
         // If client, launch game through lobby controller
-        if (playerId.equals("P2") && lobbyController != null) {
+        if (!isHost && lobbyController != null) {
             try {
                 java.lang.reflect.Method method = lobbyController.getClass()
                         .getMethod("launchGame", String.class, String.class, String.class);
@@ -196,8 +220,126 @@ public class NetworkClient {
         }
     }
 
-    public void sendGameConfig(String p1Char, String p2Char, String mapFile) {
+    private void handlePauseGame(ByteBuffer bb) {
+        String pausedBy = readString(bb);
+        System.out.println("Game paused by: " + pausedBy);
+        if (callback != null) {
+            Platform.runLater(() -> callback.onPauseGame(pausedBy));
+        }
+    }
+
+    private void handleResumeGame(ByteBuffer bb) {
+        System.out.println("Game resumed");
+        if (callback != null) {
+            Platform.runLater(() -> callback.onResumeGame());
+        }
+    }
+
+    private void handleRematch(ByteBuffer bb) {
+        System.out.println("Host started rematch");
+        if (callback != null) {
+            Platform.runLater(() -> callback.onRematchRequest());
+        }
+    }
+
+    private void handleWaitingForHost(ByteBuffer bb) {
+        System.out.println("Waiting for host to start rematch");
+        if (callback != null) {
+            Platform.runLater(() -> callback.onWaitingForHost());
+        }
+    }
+
+    // NEW: Send pause request
+    public void sendPauseRequest() {
         if (!connected) return;
+
+        try {
+            ByteBuffer bb = ByteBuffer.allocate(128);
+            bb.put(PacketType.PAUSE_GAME);
+            writeString(bb, playerId);
+
+            byte[] data = new byte[bb.position()];
+            bb.flip();
+            bb.get(data);
+
+            DatagramPacket packet = new DatagramPacket(data, data.length, serverAddress, serverPort);
+            socket.send(packet);
+            System.out.println("Pause request sent");
+        } catch (Exception e) {
+            System.err.println("Error sending pause request: " + e.getMessage());
+        }
+    }
+
+    // NEW: Send resume request
+    public void sendResumeRequest() {
+        if (!connected) return;
+
+        try {
+            ByteBuffer bb = ByteBuffer.allocate(128);
+            bb.put(PacketType.RESUME_GAME);
+            writeString(bb, playerId);
+
+            byte[] data = new byte[bb.position()];
+            bb.flip();
+            bb.get(data);
+
+            DatagramPacket packet = new DatagramPacket(data, data.length, serverAddress, serverPort);
+            socket.send(packet);
+            System.out.println("Resume request sent");
+        } catch (Exception e) {
+            System.err.println("Error sending resume request: " + e.getMessage());
+        }
+    }
+
+    // NEW: Send rematch request (host only)
+    public void sendRematchRequest() {
+        if (!connected || !isHost) {
+            System.out.println("Only host can start rematch");
+            return;
+        }
+
+        try {
+            ByteBuffer bb = ByteBuffer.allocate(128);
+            bb.put(PacketType.REMATCH);
+            writeString(bb, playerId);
+
+            byte[] data = new byte[bb.position()];
+            bb.flip();
+            bb.get(data);
+
+            DatagramPacket packet = new DatagramPacket(data, data.length, serverAddress, serverPort);
+            socket.send(packet);
+            System.out.println("Rematch request sent");
+        } catch (Exception e) {
+            System.err.println("Error sending rematch request: " + e.getMessage());
+        }
+    }
+
+    // NEW: Client sends waiting status
+    public void sendWaitingForHost() {
+        if (!connected || isHost) return;
+
+        try {
+            ByteBuffer bb = ByteBuffer.allocate(128);
+            bb.put(PacketType.WAITING_FOR_HOST);
+            writeString(bb, playerId);
+
+            byte[] data = new byte[bb.position()];
+            bb.flip();
+            bb.get(data);
+
+            DatagramPacket packet = new DatagramPacket(data, data.length, serverAddress, serverPort);
+            socket.send(packet);
+        } catch (Exception e) {
+            System.err.println("Error sending waiting status: " + e.getMessage());
+        }
+    }
+
+    public void sendGameConfig(String p1Char, String p2Char, String mapFile) {
+        if (!connected || !isHost) {
+            System.out.println("Only host can send game config");
+            return;
+        }
 
         try {
             ByteBuffer bb = ByteBuffer.allocate(256);
@@ -221,6 +363,13 @@ public class NetworkClient {
 
     public void sendInput(short inputBits) {
         if (!connected) return;
+
+        // Rate limiting for smoother network traffic
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastInputSendTime < INPUT_SEND_INTERVAL) {
+            return;
+        }
+        lastInputSendTime = currentTime;
 
         try {
             ByteBuffer bb = ByteBuffer.allocate(128);
@@ -337,6 +486,10 @@ public class NetworkClient {
         return playerId;
     }
 
+    public boolean isHost() {
+        return isHost;
+    }
+
     public static class PacketType {
         public static final byte CONNECT = 0x01;
         public static final byte CONNECT_ACCEPTED = 0x02;
@@ -349,6 +502,10 @@ public class NetworkClient {
         public static final byte HEARTBEAT = 0x40;
         public static final byte PLAYER_DISCONNECTED = 0x50;
         public static final byte GAME_CONFIG = 0x60;
+        public static final byte PAUSE_GAME = 0x70;
+        public static final byte RESUME_GAME = 0x71;
+        public static final byte REMATCH = (byte) 0x80;
+        public static final byte WAITING_FOR_HOST = (byte) 0x81;
     }
 
     public static class InputPacker {

@@ -19,10 +19,6 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import java.io.InputStream;
 
-/**
- * Unified Game Scene Controller
- * Supports both local (same device) and network (LAN) modes
- */
 public class GameSceneController {
 
     @FXML private Canvas gameCanvas;
@@ -41,7 +37,8 @@ public class GameSceneController {
     @FXML private Button resumeButton;
     @FXML private Button mainMenuButton;
     @FXML private VBox controlsInfo;
-    @FXML private Label networkStatusLabel; // Optional - for network status
+    @FXML private Label networkStatusLabel;
+    @FXML private Label pausedByLabel; // NEW
 
     private Fighter player1;
     private Fighter player2;
@@ -66,8 +63,8 @@ public class GameSceneController {
     private NetworkClient networkClient = null;
     private String localPlayerId = null;
     private boolean isNetworkMode = false;
+    private boolean isHost = false;
     private int stateUpdateCounter = 0;
-
 
     public enum GameState {
         READY, FIGHTING, ROUND_OVER, GAME_OVER, PAUSED
@@ -85,12 +82,18 @@ public class GameSceneController {
 
         setupInputHandling();
 
-        if (continueButton != null) continueButton.setOnAction(e -> nextRound());
+        if (continueButton != null) {
+            continueButton.setOnAction(e -> handleContinueButton());
+        }
         if (resumeButton != null) resumeButton.setOnAction(e -> resumeGame());
         if (mainMenuButton != null) mainMenuButton.setOnAction(e -> returnToMainMenu());
 
         if (controlsInfo != null) {
             controlsInfo.setVisible(false);
+        }
+
+        if (pausedByLabel != null) {
+            pausedByLabel.setVisible(false);
         }
 
         AudioManager.playBGM("fight_theme.wav");
@@ -100,8 +103,11 @@ public class GameSceneController {
         this.networkClient = client;
         this.localPlayerId = playerId;
         this.isNetworkMode = true;
+        this.isHost = client.isHost();
 
-        //network callback
+        System.out.println("Game initialized in network mode: " +
+                (isHost ? "HOST" : "CLIENT") + " (" + playerId + ")");
+
         if (networkClient != null) {
             networkClient.setCallback(new NetworkClient.NetworkCallback() {
                 @Override
@@ -128,7 +134,6 @@ public class GameSceneController {
 
                 @Override
                 public void onInputReceived(String playerId, long frameNumber, short inputBits) {
-                    // Apply remote player's input
                     String remotePlayerId = playerId.equals(localPlayerId) ? null : playerId;
                     if (remotePlayerId != null) {
                         inputManager.setPlayerNetworkControlled(remotePlayerId, true);
@@ -144,18 +149,66 @@ public class GameSceneController {
                         currentGameState = GameState.GAME_OVER;
                     });
                 }
+
+                @Override
+                public void onGameConfig(String p1Char, String p2Char, String mapFile) {
+                    // Already handled in MapSelectController
+                }
+
+                @Override
+                public void onPauseGame(String pausedBy) {
+                    Platform.runLater(() -> {
+                        if (currentGameState == GameState.FIGHTING) {
+                            currentGameState = GameState.PAUSED;
+                            if (pauseMenu != null) pauseMenu.setVisible(true);
+                            if (pausedByLabel != null) {
+                                pausedByLabel.setText("Paused by: " + pausedBy);
+                                pausedByLabel.setVisible(true);
+                            }
+                            System.out.println("Game paused by: " + pausedBy);
+                        }
+                    });
+                }
+
+                @Override
+                public void onResumeGame() {
+                    Platform.runLater(() -> {
+                        if (currentGameState == GameState.PAUSED) {
+                            currentGameState = GameState.FIGHTING;
+                            if (pauseMenu != null) pauseMenu.setVisible(false);
+                            if (pausedByLabel != null) pausedByLabel.setVisible(false);
+                            gameCanvas.requestFocus();
+                            System.out.println("Game resumed");
+                        }
+                    });
+                }
+
+                @Override
+                public void onRematchRequest() {
+                    Platform.runLater(() -> {
+                        System.out.println("Rematch requested by host");
+                        startRematch();
+                    });
+                }
+
+                @Override
+                public void onWaitingForHost() {
+                    Platform.runLater(() -> {
+                        System.out.println("Client is waiting for host");
+                    });
+                }
             });
 
-            // flags
+            // Set network control flags
             if (localPlayerId.equals("P1")) {
                 inputManager.setPlayerNetworkControlled("P1", false);
-                inputManager.setPlayerNetworkControlled("P2", true);  // Network
+                inputManager.setPlayerNetworkControlled("P2", true);
             } else {
-                inputManager.setPlayerNetworkControlled("P1", true);  // Network
+                inputManager.setPlayerNetworkControlled("P1", true);
                 inputManager.setPlayerNetworkControlled("P2", false);
             }
 
-            updateNetworkStatus("Connected");
+            updateNetworkStatus("Connected as " + (isHost ? "HOST" : "CLIENT"));
         }
     }
 
@@ -221,10 +274,17 @@ public class GameSceneController {
             networkClient.sendInput(inputBits);
         }
 
+        // Pause handling - both players can pause
         if (key == KeyCode.ESCAPE) {
             if (currentGameState == GameState.FIGHTING) {
+                if (isNetworkMode && networkClient != null) {
+                    networkClient.sendPauseRequest();
+                }
                 pauseGame();
             } else if (currentGameState == GameState.PAUSED) {
+                if (isNetworkMode && networkClient != null) {
+                    networkClient.sendResumeRequest();
+                }
                 resumeGame();
             }
         }
@@ -361,15 +421,71 @@ public class GameSceneController {
             currentGameState = GameState.GAME_OVER;
             String winner = player1Wins >= 2 ? selectedPlayer1 : selectedPlayer2;
             showGameMessage(winner + " WINS THE MATCH!", 5000);
+
             if (continueButton != null) {
-                continueButton.setText("New Game");
+                if (isNetworkMode) {
+                    if (isHost) {
+                        continueButton.setText("Rematch");
+                    } else {
+                        continueButton.setText("Waiting for Host...");
+                        continueButton.setDisable(true);
+                        if (networkClient != null) {
+                            networkClient.sendWaitingForHost();
+                        }
+                    }
+                } else {
+                    continueButton.setText("New Game");
+                }
                 continueButton.setVisible(true);
             }
         } else {
             if (continueButton != null) {
-                continueButton.setText("Next Round");
+                if (isNetworkMode) {
+                    if (isHost) {
+                        continueButton.setText("Next Round");
+                    } else {
+                        continueButton.setText("Waiting for Host...");
+                        continueButton.setDisable(true);
+                        if (networkClient != null) {
+                            networkClient.sendWaitingForHost();
+                        }
+                    }
+                } else {
+                    continueButton.setText("Next Round");
+                }
                 continueButton.setVisible(true);
             }
+        }
+    }
+
+    private void handleContinueButton() {
+        if (isNetworkMode && isHost) {
+            // Host starts rematch
+            if (networkClient != null) {
+                networkClient.sendRematchRequest();
+            }
+            startRematch();
+        } else if (!isNetworkMode) {
+            // Local mode - directly proceed
+            nextRound();
+        }
+        // Client does nothing - waits for host
+    }
+
+    private void startRematch() {
+        if (currentGameState == GameState.GAME_OVER) {
+            player1Wins = 0;
+            player2Wins = 0;
+            currentRound = 1;
+        } else {
+            currentRound++;
+        }
+
+        initializeGame();
+        if (messageBox != null) messageBox.setVisible(false);
+        if (continueButton != null) {
+            continueButton.setVisible(false);
+            continueButton.setDisable(false);
         }
     }
 
@@ -421,8 +537,16 @@ public class GameSceneController {
         timerLabel.setText(String.valueOf(roundTimer));
         roundLabel.setText("ROUND " + currentRound);
 
-        player1NameLabel.setText(player1.getName() + " (Wins: " + player1Wins + ")");
-        player2NameLabel.setText(player2.getName() + " (Wins: " + player2Wins + ")");
+        String p1Name = player1.getName();
+        String p2Name = player2.getName();
+
+        if (isNetworkMode) {
+            p1Name += " (HOST)";
+            p2Name += " (CLIENT)";
+        }
+
+        player1NameLabel.setText(p1Name + " | Wins: " + player1Wins);
+        player2NameLabel.setText(p2Name + " | Wins: " + player2Wins);
     }
 
     private void updateNetworkStatus(String status) {
@@ -455,6 +579,9 @@ public class GameSceneController {
         if (currentGameState == GameState.FIGHTING) {
             currentGameState = GameState.PAUSED;
             if (pauseMenu != null) pauseMenu.setVisible(true);
+            if (pausedByLabel != null && !isNetworkMode) {
+                pausedByLabel.setVisible(false); // Don't show in local mode
+            }
         }
     }
 
@@ -462,6 +589,7 @@ public class GameSceneController {
         if (currentGameState == GameState.PAUSED) {
             currentGameState = GameState.FIGHTING;
             if (pauseMenu != null) pauseMenu.setVisible(false);
+            if (pausedByLabel != null) pausedByLabel.setVisible(false);
             gameCanvas.requestFocus();
         }
     }
