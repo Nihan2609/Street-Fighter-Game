@@ -34,6 +34,34 @@ public class LeaderboardUIController {
         backBtn.setOnAction(e -> goBack());
     }
 
+    private void loadLeaderboardFromDB() {
+        String url = "jdbc:mysql://localhost:3306/street_fighter_game";
+        String user = "root";     // change if you have another username
+        String password = "1122";     // your MySQL password here
+
+        String query = "SELECT username, wins, losses, " +
+                "ROUND((wins / NULLIF((wins + losses), 0)) * 100, 2) AS win_rate " +
+                "FROM players ORDER BY wins DESC, win_rate DESC";
+
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                String username = rs.getString("username");
+                int wins = rs.getInt("wins");
+                int losses = rs.getInt("losses");
+                double winRate = rs.getDouble("win_rate");
+
+                playerList.add(new PlayerStats(username, wins, losses, winRate));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println(" Error loading leaderboard data from database.");
+        }
+    }
+
     private void goBack() {
         try {
             Stage stage = (Stage) backBtn.getScene().getWindow();
