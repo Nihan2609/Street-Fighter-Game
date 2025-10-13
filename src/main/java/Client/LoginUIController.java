@@ -6,17 +6,22 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class LoginUIController {
 
     @FXML private TextField usernameField;
     @FXML private PasswordField passwordField;
-    @FXML private Button loginBtn, signupBtn, leaderboardBtn;
+    @FXML private Button loginBtn;
+    @FXML private Button signupBtn;
+
+    private FontManager fontManager = FontManager.getInstance();
 
     @FXML
     private void initialize() {
+        fontManager.initialize();
+        applyCustomFont();
+
         loginBtn.setOnAction(e -> handleLogin());
         signupBtn.setOnAction(e -> handleSignup());
 
@@ -26,11 +31,45 @@ public class LoginUIController {
         AudioManager.playBGM("home.wav");
     }
 
+    private void applyCustomFont() {
+        if (usernameField != null) {
+            usernameField.setStyle(fontManager.getStyleString(11) +
+                    "-fx-background-color: rgba(255, 255, 255, 0.95); " +
+                    "-fx-background-radius: 8; " +
+                    "-fx-padding: 8; " +
+                    "-fx-text-fill: black;");
+        }
+
+        if (passwordField != null) {
+            passwordField.setStyle(fontManager.getStyleString(11) +
+                    "-fx-background-color: rgba(255, 255, 255, 0.95); " +
+                    "-fx-background-radius: 8; " +
+                    "-fx-padding: 8; " +
+                    "-fx-text-fill: black;");
+        }
+
+        String buttonStyle = fontManager.getStyleString(12) +
+                "-fx-background-color: #3498db; " +
+                "-fx-text-fill: white; " +
+                "-fx-background-radius: 8; " +
+                "-fx-padding: 10 20; " +
+                "-fx-cursor: hand;";
+
+        if (loginBtn != null) loginBtn.setStyle(buttonStyle);
+        if (signupBtn != null) signupBtn.setStyle(buttonStyle);
+    }
+
     private void addHoverEffect(Button button, String hoverColor, String normalColor) {
-        button.setOnMouseEntered(e -> button.setStyle(button.getStyle()
-                .replace(normalColor, hoverColor)));
-        button.setOnMouseExited(e -> button.setStyle(button.getStyle()
-                .replace(hoverColor, normalColor)));
+        String baseStyle = fontManager.getStyleString(12) +
+                "-fx-text-fill: white; " +
+                "-fx-background-radius: 8; " +
+                "-fx-padding: 10 20; " +
+                "-fx-cursor: hand;";
+
+        button.setOnMouseEntered(e ->
+                button.setStyle(baseStyle + "-fx-background-color: " + hoverColor + ";"));
+        button.setOnMouseExited(e ->
+                button.setStyle(baseStyle + "-fx-background-color: " + normalColor + ";"));
     }
 
     private void handleLogin() {
@@ -38,18 +77,18 @@ public class LoginUIController {
         String pass = passwordField.getText().trim();
 
         if (user.isEmpty() || pass.isEmpty()) {
-            new Alert(Alert.AlertType.WARNING, "Please fill in both fields.").showAndWait();
+            showAlert("Warning", "Fill in both fields", Alert.AlertType.WARNING);
             return;
         }
+
         if (DatabaseManager.loginPlayer(user, pass)) {
             try {
-
                 AudioManager.playSelectSound();
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/game/HomeUI.fxml"));
                 Parent root = loader.load();
 
                 Stage stage = (Stage) loginBtn.getScene().getWindow();
-                stage.setScene(new Scene(root));
+                stage.setScene(new Scene(root, 600, 400));
                 stage.setTitle("Street Fighter");
                 stage.show();
 
@@ -57,7 +96,7 @@ public class LoginUIController {
                 ex.printStackTrace();
             }
         } else {
-            new Alert(Alert.AlertType.ERROR, "Invalid login!").showAndWait();
+            showAlert("Error", "Invalid credentials!", Alert.AlertType.ERROR);
         }
     }
 
@@ -66,15 +105,29 @@ public class LoginUIController {
         String pass = passwordField.getText().trim();
 
         if (user.isEmpty() || pass.isEmpty()) {
-            new Alert(Alert.AlertType.WARNING, "Please fill in both fields.").showAndWait();
+            showAlert("Warning", "Fill in both fields", Alert.AlertType.WARNING);
             return;
         }
+
         if (DatabaseManager.registerPlayer(user, pass)) {
-            new Alert(Alert.AlertType.INFORMATION, "Signup Success! You can now login.").showAndWait();
+            showAlert("Success", "Signup successful!", Alert.AlertType.INFORMATION);
+            usernameField.clear();
+            passwordField.clear();
         } else {
-            new Alert(Alert.AlertType.ERROR, "Username already exists!").showAndWait();
+            showAlert("Error", "Username exists!", Alert.AlertType.ERROR);
         }
     }
 
+    private void showAlert(String title, String message, Alert.AlertType type) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
 
+        DialogPane dialogPane = alert.getDialogPane();
+        dialogPane.setStyle(fontManager.getStyleString(10) +
+                "-fx-background-color: white;");
+
+        alert.showAndWait();
+    }
 }
