@@ -20,7 +20,7 @@
     <!-- Background -->
     <ImageView fitHeight="400" fitWidth="600" preserveRatio="false">
         <image>
-            <Image url="@../../../images/HomeBg.jpg" />
+            <Image url="@../../../images/LogInBG.jpg" />
         </image>
         <effect>
             <ColorAdjust brightness="-0.3" />

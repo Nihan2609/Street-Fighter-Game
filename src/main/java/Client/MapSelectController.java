@@ -21,6 +21,7 @@ public class MapSelectController {
     @FXML private ImageView map5;
     @FXML private ImageView map6;
     @FXML private Label titleLabel;
+    @FXML private ImageView bgView;
     @FXML private Label controlLabel;
 
     private int currentIndex = 0;

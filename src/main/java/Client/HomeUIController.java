@@ -38,7 +38,7 @@ public class HomeUIController {
     }
 
     private void applyCustomFont(Button button, String hoverColor, String normalColor) {
-        String baseStyle = fontManager.getStyleString(14) +
+        String baseStyle = fontManager.getStyleString(11) +
                 "-fx-background-radius: 8; -fx-padding: 10 20; -fx-cursor: hand;";
 
         button.setStyle(baseStyle + "-fx-background-color: " + normalColor + "; -fx-text-fill: white;");

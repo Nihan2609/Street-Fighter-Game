@@ -8,16 +8,12 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane fx:id="mainPane" prefHeight="400" prefWidth="600"
-            xmlns="http://javafx.com/javafx/24.0.1"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="Client.ChampSelectController">
+<AnchorPane fx:id="mainPane" prefHeight="400" prefWidth="600" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Client.ChampSelectController">
 
     <!-- Background -->
-    <ImageView fx:id="bgView" fitHeight="400" fitWidth="600" preserveRatio="false"
-               AnchorPane.leftAnchor="0" AnchorPane.topAnchor="0">
+    <ImageView fx:id="bgView" fitHeight="400" fitWidth="600" preserveRatio="false" AnchorPane.leftAnchor="0" AnchorPane.topAnchor="0">
         <image>
-            <Image url="@../../../images/charSelectBG.jpg" />
+            <Image url="@../../../images/charSelectBG.gif" />
         </image>
         <effect>
             <ColorAdjust brightness="-0.1" />
@@ -81,25 +77,20 @@
     </Label>
 
     <!-- Control Instructions -->
-    <Label fx:id="p1ControlLabel" layoutX="60" layoutY="350"
-           text="P1: A/D switch Q confirm" textFill="YELLOW">
+    <Label fx:id="p1ControlLabel" layoutX="27.0" layoutY="350.0" text="P1: A/D switch Q confirm" textFill="YELLOW">
         <font>
             <Font size="10" />
         </font>
     </Label>
 
-    <Label fx:id="p2ControlLabel" layoutX="320" layoutY="350"
-           text="P2: LEFT/RIGHT ENTER confirm" textFill="YELLOW">
+    <Label fx:id="p2ControlLabel" layoutX="307.0" layoutY="350.0" text="P2: LEFT/RIGHT ENTER confirm" textFill="YELLOW">
         <font>
             <Font size="10" />
         </font>
     </Label>
 
     <!-- Status Label -->
-    <Label fx:id="statusLabel" alignment="CENTER"
-           layoutX="100" layoutY="30"
-           prefWidth="400" prefHeight="30"
-           text="Select Characters" textFill="LIMEGREEN">
+    <Label fx:id="statusLabel" alignment="CENTER" layoutX="100" layoutY="30" prefHeight="30" prefWidth="400" text="Select Characters" textFill="LIMEGREEN">
         <font>
             <Font size="14" />
         </font>

@@ -10,11 +10,23 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.effect.DropShadow?>
 
+<?import javafx.scene.effect.ColorAdjust?>
 <AnchorPane fx:id="mainPane" prefHeight="400" prefWidth="600"
             style="-fx-background-color: black;"
             xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="Client.MapSelectController">
+
+    <!-- Background -->
+    <ImageView fx:id="bgView" fitHeight="400" fitWidth="600" preserveRatio="false"
+               AnchorPane.leftAnchor="0" AnchorPane.topAnchor="0">
+        <image>
+            <Image url="@../../../images/charSelectBG.gif" />
+        </image>
+        <effect>
+            <ColorAdjust/>
+        </effect>
+    </ImageView>
 
     <!-- Title -->
     <Label fx:id="titleLabel" alignment="CENTER"
