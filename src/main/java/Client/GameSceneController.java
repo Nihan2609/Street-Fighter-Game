@@ -25,10 +25,8 @@ public class GameSceneController {
     @FXML private Canvas gameCanvas;
     @FXML private Label roundLabel;
     @FXML private Label timerLabel;
-    @FXML private ImageView player1NameImage;  // Changed to ImageView
-    @FXML private ImageView player2NameImage;  // Changed to ImageView
-    @FXML private ImageView player1HealthImage;  // NEW: Health bar image
-    @FXML private ImageView player2HealthImage;  // NEW: Health bar image
+    @FXML private ImageView player1NameImage;
+    @FXML private ImageView player2NameImage;
     @FXML private Label player1HealthLabel;
     @FXML private Label player2HealthLabel;
     @FXML private ProgressBar player1HealthBar;
@@ -61,6 +59,10 @@ public class GameSceneController {
     private int currentRound = 1;
     private int player1Wins = 0;
     private int player2Wins = 0;
+    private long lastFPSCheck = 0;
+    private int frameCount = 0;
+    private int currentFPS = 0;
+    private boolean showFPS = true;
 
     private NetworkClient networkClient = null;
     private String localPlayerId = null;
@@ -73,7 +75,6 @@ public class GameSceneController {
     // Character name images
     private Image ryuNameImage;
     private Image kenNameImage;
-    private Image healthBarImage;
 
     public enum GameState {
         READY, FIGHTING, ROUND_OVER, GAME_OVER, PAUSED
@@ -127,22 +128,30 @@ public class GameSceneController {
 
     private void loadCharacterNameImages() {
         try {
-            ryuNameImage = new Image(getClass().getResourceAsStream("/images/ryu_name.png"));
-            kenNameImage = new Image(getClass().getResourceAsStream("/images/ken_name.png"));
-            healthBarImage = new Image(getClass().getResourceAsStream("/images/health_bar.png"));
+            InputStream ryuStream = getClass().getResourceAsStream("/images/ryu_name.png");
+            if (ryuStream != null) {
+                ryuNameImage = new Image(ryuStream);
+                ryuStream.close();
+            }
+
+            InputStream kenStream = getClass().getResourceAsStream("/images/ken_name.png");
+            if (kenStream != null) {
+                kenNameImage = new Image(kenStream);
+                kenStream.close();
+            }
         } catch (Exception e) {
             System.err.println("Error loading character name images: " + e.getMessage());
         }
     }
 
     private void applyCustomFont() {
-        if (roundLabel != null) roundLabel.setStyle(fontManager.getStyleString(14, "white"));
+        if (roundLabel != null) roundLabel.setStyle(fontManager.getStyleString(16, "white"));
         if (timerLabel != null) timerLabel.setStyle(fontManager.getStyleString(20, "yellow"));
         if (player1HealthLabel != null) player1HealthLabel.setStyle(fontManager.getStyleString(10, "white"));
         if (player2HealthLabel != null) player2HealthLabel.setStyle(fontManager.getStyleString(10, "white"));
-        if (gameStateLabel != null) gameStateLabel.setStyle(fontManager.getStyleString(24, "yellow"));
-        if (networkStatusLabel != null) networkStatusLabel.setStyle(fontManager.getStyleString(10, "lime"));
-        if (pausedByLabel != null) pausedByLabel.setStyle(fontManager.getStyleString(12, "yellow"));
+        if (gameStateLabel != null) gameStateLabel.setStyle(fontManager.getStyleString(28, "yellow"));
+        if (networkStatusLabel != null) networkStatusLabel.setStyle(fontManager.getStyleString(9, "lime"));
+        if (pausedByLabel != null) pausedByLabel.setStyle(fontManager.getStyleString(10, "yellow"));
     }
 
     public void setNetworkMode(NetworkClient client, String playerId) {
@@ -268,30 +277,24 @@ public class GameSceneController {
     }
 
     private void updateCharacterNameImages() {
-        // Set Player 1 name image
         if (player1NameImage != null) {
-            if (selectedPlayer1.equals("RYU")) {
+            if (selectedPlayer1.equals("RYU") && ryuNameImage != null) {
                 player1NameImage.setImage(ryuNameImage);
-            } else if (selectedPlayer1.equals("KEN")) {
+                player1NameImage.setVisible(true);
+            } else if (selectedPlayer1.equals("KEN") && kenNameImage != null) {
                 player1NameImage.setImage(kenNameImage);
+                player1NameImage.setVisible(true);
             }
         }
 
-        // Set Player 2 name image
         if (player2NameImage != null) {
-            if (selectedPlayer2.equals("RYU")) {
+            if (selectedPlayer2.equals("RYU") && ryuNameImage != null) {
                 player2NameImage.setImage(ryuNameImage);
-            } else if (selectedPlayer2.equals("KEN")) {
+                player2NameImage.setVisible(true);
+            } else if (selectedPlayer2.equals("KEN") && kenNameImage != null) {
                 player2NameImage.setImage(kenNameImage);
+                player2NameImage.setVisible(true);
             }
-        }
-
-        // Set health bar images
-        if (player1HealthImage != null) {
-            player1HealthImage.setImage(healthBarImage);
-        }
-        if (player2HealthImage != null) {
-            player2HealthImage.setImage(healthBarImage);
         }
     }
 
@@ -565,11 +568,26 @@ public class GameSceneController {
     }
 
     private void render() {
+        frameCount++;
+        long currentTime = System.currentTimeMillis();
+
+        if (currentTime - lastFPSCheck >= 1000) {
+            currentFPS = frameCount;
+            frameCount = 0;
+            lastFPSCheck = currentTime;
+        }
+
         gc.clearRect(0, 0, gameCanvas.getWidth(), gameCanvas.getHeight());
         drawMapBackground();
 
         if (player1 != null) player1.render(gc);
         if (player2 != null) player2.render(gc);
+
+        if (showFPS) {
+            gc.setFont(FontManager.getInstance().getSmall());
+            gc.setFill(Color.YELLOW);
+            gc.fillText("FPS: " + currentFPS, 10, 20);
+        }
     }
 
     private void drawMapBackground() {
@@ -592,11 +610,28 @@ public class GameSceneController {
         player1HealthBar.setProgress(p1HealthPercent);
         player2HealthBar.setProgress(p2HealthPercent);
 
+        // Dynamic health bar colors
+        updateHealthBarColor(player1HealthBar, p1HealthPercent);
+        updateHealthBarColor(player2HealthBar, p2HealthPercent);
+
         player1HealthLabel.setText(player1.getHealth() + "/" + player1.getMaxHealth());
         player2HealthLabel.setText(player2.getHealth() + "/" + player2.getMaxHealth());
 
         timerLabel.setText(String.valueOf(roundTimer));
         roundLabel.setText("ROUND " + currentRound);
+    }
+
+    private void updateHealthBarColor(ProgressBar healthBar, double percent) {
+        if (percent > 0.6) {
+            // Green for healthy
+            healthBar.setStyle("-fx-accent: #2ecc71;");
+        } else if (percent > 0.3) {
+            // Orange for medium
+            healthBar.setStyle("-fx-accent: #f39c12;");
+        } else {
+            // Red for critical
+            healthBar.setStyle("-fx-accent: #e74c3c;");
+        }
     }
 
     private void updateNetworkStatus(String status) {
