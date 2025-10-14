@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
@@ -9,68 +8,89 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.effect.DropShadow?>
 
-<AnchorPane fx:id="mainPane" prefHeight="400" prefWidth="600" style="-fx-background-color: black;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Client.MapSelectController">
-    <children>
-        <Label fx:id="titleLabel" alignment="CENTER" layoutX="10.0" layoutY="20.0" prefHeight="25.0" prefWidth="580.0" text="Select a Map" textFill="WHITE" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0">
-            <font>
-                <Font name="Candara Bold" size="24.0" />
-            </font>
-        </Label>
-        <GridPane fx:id="mapGrid" layoutX="10.0" layoutY="60.0" prefHeight="270.0" prefWidth="580.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0">
-            <columnConstraints>
-                <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-            </columnConstraints>
-            <rowConstraints>
-                <RowConstraints valignment="CENTER" vgrow="SOMETIMES" />
-                <RowConstraints valignment="CENTER" vgrow="SOMETIMES" />
-                <RowConstraints valignment="CENTER" vgrow="SOMETIMES" />
-            </rowConstraints>
-            <children>
-                <ImageView fx:id="map1" fitHeight="80.0" fitWidth="150.0">
-                    <image>
-                        <Image url="@../../../images/map1.gif" />
-                    </image>
-                </ImageView>
-                <ImageView fx:id="map2" fitHeight="80.0" fitWidth="150.0" GridPane.columnIndex="1">
-                    <image>
-                        <Image url="@../../../images/map2.gif" />
-                    </image>
-                </ImageView>
-                <ImageView fx:id="map3" fitHeight="80.0" fitWidth="150.0" GridPane.columnIndex="2">
-                    <image>
-                        <Image url="@../../../images/map3.gif" />
-                    </image>
-                </ImageView>
-                <ImageView fx:id="map4" fitHeight="80.0" fitWidth="150.0" GridPane.rowIndex="1">
-                    <image>
-                        <Image url="@../../../images/map4.gif" />
-                    </image>
-                </ImageView>
-                <ImageView fx:id="map5" fitHeight="80.0" fitWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                    <image>
-                        <Image url="@../../../images/map5.gif" />
-                    </image>
-                </ImageView>
-                <ImageView fx:id="map6" fitHeight="80.0" fitWidth="150.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
-                    <image>
-                        <Image url="@../../../images/map6.gif" />
-                    </image>
-                </ImageView>
-            </children>
-        </GridPane>
-        <Label layoutX="10.0" layoutY="350.0" prefWidth="580.0" alignment="CENTER"
-               text="Use A/D to move • SPACE to select" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0">
-            <font>
-                <Font name="Candara Bold" size="16.0" />
-            </font>
-            <style>
-                -fx-text-fill: linear-gradient(to right, #00ffea, #ff00ff, #ffff00);
-                -fx-font-weight: bold;
-            </style>
-        </Label>
+<AnchorPane fx:id="mainPane" prefHeight="400" prefWidth="600"
+            style="-fx-background-color: black;"
+            xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="Client.MapSelectController">
 
-    </children>
+    <!-- Title -->
+    <Label fx:id="titleLabel" alignment="CENTER"
+           layoutX="10" layoutY="20"
+           prefWidth="580"
+           text="Select a Map" textFill="WHITE"
+           AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0">
+        <font>
+            <Font size="20" />
+        </font>
+        <effect>
+            <DropShadow color="cyan" radius="8" spread="0.5" />
+        </effect>
+    </Label>
+
+    <!-- Map Grid -->
+    <GridPane fx:id="mapGrid" layoutX="10" layoutY="60"
+              prefHeight="270" prefWidth="580"
+              AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0">
+        <columnConstraints>
+            <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints valignment="CENTER" vgrow="SOMETIMES" />
+            <RowConstraints valignment="CENTER" vgrow="SOMETIMES" />
+        </rowConstraints>
+
+        <ImageView fx:id="map1" fitHeight="80" fitWidth="150" GridPane.columnIndex="0" GridPane.rowIndex="0">
+            <image>
+                <Image url="@../../../images/map1.gif" />
+            </image>
+        </ImageView>
+
+        <ImageView fx:id="map2" fitHeight="80" fitWidth="150" GridPane.columnIndex="1" GridPane.rowIndex="0">
+            <image>
+                <Image url="@../../../images/map2.gif" />
+            </image>
+        </ImageView>
+
+        <ImageView fx:id="map3" fitHeight="80" fitWidth="150" GridPane.columnIndex="2" GridPane.rowIndex="0">
+            <image>
+                <Image url="@../../../images/map3.gif" />
+            </image>
+        </ImageView>
+
+        <ImageView fx:id="map4" fitHeight="80" fitWidth="150" GridPane.columnIndex="0" GridPane.rowIndex="1">
+            <image>
+                <Image url="@../../../images/map4.gif" />
+            </image>
+        </ImageView>
+
+        <ImageView fx:id="map5" fitHeight="80" fitWidth="150" GridPane.columnIndex="1" GridPane.rowIndex="1">
+            <image>
+                <Image url="@../../../images/map5.gif" />
+            </image>
+        </ImageView>
+
+        <ImageView fx:id="map6" fitHeight="80" fitWidth="150" GridPane.columnIndex="2" GridPane.rowIndex="1">
+            <image>
+                <Image url="@../../../images/map6.gif" />
+            </image>
+        </ImageView>
+    </GridPane>
+
+    <!-- Controls Instruction -->
+    <Label layoutX="10" layoutY="350" prefWidth="580" alignment="CENTER"
+           text="A/D move  SPACE select" textFill="YELLOW"
+           AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0">
+        <font>
+            <Font size="12" />
+        </font>
+        <effect>
+            <DropShadow color="black" radius="5" spread="0.5" />
+        </effect>
+    </Label>
+
 </AnchorPane>

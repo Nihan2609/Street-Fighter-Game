@@ -24,24 +24,53 @@ public class NetworkLobbyController {
 
     private NetworkGameServer gameServer;
     private NetworkClient networkClient;
+    private FontManager fontManager = FontManager.getInstance();
 
     @FXML
     private void initialize() {
+        fontManager.initialize();
+
         try {
             String localIP = InetAddress.getLocalHost().getHostAddress();
             ipLabel.setText("Your IP: " + localIP);
+            ipLabel.setStyle(fontManager.getStyleString(12, "lime"));
         } catch (Exception e) {
-            ipLabel.setText("Your IP: Unable to detect");
+            ipLabel.setText("IP: N/A");
+            ipLabel.setStyle(fontManager.getStyleString(10, "yellow"));
         }
 
+        applyCustomFont();
+
         ipField.setText("localhost");
+        ipField.setStyle(fontManager.getStyleString(12) +
+                "-fx-background-color: white; -fx-background-radius: 5; -fx-padding: 5;");
+
         hostButton.setOnAction(e -> startHost());
         joinButton.setOnAction(e -> joinGame());
         backButton.setOnAction(e -> goBack());
     }
 
+    private void applyCustomFont() {
+        String btnStyle = fontManager.getStyleString(14) +
+                "-fx-text-fill: white; -fx-background-radius: 10; -fx-padding: 10 20; -fx-cursor: hand;";
+
+        if (hostButton != null)
+            hostButton.setStyle(btnStyle + "-fx-background-color: #27ae60;");
+
+        if (joinButton != null)
+            joinButton.setStyle(btnStyle + "-fx-background-color: #3498db;");
+
+        if (backButton != null)
+            backButton.setStyle(fontManager.getStyleString(12) +
+                    "-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 8 16; -fx-cursor: hand;");
+
+        if (statusLabel != null)
+            statusLabel.setStyle(fontManager.getStyleString(12, "white"));
+    }
+
     private void startHost() {
         statusLabel.setText("Starting server...");
+        statusLabel.setStyle(fontManager.getStyleString(12, "yellow"));
         hostButton.setDisable(true);
         joinButton.setDisable(true);
 
@@ -56,18 +85,17 @@ public class NetworkLobbyController {
                 networkClient.connect("localhost", 5555);
 
                 Platform.runLater(() -> {
-                    statusLabel.setText("Waiting for Player 2...");
-                    statusLabel.setStyle("-fx-text-fill: yellow;");
+                    statusLabel.setText("Waiting for P2...");
+                    statusLabel.setStyle(fontManager.getStyleString(12, "yellow"));
                 });
 
             } catch (Exception e) {
                 Platform.runLater(() -> {
                     statusLabel.setText("Error: " + e.getMessage());
-                    statusLabel.setStyle("-fx-text-fill: red;");
+                    statusLabel.setStyle(fontManager.getStyleString(10, "red"));
                     hostButton.setDisable(false);
                     joinButton.setDisable(false);
                 });
-                System.err.println("Error starting host: " + e.getMessage());
             }
         }).start();
     }
@@ -76,12 +104,13 @@ public class NetworkLobbyController {
         String serverIP = ipField.getText().trim();
 
         if (serverIP.isEmpty()) {
-            statusLabel.setText("Please enter server IP");
-            statusLabel.setStyle("-fx-text-fill: red;");
+            statusLabel.setText("Enter server IP");
+            statusLabel.setStyle(fontManager.getStyleString(10, "red"));
             return;
         }
 
-        statusLabel.setText("Connecting to " + serverIP + "...");
+        statusLabel.setText("Connecting...");
+        statusLabel.setStyle(fontManager.getStyleString(12, "yellow"));
         hostButton.setDisable(true);
         joinButton.setDisable(true);
 
@@ -96,13 +125,13 @@ public class NetworkLobbyController {
 
                 if (networkClient.isConnected()) {
                     Platform.runLater(() -> {
-                        statusLabel.setText("Connected! Waiting for host to start game...");
-                        statusLabel.setStyle("-fx-text-fill: lime; -fx-font-size: 16px;");
+                        statusLabel.setText("Connected!");
+                        statusLabel.setStyle(fontManager.getStyleString(14, "lime"));
                     });
                 } else {
                     Platform.runLater(() -> {
-                        statusLabel.setText("Connection failed");
-                        statusLabel.setStyle("-fx-text-fill: red;");
+                        statusLabel.setText("Failed");
+                        statusLabel.setStyle(fontManager.getStyleString(12, "red"));
                         hostButton.setDisable(false);
                         joinButton.setDisable(false);
                     });
@@ -111,11 +140,10 @@ public class NetworkLobbyController {
             } catch (Exception e) {
                 Platform.runLater(() -> {
                     statusLabel.setText("Error: " + e.getMessage());
-                    statusLabel.setStyle("-fx-text-fill: red;");
+                    statusLabel.setStyle(fontManager.getStyleString(10, "red"));
                     hostButton.setDisable(false);
                     joinButton.setDisable(false);
                 });
-                System.err.println("Error joining game: " + e.getMessage());
             }
         }).start();
     }
@@ -129,15 +157,15 @@ public class NetworkLobbyController {
             public void onDisconnected() {
                 Platform.runLater(() -> {
                     statusLabel.setText("Connection lost!");
-                    statusLabel.setStyle("-fx-text-fill: red;");
+                    statusLabel.setStyle(fontManager.getStyleString(12, "red"));
                 });
             }
 
             @Override
             public void onGameStart() {
                 Platform.runLater(() -> {
-                    statusLabel.setText("Player 2 connected! Starting...");
-                    statusLabel.setStyle("-fx-text-fill: lime;");
+                    statusLabel.setText("P2 connected!");
+                    statusLabel.setStyle(fontManager.getStyleString(12, "lime"));
 
                     new Thread(() -> {
                         try {
@@ -157,29 +185,19 @@ public class NetworkLobbyController {
             public void onPlayerDisconnected(String playerId) {}
 
             @Override
-            public void onGameConfig(String p1Char, String p2Char, String mapFile) {
-                // Host doesn't need this callback in lobby
-            }
+            public void onGameConfig(String p1Char, String p2Char, String mapFile) {}
 
             @Override
-            public void onPauseGame(String pausedBy) {
-                // Not used in lobby
-            }
+            public void onPauseGame(String pausedBy) {}
 
             @Override
-            public void onResumeGame() {
-                // Not used in lobby
-            }
+            public void onResumeGame() {}
 
             @Override
-            public void onRematchRequest() {
-                // Not used in lobby
-            }
+            public void onRematchRequest() {}
 
             @Override
-            public void onWaitingForHost() {
-                // Not used in lobby
-            }
+            public void onWaitingForHost() {}
         });
     }
 
@@ -192,14 +210,12 @@ public class NetworkLobbyController {
             public void onDisconnected() {
                 Platform.runLater(() -> {
                     statusLabel.setText("Connection lost!");
-                    statusLabel.setStyle("-fx-text-fill: red;");
+                    statusLabel.setStyle(fontManager.getStyleString(12, "red"));
                 });
             }
 
             @Override
-            public void onGameStart() {
-                // Client waits for GAME_CONFIG
-            }
+            public void onGameStart() {}
 
             @Override
             public void onInputReceived(String playerId, long frameNumber, short inputBits) {}
@@ -208,30 +224,19 @@ public class NetworkLobbyController {
             public void onPlayerDisconnected(String playerId) {}
 
             @Override
-            public void onGameConfig(String p1Char, String p2Char, String mapFile) {
-                System.out.println("Client callback received game config");
-                // launchGame will be called via reflection from NetworkClient
-            }
+            public void onGameConfig(String p1Char, String p2Char, String mapFile) {}
 
             @Override
-            public void onPauseGame(String pausedBy) {
-                // Not used in lobby
-            }
+            public void onPauseGame(String pausedBy) {}
 
             @Override
-            public void onResumeGame() {
-                // Not used in lobby
-            }
+            public void onResumeGame() {}
 
             @Override
-            public void onRematchRequest() {
-                // Not used in lobby
-            }
+            public void onRematchRequest() {}
 
             @Override
-            public void onWaitingForHost() {
-                // Not used in lobby
-            }
+            public void onWaitingForHost() {}
         });
     }
 
@@ -249,15 +254,13 @@ public class NetworkLobbyController {
             stage.show();
 
         } catch (Exception e) {
-            System.err.println("Error loading character select: " + e.getMessage());
+            System.err.println("Error: " + e.getMessage());
         }
     }
 
     public void launchGame(String p1Char, String p2Char, String mapFile) {
         Platform.runLater(() -> {
             try {
-                System.out.println("Client launching game: " + p1Char + " vs " + p2Char + " on " + mapFile);
-
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/game/GameScene.fxml"));
                 Parent root = loader.load();
 
@@ -274,7 +277,7 @@ public class NetworkLobbyController {
                 stage.show();
 
             } catch (Exception e) {
-                System.err.println("Error launching game: " + e.getMessage());
+                System.err.println("Error: " + e.getMessage());
             }
         });
     }
@@ -293,7 +296,7 @@ public class NetworkLobbyController {
             stage.show();
 
         } catch (Exception e) {
-            System.err.println("Error returning to main menu: " + e.getMessage());
+            System.err.println("Error: " + e.getMessage());
         }
     }
 }

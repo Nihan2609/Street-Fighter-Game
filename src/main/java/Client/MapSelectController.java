@@ -21,16 +21,28 @@ public class MapSelectController {
     @FXML private ImageView map5;
     @FXML private ImageView map6;
     @FXML private Label titleLabel;
+    @FXML private Label controlLabel;
 
     private int currentIndex = 0;
     private ImageView[] maps;
     private NetworkClient networkClient = null;
     private boolean isHost = false;
+    private FontManager fontManager = FontManager.getInstance();
 
     @FXML
     private void initialize() {
+        fontManager.initialize();
+
         maps = new ImageView[]{map1, map2, map3, map4, map5, map6};
         highlightMap(maps[currentIndex]);
+
+        // Apply custom font
+        if (titleLabel != null) {
+            titleLabel.setStyle(fontManager.getStyleString(18, "white"));
+        }
+        if (controlLabel != null) {
+            controlLabel.setStyle(fontManager.getStyleString(10, "yellow"));
+        }
 
         titleLabel.sceneProperty().addListener((obs, oldScene, newScene) -> {
             if (newScene != null) {
@@ -44,14 +56,12 @@ public class MapSelectController {
         this.isHost = client != null && client.isHost();
 
         if (!isHost && networkClient != null) {
-            // Client can't select map
-            titleLabel.setText("HOST is selecting the map...");
-            titleLabel.setStyle("-fx-text-fill: yellow; -fx-font-size: 18px; -fx-font-weight: bold;");
+            titleLabel.setText("HOST selecting map...");
+            titleLabel.setStyle(fontManager.getStyleString(14, "yellow"));
         }
     }
 
     private void handleKeyPress(KeyCode code) {
-        // In network mode, only host can select
         if (networkClient != null && !isHost) {
             return;
         }
@@ -96,7 +106,6 @@ public class MapSelectController {
     private void selectMap(ImageView selectedImageView) {
         String mapFile = getMapFile(selectedImageView);
 
-        // If network mode and host, send config to server
         if (networkClient != null && isHost) {
             networkClient.sendGameConfig(player1Choice, player2Choice, mapFile);
         }
@@ -135,7 +144,7 @@ public class MapSelectController {
             Scene gameScene = new Scene(root, 800, 400);
             Stage stage = (Stage) map1.getScene().getWindow();
             stage.setScene(gameScene);
-            stage.setTitle("Street Fighter" + (networkClient != null ? " - Network Mode" : ""));
+            stage.setTitle("Street Fighter" + (networkClient != null ? " - Network" : ""));
             stage.setResizable(false);
             stage.sizeToScene();
             stage.centerOnScreen();

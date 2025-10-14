@@ -22,6 +22,10 @@ public class ChampSelectController {
     @FXML private Label p1NameLabel;
     @FXML private Label p2NameLabel;
     @FXML private Label statusLabel;
+    @FXML private Label p1Label;
+    @FXML private Label p2Label;
+    @FXML private Label p1ControlLabel;
+    @FXML private Label p2ControlLabel;
 
     private int p1Index = 0;
     private int p2Index = 1;
@@ -34,9 +38,12 @@ public class ChampSelectController {
 
     private NetworkClient networkClient = null;
     private boolean isHost = false;
+    private FontManager fontManager = FontManager.getInstance();
 
     @FXML
     public void initialize() {
+        fontManager.initialize();
+
         ryuImg = new Image(getClass().getResource("/images/ryuSelect.png").toExternalForm());
         kenImg = new Image(getClass().getResource("/images/kenSelect.png").toExternalForm());
 
@@ -46,6 +53,7 @@ public class ChampSelectController {
         fadeTransition.setCycleCount(FadeTransition.INDEFINITE);
         fadeTransition.setAutoReverse(true);
 
+        applyCustomFont();
         updateUI();
 
         mainPane.sceneProperty().addListener((obs, oldScene, newScene) -> {
@@ -55,26 +63,47 @@ public class ChampSelectController {
         });
     }
 
+    private void applyCustomFont() {
+        if (p1Label != null) {
+            p1Label.setStyle(fontManager.getStyleString(14, "#FF0000"));
+        }
+        if (p2Label != null) {
+            p2Label.setStyle(fontManager.getStyleString(14, "#0000FF"));
+        }
+        if (p1NameLabel != null) {
+            p1NameLabel.setStyle(fontManager.getStyleString(12, "#FF0000"));
+        }
+        if (p2NameLabel != null) {
+            p2NameLabel.setStyle(fontManager.getStyleString(12, "#0000FF"));
+        }
+        if (statusLabel != null) {
+            statusLabel.setStyle(fontManager.getStyleString(14, "#00FF00"));
+        }
+        if (p1ControlLabel != null) {
+            p1ControlLabel.setStyle(fontManager.getStyleString(10, "yellow"));
+        }
+        if (p2ControlLabel != null) {
+            p2ControlLabel.setStyle(fontManager.getStyleString(10, "yellow"));
+        }
+    }
+
     public void setNetworkClient(NetworkClient client) {
         this.networkClient = client;
         this.isHost = client != null && client.isHost();
 
         if (!isHost && networkClient != null) {
-            // Client can't select - show waiting message
-            statusLabel.setText("HOST is selecting characters...");
-            statusLabel.setStyle("-fx-text-fill: yellow; -fx-font-size: 16px;");
+            statusLabel.setText("HOST is selecting...");
+            statusLabel.setStyle(fontManager.getStyleString(12, "yellow"));
             statusLabel.setOpacity(1.0);
             fadeTransition.stop();
         }
     }
 
     private void handleKeyPress(KeyCode code) {
-        // In network mode, only host can select
         if (networkClient != null && !isHost) {
             return;
         }
 
-        // Local mode controls (both players on same keyboard)
         if (!p1Locked) {
             if (code == KeyCode.A || code == KeyCode.D) {
                 p1Index = (p1Index == 0) ? 1 : 0;
@@ -106,20 +135,20 @@ public class ChampSelectController {
     private void updateUI() {
         p1ImgView.setImage((p1Index == 0) ? ryuImg : kenImg);
         String p1Status = p1Locked ? " ✓" : "";
-        p1NameLabel.setText("Player 1: " + (p1Index == 0 ? "Ryu" : "Ken") + p1Status);
+        p1NameLabel.setText("P1: " + (p1Index == 0 ? "Ryu" : "Ken") + p1Status);
 
         p2ImgView.setImage((p2Index == 0) ? ryuImg : kenImg);
         String p2Status = p2Locked ? " ✓" : "";
-        p2NameLabel.setText("Player 2: " + (p2Index == 0 ? "Ryu" : "Ken") + p2Status);
+        p2NameLabel.setText("P2: " + (p2Index == 0 ? "Ryu" : "Ken") + p2Status);
 
         if (networkClient == null || isHost) {
             if (p1Locked && p2Locked) {
-                statusLabel.setText("Both Characters Selected! Press SPACE to Continue");
-                statusLabel.setStyle("-fx-text-fill: lime; -fx-font-size: 16px;");
+                statusLabel.setText("Press SPACE");
+                statusLabel.setStyle(fontManager.getStyleString(16, "lime"));
                 fadeTransition.play();
             } else {
-                statusLabel.setText("Select Characters | P1: A/D + Q | P2: ←/→ + Enter");
-                statusLabel.setStyle("-fx-text-fill: white; -fx-font-size: 14px;");
+                statusLabel.setText("Select Characters");
+                statusLabel.setStyle(fontManager.getStyleString(14, "white"));
                 fadeTransition.stop();
                 statusLabel.setOpacity(1.0);
             }
@@ -137,7 +166,6 @@ public class ChampSelectController {
             MapSelectController controller = loader.getController();
             controller.setPlayerChoices(p1Choice, p2Choice);
 
-            // Pass network client if in network mode
             if (networkClient != null) {
                 controller.setNetworkClient(networkClient);
             }

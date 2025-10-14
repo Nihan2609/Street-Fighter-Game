@@ -26,27 +26,37 @@ public class LeaderboardUIController {
     @FXML private Button backBtn;
 
     private ObservableList<PlayerStats> playerList = FXCollections.observableArrayList();
+    private FontManager fontManager = FontManager.getInstance();
 
     @FXML
     private void initialize() {
+        fontManager.initialize();
+
         usernameCol.setCellValueFactory(new PropertyValueFactory<>("username"));
         winsCol.setCellValueFactory(new PropertyValueFactory<>("wins"));
         lossesCol.setCellValueFactory(new PropertyValueFactory<>("losses"));
         winRateCol.setCellValueFactory(new PropertyValueFactory<>("winRate"));
 
-        // 🔹 Load data from database
-        loadLeaderboardFromDB();
+        // Apply custom font to table
+        leaderboardTable.setStyle(fontManager.getStyleString(10));
 
-        // 🔹 Set data to table
+        loadLeaderboardFromDB();
         leaderboardTable.setItems(playerList);
+
+        // Apply custom font to button
+        if (backBtn != null) {
+            backBtn.setStyle(fontManager.getStyleString(12) +
+                    "-fx-background-color: #3498db; -fx-text-fill: white; " +
+                    "-fx-background-radius: 8; -fx-padding: 8 20; -fx-cursor: hand;");
+        }
 
         backBtn.setOnAction(e -> goBack());
     }
 
     private void loadLeaderboardFromDB() {
         String url = "jdbc:mysql://localhost:3306/street_fighter_game";
-        String user = "root";     // change if you have another username
-        String password = "212001";     // your MySQL password here
+        String user = "root";
+        String password = "212001";
 
         String query = "SELECT username, wins, losses, " +
                 "ROUND((wins / NULLIF((wins + losses), 0)) * 100, 2) AS win_rate " +
@@ -67,7 +77,7 @@ public class LeaderboardUIController {
 
         } catch (SQLException e) {
             e.printStackTrace();
-            System.out.println(" Error loading leaderboard data from database.");
+            System.out.println("Error loading leaderboard data");
         }
     }
 
@@ -84,7 +94,6 @@ public class LeaderboardUIController {
         }
     }
 
-    // Class to hold player stats
     public static class PlayerStats {
         private final String username;
         private final int wins;

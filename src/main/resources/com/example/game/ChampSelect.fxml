@@ -2,75 +2,110 @@
 
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.effect.ColorAdjust?>
+<?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<?import javafx.scene.effect.DropShadow?>
-<AnchorPane fx:id="mainPane" prefHeight="400" prefWidth="600" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1"
+<AnchorPane fx:id="mainPane" prefHeight="400" prefWidth="600"
+            xmlns="http://javafx.com/javafx/24.0.1"
+            xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="Client.ChampSelectController">
 
-    <ImageView fx:id="bgView" fitHeight="400" fitWidth="600" AnchorPane.leftAnchor="0" AnchorPane.topAnchor="0">
+    <!-- Background -->
+    <ImageView fx:id="bgView" fitHeight="400" fitWidth="600" preserveRatio="false"
+               AnchorPane.leftAnchor="0" AnchorPane.topAnchor="0">
         <image>
             <Image url="@../../../images/charSelectBG.jpg" />
         </image>
         <effect>
-            <ColorAdjust brightness="-0.3" />
+            <ColorAdjust brightness="-0.1" />
         </effect>
     </ImageView>
 
-    <Label layoutX="100" layoutY="100" text="Player 1:" textFill="RED">
+    <!-- Player 1 Section -->
+    <Label fx:id="p1Label" layoutX="100" layoutY="80" text="Player 1" textFill="RED">
         <font>
-            <Font name="Candara Bold" size="18.0" />
+            <Font size="14" />
         </font>
+        <effect>
+            <DropShadow color="black" radius="3" spread="0.5" />
+        </effect>
     </Label>
-    <ImageView fx:id="p1ImgView" fitHeight="150" fitWidth="100" layoutX="100" layoutY="120">
+
+    <ImageView fx:id="p1ImgView" fitHeight="150" fitWidth="100" layoutX="100" layoutY="100">
         <image>
             <Image url="@../../../images/ryuSelect.png" />
         </image>
+        <effect>
+            <DropShadow color="red" radius="10" spread="0.3" />
+        </effect>
     </ImageView>
-    <Label fx:id="p1NameLabel" layoutX="100" layoutY="280" textFill="RED">
+
+    <Label fx:id="p1NameLabel" layoutX="90" layoutY="260" text="P1: Ryu" textFill="RED">
         <font>
-            <Font name="Arial" size="16" />
+            <Font size="12" />
         </font>
+        <effect>
+            <DropShadow color="black" radius="2" spread="0.5" />
+        </effect>
     </Label>
 
-    <Label layoutX="400" layoutY="100" text="Player 2:" textFill="BLUE">
+    <!-- Player 2 Section -->
+    <Label fx:id="p2Label" layoutX="400" layoutY="80" text="Player 2" textFill="BLUE">
         <font>
-            <Font name="Cambria" size="18.0" />
+            <Font size="14" />
         </font>
+        <effect>
+            <DropShadow color="black" radius="3" spread="0.5" />
+        </effect>
     </Label>
-    <ImageView fx:id="p2ImgView" fitHeight="150" fitWidth="100" layoutX="400" layoutY="120">
+
+    <ImageView fx:id="p2ImgView" fitHeight="150" fitWidth="100" layoutX="400" layoutY="100">
         <image>
             <Image url="@../../../images/kenSelect.png" />
         </image>
+        <effect>
+            <DropShadow color="blue" radius="10" spread="0.3" />
+        </effect>
     </ImageView>
-    <Label fx:id="p2NameLabel" layoutX="400" layoutY="280" textFill="BLUE">
+
+    <Label fx:id="p2NameLabel" layoutX="390" layoutY="260" text="P2: Ken" textFill="BLUE">
         <font>
-            <Font name="Arial" size="16" />
+            <Font size="12" />
+        </font>
+        <effect>
+            <DropShadow color="black" radius="2" spread="0.5" />
+        </effect>
+    </Label>
+
+    <!-- Control Instructions -->
+    <Label fx:id="p1ControlLabel" layoutX="60" layoutY="350"
+           text="P1: A/D switch Q confirm" textFill="YELLOW">
+        <font>
+            <Font size="10" />
         </font>
     </Label>
 
-    <Label layoutX="79.0" layoutY="350.0" text="P1: A/D to switch, Q to confirm" textFill="YELLOW">
+    <Label fx:id="p2ControlLabel" layoutX="320" layoutY="350"
+           text="P2: LEFT/RIGHT ENTER confirm" textFill="YELLOW">
         <font>
-            <Font name="Arial" size="12" />
+            <Font size="10" />
         </font>
     </Label>
-    <Label layoutX="348.0" layoutY="350.0" text="P2: ←/→ to switch, ENTER to confirm" textFill="YELLOW">
-        <font>
-            <Font name="Arial" size="12" />
-        </font>
-    </Label>
-    <Label fx:id="statusLabel" alignment="CENTER" layoutX="57.0" layoutY="30.0" prefHeight="25.0" prefWidth="470.0" textFill="LIMEGREEN" AnchorPane.leftAnchor="57.0" AnchorPane.rightAnchor="57.39999999999998"
-           style="-fx-font-size: 24px;
-              -fx-font-weight: bold;
-              -fx-text-fill: limegreen;
-              -fx-padding: 8;">
-        <font>
-            <Font name="Arial" size="20" />
-        </font>
 
+    <!-- Status Label -->
+    <Label fx:id="statusLabel" alignment="CENTER"
+           layoutX="100" layoutY="30"
+           prefWidth="400" prefHeight="30"
+           text="Select Characters" textFill="LIMEGREEN">
+        <font>
+            <Font size="14" />
+        </font>
+        <effect>
+            <DropShadow color="black" radius="5" spread="0.5" />
+        </effect>
     </Label>
 
 </AnchorPane>

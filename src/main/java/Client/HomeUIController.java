@@ -8,7 +8,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.Parent;
 
-
 import java.io.IOException;
 import java.util.Objects;
 
@@ -16,30 +15,39 @@ public class HomeUIController {
 
     public ImageView bgImage;
     @FXML private Button multiplayerBtn;
-    @FXML private Button networkMultiplayerBtn;  // NEW: Network button
+    @FXML private Button networkMultiplayerBtn;
     @FXML private Button leaderboardBtn;
     @FXML private Button logoutBtn;
-    // @FXML private Button vsBotBtn;  // REMOVED
+
+    private FontManager fontManager = FontManager.getInstance();
 
     @FXML
     public void initialize() {
+        fontManager.initialize();
+
         leaderboardBtn.setOnAction(e -> openLeaderboard());
         logoutBtn.setOnAction(e -> logout());
         multiplayerBtn.setOnAction(e -> openMultiplayer());
-        networkMultiplayerBtn.setOnAction(e -> openNetworkMultiplayer());  // NEW
-        // vsBotBtn removed
+        networkMultiplayerBtn.setOnAction(e -> openNetworkMultiplayer());
 
-        addHoverEffect(multiplayerBtn, "#2980b9", "#3498db");
-        addHoverEffect(networkMultiplayerBtn, "#8e44ad", "#9b59b6");  // NEW: Purple theme
-        addHoverEffect(leaderboardBtn, "#2980b9", "#3498db");
-        addHoverEffect(logoutBtn, "#c0392b", "#e74c3c");
+        // Apply custom font to buttons
+        applyCustomFont(multiplayerBtn, "#2980b9", "#3498db");
+        applyCustomFont(networkMultiplayerBtn, "#8e44ad", "#9b59b6");
+        applyCustomFont(leaderboardBtn, "#2980b9", "#3498db");
+        applyCustomFont(logoutBtn, "#c0392b", "#e74c3c");
     }
 
-    private void addHoverEffect(Button button, String hoverColor, String normalColor) {
-        button.setOnMouseEntered(e -> button.setStyle(button.getStyle()
-                .replace(normalColor, hoverColor)));
-        button.setOnMouseExited(e -> button.setStyle(button.getStyle()
-                .replace(hoverColor, normalColor)));
+    private void applyCustomFont(Button button, String hoverColor, String normalColor) {
+        String baseStyle = fontManager.getStyleString(14) +
+                "-fx-background-radius: 8; -fx-padding: 10 20; -fx-cursor: hand;";
+
+        button.setStyle(baseStyle + "-fx-background-color: " + normalColor + "; -fx-text-fill: white;");
+
+        button.setOnMouseEntered(e ->
+                button.setStyle(baseStyle + "-fx-background-color: " + hoverColor + "; -fx-text-fill: white;"));
+
+        button.setOnMouseExited(e ->
+                button.setStyle(baseStyle + "-fx-background-color: " + normalColor + "; -fx-text-fill: white;"));
     }
 
     @FXML
