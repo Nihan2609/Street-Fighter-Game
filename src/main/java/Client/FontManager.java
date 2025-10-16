@@ -28,25 +28,24 @@ public class FontManager {
         if (initialized) return;
 
         try {
-            // Load PressStart2P font
             InputStream fontStream = getClass().getResourceAsStream("/fonts/PressStart2P-Regular.ttf");
             if (fontStream != null) {
                 pressStart2P = Font.loadFont(fontStream, MEDIUM);
                 fontStream.close();
 
                 if (pressStart2P != null) {
-                    System.out.println("✓ PressStart2P font loaded successfully");
+                    //System.out.println("✓ PressStart2P font loaded successfully");
                     initialized = true;
                 } else {
-                    System.err.println("✗ Failed to load PressStart2P font");
+                    //System.err.println("✗ Failed to load PressStart2P font");
                     loadFallbackFont();
                 }
             } else {
-                System.err.println("✗ Font file not found: /fonts/PressStart2P-Regular.ttf");
+                //System.err.println("✗ Font file not found: /fonts/PressStart2P-Regular.ttf");
                 loadFallbackFont();
             }
         } catch (Exception e) {
-            System.err.println("Error loading custom font: " + e.getMessage());
+            //System.err.println("Error loading custom font: " + e.getMessage());
             e.printStackTrace();
             loadFallbackFont();
         }
@@ -54,23 +53,21 @@ public class FontManager {
 
     private void loadFallbackFont() {
         pressStart2P = Font.font("Monospaced", MEDIUM);
-        System.out.println("Using fallback font: Monospaced");
+        //System.out.println("Using fallback font: Monospaced");
         initialized = true;
     }
 
-    // Get font with default size
     public Font getPressStart2P() {
         if (!initialized) initialize();
         return pressStart2P;
     }
 
-    // Get font with custom size
     public Font getPressStart2P(double size) {
         if (!initialized) initialize();
         return Font.font(pressStart2P.getFamily(), size);
     }
 
-    // Convenient methods for different sizes
+
     public Font getSmall() {
         return getPressStart2P(SMALL);
     }
@@ -91,7 +88,6 @@ public class FontManager {
         return getPressStart2P(TITLE);
     }
 
-    // Apply font to a JavaFX Node with inline CSS
     public String getFontStyle(double size) {
         if (!initialized) initialize();
         return String.format(
@@ -101,12 +97,10 @@ public class FontManager {
         );
     }
 
-    // Get CSS style string
     public String getStyleString(double size) {
         return getFontStyle(size);
     }
 
-    // Get CSS style with color
     public String getStyleString(double size, String color) {
         return getFontStyle(size) + " -fx-text-fill: " + color + ";";
     }

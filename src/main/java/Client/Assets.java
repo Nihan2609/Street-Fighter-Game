@@ -87,22 +87,22 @@ public class Assets {
         if (initialized) return;
 
         try {
-            System.out.println("Initializing Assets...");
+            //System.out.println("Initializing Assets...");
             loadRyuAssets();
             loadKenAssets();
             initialized = true;
-            System.out.println("Assets initialization complete - All " +
-                    (getRyuAnimationCount() + getKenAnimationCount()) + " animations loaded");
+            //System.out.println("Assets initialization complete - All " +
+            //        (getRyuAnimationCount() + getKenAnimationCount()) + " animations loaded");
 
         } catch (Exception e) {
-            System.err.println("Error initializing assets: " + e.getMessage());
+            //System.err.println("Error initializing assets: " + e.getMessage());
             e.printStackTrace();
             initialized = true; // Prevent infinite retry loops
         }
     }
 
     private static void loadRyuAssets() {
-        System.out.println("Loading Ryu assets...");
+        //System.out.println("Loading Ryu assets...");
 
         try {
             // Load all Ryu sprite sheets
@@ -167,15 +167,15 @@ public class Assets {
                 dead[0] = ss_dead.crop(98, 49, 0, 0);
             }
 
-            System.out.println("Ryu assets loaded successfully - " + getRyuAnimationCount() + " animations");
+            ///System.out.println("Ryu assets loaded successfully - " + getRyuAnimationCount() + " animations");
 
         } catch (Exception e) {
-            System.err.println("Error loading Ryu assets: " + e.getMessage());
+            //System.err.println("Error loading Ryu assets: " + e.getMessage());
         }
     }
 
     private static void loadKenAssets() {
-        System.out.println("Loading Ken assets...");
+        //System.out.println("Loading Ken assets...");
 
         try {
             // Load all Ken sprite sheets
