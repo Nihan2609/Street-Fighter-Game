@@ -117,15 +117,15 @@ public class NetworkLobbyController {
         new Thread(() -> {
             try {
                 networkClient = new NetworkClient("P2", "Player 2");
-                networkClient.setLobbyController(this);
-                setupClientCallback();
+                networkClient.setLobbyController(this); // IMPORTANT: Set lobby controller
+                setupClientCallback(); // Setup callback BEFORE connecting
                 networkClient.connect(serverIP, 5555);
 
                 Thread.sleep(1000);
 
                 if (networkClient.isConnected()) {
                     Platform.runLater(() -> {
-                        statusLabel.setText("Connected!");
+                        statusLabel.setText("Connected! Waiting for host...");
                         statusLabel.setStyle(fontManager.getStyleString(14, "lime"));
                     });
                 } else {
@@ -151,7 +151,9 @@ public class NetworkLobbyController {
     private void setupHostCallback() {
         networkClient.setCallback(new NetworkClient.NetworkCallback() {
             @Override
-            public void onConnected() {}
+            public void onConnected() {
+                System.out.println("Host callback: onConnected");
+            }
 
             @Override
             public void onDisconnected() {
@@ -185,7 +187,9 @@ public class NetworkLobbyController {
             public void onPlayerDisconnected(String playerId) {}
 
             @Override
-            public void onGameConfig(String p1Char, String p2Char, String mapFile) {}
+            public void onGameConfig(String p1Char, String p2Char, String mapFile) {
+                // Host doesn't need to handle this - they select
+            }
 
             @Override
             public void onPauseGame(String pausedBy) {}
@@ -204,7 +208,9 @@ public class NetworkLobbyController {
     private void setupClientCallback() {
         networkClient.setCallback(new NetworkClient.NetworkCallback() {
             @Override
-            public void onConnected() {}
+            public void onConnected() {
+                System.out.println("Client callback: onConnected");
+            }
 
             @Override
             public void onDisconnected() {
@@ -215,7 +221,9 @@ public class NetworkLobbyController {
             }
 
             @Override
-            public void onGameStart() {}
+            public void onGameStart() {
+                System.out.println("Client callback: onGameStart");
+            }
 
             @Override
             public void onInputReceived(String playerId, long frameNumber, short inputBits) {}
@@ -224,7 +232,15 @@ public class NetworkLobbyController {
             public void onPlayerDisconnected(String playerId) {}
 
             @Override
-            public void onGameConfig(String p1Char, String p2Char, String mapFile) {}
+            public void onGameConfig(String p1Char, String p2Char, String mapFile) {
+                // THIS IS THE FIX - Client receives game config and launches game
+                System.out.println("Client callback: onGameConfig - " + p1Char + " vs " + p2Char + " on " + mapFile);
+                Platform.runLater(() -> {
+                    statusLabel.setText("Starting game...");
+                    statusLabel.setStyle(fontManager.getStyleString(12, "yellow"));
+                });
+                // The NetworkClient will call launchGame via reflection
+            }
 
             @Override
             public void onPauseGame(String pausedBy) {}
@@ -254,13 +270,20 @@ public class NetworkLobbyController {
             stage.show();
 
         } catch (Exception e) {
-            System.err.println("Error: " + e.getMessage());
+            System.err.println("Error proceeding to character select: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
+    // IMPORTANT: This method is called by NetworkClient via reflection
     public void launchGame(String p1Char, String p2Char, String mapFile) {
+        System.out.println("launchGame called: " + p1Char + " vs " + p2Char + " on " + mapFile);
+
         Platform.runLater(() -> {
             try {
+                statusLabel.setText("Loading game...");
+                statusLabel.setStyle(fontManager.getStyleString(12, "yellow"));
+
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/game/GameScene.fxml"));
                 Parent root = loader.load();
 
@@ -269,15 +292,21 @@ public class NetworkLobbyController {
                 gameController.setNetworkMode(networkClient, "P2");
 
                 Stage stage = (Stage) statusLabel.getScene().getWindow();
-                stage.setScene(new Scene(root, 800, 400));
-                stage.setTitle("Street Fighter");
+                Scene scene = new Scene(root, 800, 400);
+                stage.setScene(scene);
+                stage.setTitle("Street Fighter - Network Game");
                 stage.setResizable(false);
                 stage.sizeToScene();
                 stage.centerOnScreen();
                 stage.show();
 
+                System.out.println("Game scene loaded successfully for client");
+
             } catch (Exception e) {
-                System.err.println("Error: " + e.getMessage());
+                System.err.println("Error launching game: " + e.getMessage());
+                e.printStackTrace();
+                statusLabel.setText("Error loading game!");
+                statusLabel.setStyle(fontManager.getStyleString(10, "red"));
             }
         });
     }
@@ -296,7 +325,8 @@ public class NetworkLobbyController {
             stage.show();
 
         } catch (Exception e) {
-            System.err.println("Error: " + e.getMessage());
+            System.err.println("Error going back: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }

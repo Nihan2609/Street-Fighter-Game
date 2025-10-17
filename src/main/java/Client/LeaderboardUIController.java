@@ -56,7 +56,7 @@ public class LeaderboardUIController {
     private void loadLeaderboardFromDB() {
         String url = "jdbc:mysql://localhost:3306/street_fighter_game";
         String user = "root";
-        String password = "212001";
+        String password = "1122";
 
         String query = "SELECT username, wins, losses, " +
                 "ROUND((wins / NULLIF((wins + losses), 0)) * 100, 2) AS win_rate " +

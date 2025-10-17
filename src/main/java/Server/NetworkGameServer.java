@@ -175,9 +175,9 @@ public class NetworkGameServer {
         sendResponse(packet, PacketType.CONNECT_ACCEPTED, playerId);
 
         if (players.size() == 2) {
-            System.out.println("\n===========================================");
+
             System.out.println("  Both players connected! Ready to fight!");
-            System.out.println("===========================================\n");
+
             broadcastGameStart();
         }
     }
@@ -347,7 +347,7 @@ public class NetworkGameServer {
             return;
         }
 
-        System.out.println("🔄 Host started REMATCH");
+        System.out.println("Host started REMATCH");
 
         // Reset game state
         gamePaused = false;
