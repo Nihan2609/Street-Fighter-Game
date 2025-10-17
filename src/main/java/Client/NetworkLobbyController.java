@@ -205,11 +205,17 @@ public class NetworkLobbyController {
         });
     }
 
+// In NetworkLobbyController.java - Replace setupClientCallback:
+
     private void setupClientCallback() {
         networkClient.setCallback(new NetworkClient.NetworkCallback() {
             @Override
             public void onConnected() {
                 System.out.println("Client callback: onConnected");
+                Platform.runLater(() -> {
+                    statusLabel.setText("Connected! Waiting for host...");
+                    statusLabel.setStyle(fontManager.getStyleString(14, "lime"));
+                });
             }
 
             @Override
@@ -217,27 +223,37 @@ public class NetworkLobbyController {
                 Platform.runLater(() -> {
                     statusLabel.setText("Connection lost!");
                     statusLabel.setStyle(fontManager.getStyleString(12, "red"));
+                    hostButton.setDisable(false);
+                    joinButton.setDisable(false);
                 });
             }
 
             @Override
             public void onGameStart() {
-                System.out.println("Client callback: onGameStart");
+                System.out.println("Client callback: onGameStart - Both players connected");
+                Platform.runLater(() -> {
+                    statusLabel.setText("Host is selecting characters...");
+                    statusLabel.setStyle(fontManager.getStyleString(12, "yellow"));
+                });
             }
 
             @Override
             public void onInputReceived(String playerId, long frameNumber, short inputBits) {}
 
             @Override
-            public void onPlayerDisconnected(String playerId) {}
+            public void onPlayerDisconnected(String playerId) {
+                Platform.runLater(() -> {
+                    statusLabel.setText("Host disconnected!");
+                    statusLabel.setStyle(fontManager.getStyleString(12, "red"));
+                });
+            }
 
             @Override
             public void onGameConfig(String p1Char, String p2Char, String mapFile) {
-                // THIS IS THE FIX - Client receives game config and launches game
                 System.out.println("Client callback: onGameConfig - " + p1Char + " vs " + p2Char + " on " + mapFile);
                 Platform.runLater(() -> {
                     statusLabel.setText("Starting game...");
-                    statusLabel.setStyle(fontManager.getStyleString(12, "yellow"));
+                    statusLabel.setStyle(fontManager.getStyleString(12, "lime"));
                 });
                 // The NetworkClient will call launchGame via reflection
             }
@@ -276,6 +292,9 @@ public class NetworkLobbyController {
     }
 
     // IMPORTANT: This method is called by NetworkClient via reflection
+    // In NetworkLobbyController.java - Replace the launchGame method:
+
+    // IMPORTANT: This method is called by NetworkClient via reflection
     public void launchGame(String p1Char, String p2Char, String mapFile) {
         System.out.println("launchGame called: " + p1Char + " vs " + p2Char + " on " + mapFile);
 
@@ -284,23 +303,30 @@ public class NetworkLobbyController {
                 statusLabel.setText("Loading game...");
                 statusLabel.setStyle(fontManager.getStyleString(12, "yellow"));
 
+                // Small delay to ensure packet processing completes
+                Thread.sleep(100);
+
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/game/GameScene.fxml"));
                 Parent root = loader.load();
 
                 GameSceneController gameController = loader.getController();
-                gameController.setGameData(p1Char, p2Char, mapFile);
+
+                // Set network mode FIRST (this sets up callbacks)
                 gameController.setNetworkMode(networkClient, "P2");
+
+                // Then set game data (this initializes the game)
+                gameController.setGameData(p1Char, p2Char, mapFile);
 
                 Stage stage = (Stage) statusLabel.getScene().getWindow();
                 Scene scene = new Scene(root, 800, 400);
                 stage.setScene(scene);
-                stage.setTitle("Street Fighter - Network Game");
+                stage.setTitle("Street Fighter - Network Game (CLIENT)");
                 stage.setResizable(false);
                 stage.sizeToScene();
                 stage.centerOnScreen();
                 stage.show();
 
-                System.out.println("Game scene loaded successfully for client");
+                System.out.println("✓ Game scene loaded successfully for client");
 
             } catch (Exception e) {
                 System.err.println("Error launching game: " + e.getMessage());

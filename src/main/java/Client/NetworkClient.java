@@ -344,7 +344,8 @@ public class NetworkClient {
         try {
             ByteBuffer bb = ByteBuffer.allocate(256);
             bb.put(PacketType.GAME_CONFIG);
-            writeString(bb, p1Char);
+            writeString(bb, playerId);  // ✅ FIXED - Send actual player ID ("P1")
+            writeString(bb, p1Char);    // Character choices
             writeString(bb, p2Char);
             writeString(bb, mapFile);
 
