@@ -92,11 +92,8 @@ public class GameSceneController {
         assetManager = AssetManager.getInstance();
         inputManager = InputManager.getInstance();
 
-        // Load character name images
         loadCharacterNameImages();
-
         applyCustomFont();
-
         setupInputHandling();
 
         if (continueButton != null) {
@@ -115,13 +112,8 @@ public class GameSceneController {
                     "-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 10;");
         }
 
-        if (controlsInfo != null) {
-            controlsInfo.setVisible(false);
-        }
-
-        if (pausedByLabel != null) {
-            pausedByLabel.setVisible(false);
-        }
+        if (controlsInfo != null) controlsInfo.setVisible(false);
+        if (pausedByLabel != null) pausedByLabel.setVisible(false);
 
         AudioManager.playBGM("fight_theme.wav");
     }
@@ -237,14 +229,23 @@ public class GameSceneController {
 
                 @Override
                 public void onRematchRequest() {
-                    Platform.runLater(() -> startRematch());
+                    Platform.runLater(() -> {
+                        System.out.println("Received rematch request - resetting to Round 1");
+                        startRematch();
+                    });
+                }
+
+                @Override
+                public void onNextRound(int round, int p1Wins, int p2Wins) {
+                    Platform.runLater(() -> {
+                        System.out.println("Received next round: Round " + round + " (P1:" + p1Wins + " P2:" + p2Wins + ")");
+                        handleNextRound(round, p1Wins, p2Wins);
+                    });
                 }
 
                 @Override
                 public void onWaitingForHost() {
-                    Platform.runLater(() -> {
-                        System.out.println("Client waiting for host");
-                    });
+                    Platform.runLater(() -> System.out.println("Client waiting for host"));
                 }
             });
 
@@ -266,8 +267,6 @@ public class GameSceneController {
         this.selectedMapFile = mapFile != null ? mapFile : "map1";
 
         loadBackgroundImage();
-
-        // Set character name images
         updateCharacterNameImages();
 
         if (gc != null) {
@@ -310,9 +309,7 @@ public class GameSceneController {
                 stream.close();
             }
             backgroundImage = new Image("/images/" + selectedMapFile + ".gif");
-            if (backgroundImage.isError()) {
-                backgroundImage = null;
-            }
+            if (backgroundImage.isError()) backgroundImage = null;
         } catch (Exception e) {
             backgroundImage = null;
         }
@@ -375,9 +372,7 @@ public class GameSceneController {
     }
 
     private void startGameLoop() {
-        if (gameLoop != null) {
-            gameLoop.stop();
-        }
+        if (gameLoop != null) gameLoop.stop();
 
         gameLoop = new AnimationTimer() {
             @Override
@@ -528,22 +523,52 @@ public class GameSceneController {
     private void handleContinueButton() {
         if (isNetworkMode && isHost) {
             if (networkClient != null) {
-                networkClient.sendRematchRequest();
+                boolean isRematch = (currentGameState == GameState.GAME_OVER);
+
+                if (isRematch) {
+                    // Full rematch - reset everything
+                    networkClient.sendRematchRequest();
+                    player1Wins = 0;
+                    player2Wins = 0;
+                    currentRound = 1;
+                } else {
+                    // Next round - increment and sync
+                    currentRound++;
+                    networkClient.sendNextRound(currentRound, player1Wins, player2Wins);
+                }
+
+                initializeGame();
+                if (messageBox != null) messageBox.setVisible(false);
+                if (continueButton != null) {
+                    continueButton.setVisible(false);
+                    continueButton.setDisable(false);
+                }
             }
-            startRematch();
         } else if (!isNetworkMode) {
             nextRound();
         }
     }
 
     private void startRematch() {
-        if (currentGameState == GameState.GAME_OVER) {
-            player1Wins = 0;
-            player2Wins = 0;
-            currentRound = 1;
-        } else {
-            currentRound++;
+        System.out.println("Starting rematch - resetting to Round 1");
+        player1Wins = 0;
+        player2Wins = 0;
+        currentRound = 1;
+
+        initializeGame();
+        if (messageBox != null) messageBox.setVisible(false);
+        if (continueButton != null) {
+            continueButton.setVisible(false);
+            continueButton.setDisable(false);
         }
+    }
+
+    private void handleNextRound(int round, int p1Wins, int p2Wins) {
+        System.out.println("Syncing to Round " + round + " (P1: " + p1Wins + " wins, P2: " + p2Wins + " wins)");
+
+        currentRound = round;
+        player1Wins = p1Wins;
+        player2Wins = p2Wins;
 
         initializeGame();
         if (messageBox != null) messageBox.setVisible(false);
@@ -610,7 +635,6 @@ public class GameSceneController {
         player1HealthBar.setProgress(p1HealthPercent);
         player2HealthBar.setProgress(p2HealthPercent);
 
-        // Dynamic health bar colors
         updateHealthBarColor(player1HealthBar, p1HealthPercent);
         updateHealthBarColor(player2HealthBar, p2HealthPercent);
 
@@ -623,13 +647,10 @@ public class GameSceneController {
 
     private void updateHealthBarColor(ProgressBar healthBar, double percent) {
         if (percent > 0.6) {
-            // Green for healthy
             healthBar.setStyle("-fx-accent: #2ecc71;");
         } else if (percent > 0.3) {
-            // Orange for medium
             healthBar.setStyle("-fx-accent: #f39c12;");
         } else {
-            // Red for critical
             healthBar.setStyle("-fx-accent: #e74c3c;");
         }
     }
@@ -681,10 +702,7 @@ public class GameSceneController {
 
     private void returnToMainMenu() {
         try {
-            if (gameLoop != null) {
-                gameLoop.stop();
-            }
-
+            if (gameLoop != null) gameLoop.stop();
             if (isNetworkMode && networkClient != null) {
                 networkClient.disconnect();
             }

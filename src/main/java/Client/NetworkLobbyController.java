@@ -117,8 +117,8 @@ public class NetworkLobbyController {
         new Thread(() -> {
             try {
                 networkClient = new NetworkClient("P2", "Player 2");
-                networkClient.setLobbyController(this); // IMPORTANT: Set lobby controller
-                setupClientCallback(); // Setup callback BEFORE connecting
+                networkClient.setLobbyController(this);
+                setupClientCallback();
                 networkClient.connect(serverIP, 5555);
 
                 Thread.sleep(1000);
@@ -187,9 +187,7 @@ public class NetworkLobbyController {
             public void onPlayerDisconnected(String playerId) {}
 
             @Override
-            public void onGameConfig(String p1Char, String p2Char, String mapFile) {
-                // Host doesn't need to handle this - they select
-            }
+            public void onGameConfig(String p1Char, String p2Char, String mapFile) {}
 
             @Override
             public void onPauseGame(String pausedBy) {}
@@ -201,11 +199,12 @@ public class NetworkLobbyController {
             public void onRematchRequest() {}
 
             @Override
+            public void onNextRound(int round, int p1Wins, int p2Wins) {}
+
+            @Override
             public void onWaitingForHost() {}
         });
     }
-
-// In NetworkLobbyController.java - Replace setupClientCallback:
 
     private void setupClientCallback() {
         networkClient.setCallback(new NetworkClient.NetworkCallback() {
@@ -255,7 +254,6 @@ public class NetworkLobbyController {
                     statusLabel.setText("Starting game...");
                     statusLabel.setStyle(fontManager.getStyleString(12, "lime"));
                 });
-                // The NetworkClient will call launchGame via reflection
             }
 
             @Override
@@ -266,6 +264,9 @@ public class NetworkLobbyController {
 
             @Override
             public void onRematchRequest() {}
+
+            @Override
+            public void onNextRound(int round, int p1Wins, int p2Wins) {}
 
             @Override
             public void onWaitingForHost() {}
@@ -291,10 +292,6 @@ public class NetworkLobbyController {
         }
     }
 
-    // IMPORTANT: This method is called by NetworkClient via reflection
-    // In NetworkLobbyController.java - Replace the launchGame method:
-
-    // IMPORTANT: This method is called by NetworkClient via reflection
     public void launchGame(String p1Char, String p2Char, String mapFile) {
         System.out.println("launchGame called: " + p1Char + " vs " + p2Char + " on " + mapFile);
 
@@ -303,18 +300,13 @@ public class NetworkLobbyController {
                 statusLabel.setText("Loading game...");
                 statusLabel.setStyle(fontManager.getStyleString(12, "yellow"));
 
-                // Small delay to ensure packet processing completes
                 Thread.sleep(100);
 
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/game/GameScene.fxml"));
                 Parent root = loader.load();
 
                 GameSceneController gameController = loader.getController();
-
-                // Set network mode FIRST (this sets up callbacks)
                 gameController.setNetworkMode(networkClient, "P2");
-
-                // Then set game data (this initializes the game)
                 gameController.setGameData(p1Char, p2Char, mapFile);
 
                 Stage stage = (Stage) statusLabel.getScene().getWindow();

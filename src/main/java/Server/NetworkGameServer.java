@@ -8,16 +8,13 @@ import java.util.concurrent.*;
 public class NetworkGameServer {
     private static final int PORT = 5555;
     private static final int BUFFER_SIZE = 1024;
-    private static final int TICK_RATE = 60;
-    private static final long TICK_DURATION_MS = 1000 / TICK_RATE;
 
-    private DatagramSocket socket;
+    private final DatagramSocket socket;
     private volatile boolean running = false;
-    private Map<String, PlayerConnection> players = new ConcurrentHashMap<>();
-    private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
-    private Map<String, GameState> playerStates = new ConcurrentHashMap<>();
+    private final Map<String, PlayerConnection> players = new ConcurrentHashMap<>();
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private final Map<String, GameState> playerStates = new ConcurrentHashMap<>();
 
-    // NEW: Track game state
     private volatile boolean gamePaused = false;
     private String hostPlayerId = null;
 
@@ -27,7 +24,7 @@ public class NetworkGameServer {
         String playerId;
         long lastHeartbeat;
         boolean ready;
-        boolean isHost; // NEW
+        boolean isHost;
 
         PlayerConnection(InetAddress address, int port, String playerId, boolean isHost) {
             this.address = address;
@@ -52,7 +49,9 @@ public class NetworkGameServer {
     }
 
     public NetworkGameServer() throws SocketException {
-        socket = new DatagramSocket(PORT);
+        socket = new DatagramSocket(null);
+        socket.setReuseAddress(true);
+        socket.bind(new InetSocketAddress(PORT));
         socket.setSoTimeout(0);
     }
 
@@ -64,8 +63,8 @@ public class NetworkGameServer {
         System.out.println("Server started on port " + PORT);
         System.out.println("Waiting for host to connect...");
 
-        Thread receiverThread = new Thread(this::receiveLoop);
-        receiverThread.setDaemon(false);
+        Thread receiverThread = new Thread(this::receiveLoop, "UDP-Receiver");
+        receiverThread.setDaemon(true);
         receiverThread.start();
 
         scheduler.scheduleAtFixedRate(this::checkHeartbeats, 1, 1, TimeUnit.SECONDS);
@@ -73,16 +72,14 @@ public class NetworkGameServer {
 
     private void receiveLoop() {
         byte[] buffer = new byte[BUFFER_SIZE];
+        DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
 
         while (running) {
             try {
-                DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                 socket.receive(packet);
                 handlePacket(packet);
-            } catch (SocketTimeoutException e) {
-                // Normal timeout
             } catch (Exception e) {
-                if (running) {
+                if (running && !(e instanceof SocketTimeoutException)) {
                     System.err.println("Error receiving packet: " + e.getMessage());
                 }
             }
@@ -99,14 +96,10 @@ public class NetworkGameServer {
                     handleConnect(packet, bb);
                     break;
                 case PacketType.INPUT:
-                    if (!gamePaused) { // Only process input when not paused
-                        handleInput(packet, bb);
-                    }
+                    if (!gamePaused) handleInput(packet, bb);
                     break;
                 case PacketType.STATE_UPDATE:
-                    if (!gamePaused) { // Only process state when not paused
-                        handleStateUpdate(packet, bb);
-                    }
+                    if (!gamePaused) handleStateUpdate(packet, bb);
                     break;
                 case PacketType.HEARTBEAT:
                     handleHeartbeat(packet, bb);
@@ -126,6 +119,9 @@ public class NetworkGameServer {
                 case PacketType.REMATCH:
                     handleRematch(packet, bb);
                     break;
+                case PacketType.NEXT_ROUND:
+                    handleNextRound(packet, bb);
+                    break;
                 case PacketType.WAITING_FOR_HOST:
                     handleWaitingForHost(packet, bb);
                     break;
@@ -141,10 +137,8 @@ public class NetworkGameServer {
         String playerId = readString(bb);
         String playerName = readString(bb);
         boolean isHost = bb.get() == 1;
+        String clientKey = packet.getAddress() + ":" + packet.getPort();
 
-        String clientKey = packet.getAddress().toString() + ":" + packet.getPort();
-
-        // First connection must be host
         if (players.isEmpty() && !isHost) {
             sendResponse(packet, PacketType.CONNECT_REJECTED, "Host must connect first");
             return;
@@ -155,7 +149,6 @@ public class NetworkGameServer {
             return;
         }
 
-        // Ensure only one host
         if (isHost && hostPlayerId != null) {
             sendResponse(packet, PacketType.CONNECT_REJECTED, "Host already connected");
             return;
@@ -175,9 +168,7 @@ public class NetworkGameServer {
         sendResponse(packet, PacketType.CONNECT_ACCEPTED, playerId);
 
         if (players.size() == 2) {
-
             System.out.println("  Both players connected! Ready to fight!");
-
             broadcastGameStart();
         }
     }
@@ -187,18 +178,15 @@ public class NetworkGameServer {
         long frameNumber = bb.getLong();
         short inputBits = bb.getShort();
 
-        String clientKey = packet.getAddress().toString() + ":" + packet.getPort();
+        String clientKey = packet.getAddress() + ":" + packet.getPort();
         PlayerConnection pc = players.get(clientKey);
-        if (pc != null) {
-            pc.lastHeartbeat = System.currentTimeMillis();
-        }
+        if (pc != null) pc.lastHeartbeat = System.currentTimeMillis();
 
         broadcastInput(playerId, frameNumber, inputBits);
     }
 
     private void handleStateUpdate(DatagramPacket packet, ByteBuffer bb) {
         String playerId = readString(bb);
-
         GameState state = new GameState();
         state.x = bb.getFloat();
         state.y = bb.getFloat();
@@ -209,35 +197,28 @@ public class NetworkGameServer {
 
         playerStates.put(playerId, state);
 
-        String clientKey = packet.getAddress().toString() + ":" + packet.getPort();
+        String clientKey = packet.getAddress() + ":" + packet.getPort();
         PlayerConnection pc = players.get(clientKey);
-        if (pc != null) {
-            pc.lastHeartbeat = System.currentTimeMillis();
-        }
+        if (pc != null) pc.lastHeartbeat = System.currentTimeMillis();
 
         validateGameState(playerId, state);
     }
 
     private void handleHeartbeat(DatagramPacket packet, ByteBuffer bb) {
         String playerId = readString(bb);
-        String clientKey = packet.getAddress().toString() + ":" + packet.getPort();
-
+        String clientKey = packet.getAddress() + ":" + packet.getPort();
         PlayerConnection pc = players.get(clientKey);
-        if (pc != null) {
-            pc.lastHeartbeat = System.currentTimeMillis();
-        }
+        if (pc != null) pc.lastHeartbeat = System.currentTimeMillis();
     }
 
     private void handleDisconnect(DatagramPacket packet, ByteBuffer bb) {
         String playerId = readString(bb);
-        String clientKey = packet.getAddress().toString() + ":" + packet.getPort();
+        String clientKey = packet.getAddress() + ":" + packet.getPort();
 
         PlayerConnection pc = players.remove(clientKey);
         playerStates.remove(playerId);
 
-        if (pc != null && pc.isHost) {
-            hostPlayerId = null;
-        }
+        if (pc != null && pc.isHost) hostPlayerId = null;
 
         System.out.println("✗ Player disconnected: " + playerId + (pc != null && pc.isHost ? " (HOST)" : ""));
         broadcastPlayerDisconnected(playerId);
@@ -246,7 +227,6 @@ public class NetworkGameServer {
     private void handleGameConfig(DatagramPacket packet, ByteBuffer bb) {
         String playerId = readString(bb);
 
-        // Only host can configure game
         if (!playerId.equals(hostPlayerId)) {
             System.out.println("⚠ Non-host player tried to configure game: " + playerId);
             return;
@@ -272,6 +252,7 @@ public class NetworkGameServer {
             try {
                 DatagramPacket sendPacket = new DatagramPacket(data, data.length, pc.address, pc.port);
                 socket.send(sendPacket);
+                System.out.println("  ✓ Sent game config to " + pc.playerId);
             } catch (Exception e) {
                 System.err.println("Error broadcasting game config: " + e.getMessage());
             }
@@ -280,16 +261,11 @@ public class NetworkGameServer {
 
     private void handlePauseGame(DatagramPacket packet, ByteBuffer bb) {
         String playerId = readString(bb);
-
-        if (gamePaused) {
-            System.out.println("⏸ Game already paused");
-            return;
-        }
+        if (gamePaused) return;
 
         gamePaused = true;
         System.out.println("⏸ Game PAUSED by: " + playerId);
 
-        // Broadcast pause to all players
         ByteBuffer outBb = ByteBuffer.allocate(128);
         outBb.put(PacketType.PAUSE_GAME);
         writeString(outBb, playerId);
@@ -310,16 +286,11 @@ public class NetworkGameServer {
 
     private void handleResumeGame(DatagramPacket packet, ByteBuffer bb) {
         String playerId = readString(bb);
-
-        if (!gamePaused) {
-            System.out.println("▶ Game not paused");
-            return;
-        }
+        if (!gamePaused) return;
 
         gamePaused = false;
         System.out.println("▶ Game RESUMED by: " + playerId);
 
-        // Broadcast resume to all players
         ByteBuffer outBb = ByteBuffer.allocate(128);
         outBb.put(PacketType.RESUME_GAME);
         writeString(outBb, playerId);
@@ -341,19 +312,16 @@ public class NetworkGameServer {
     private void handleRematch(DatagramPacket packet, ByteBuffer bb) {
         String playerId = readString(bb);
 
-        // Only host can start rematch
         if (!playerId.equals(hostPlayerId)) {
             System.out.println("⚠ Non-host player tried to start rematch: " + playerId);
             return;
         }
 
-        System.out.println("Host started REMATCH");
+        System.out.println("🔄 Host started REMATCH - Resetting to Round 1");
 
-        // Reset game state
         gamePaused = false;
         playerStates.clear();
 
-        // Broadcast rematch to all players
         ByteBuffer outBb = ByteBuffer.allocate(128);
         outBb.put(PacketType.REMATCH);
         writeString(outBb, playerId);
@@ -366,8 +334,47 @@ public class NetworkGameServer {
             try {
                 DatagramPacket sendPacket = new DatagramPacket(data, data.length, pc.address, pc.port);
                 socket.send(sendPacket);
+                System.out.println("  ✓ Sent rematch to " + pc.playerId);
             } catch (Exception e) {
                 System.err.println("Error broadcasting rematch: " + e.getMessage());
+            }
+        }
+    }
+
+    private void handleNextRound(DatagramPacket packet, ByteBuffer bb) {
+        String playerId = readString(bb);
+
+        if (!playerId.equals(hostPlayerId)) {
+            System.out.println("⚠ Non-host player tried to start next round: " + playerId);
+            return;
+        }
+
+        int round = bb.getInt();
+        int p1Wins = bb.getInt();
+        int p2Wins = bb.getInt();
+
+        System.out.println("▶ Host started next round: Round " + round + " (P1: " + p1Wins + " wins, P2: " + p2Wins + " wins)");
+
+        gamePaused = false;
+        playerStates.clear();
+
+        ByteBuffer outBb = ByteBuffer.allocate(128);
+        outBb.put(PacketType.NEXT_ROUND);
+        outBb.putInt(round);
+        outBb.putInt(p1Wins);
+        outBb.putInt(p2Wins);
+
+        byte[] data = new byte[outBb.position()];
+        outBb.flip();
+        outBb.get(data);
+
+        for (PlayerConnection pc : players.values()) {
+            try {
+                DatagramPacket sendPacket = new DatagramPacket(data, data.length, pc.address, pc.port);
+                socket.send(sendPacket);
+                System.out.println("  ✓ Sent next round to " + pc.playerId);
+            } catch (Exception e) {
+                System.err.println("Error broadcasting next round: " + e.getMessage());
             }
         }
     }
@@ -443,36 +450,29 @@ public class NetworkGameServer {
     }
 
     private void validateGameState(String playerId, GameState state) {
-        if (state.health < 0) state.health = 0;
-        if (state.health > 1000) state.health = 1000;
-        if (state.x < 0) state.x = 0;
-        if (state.x > 740) state.x = 740;
-        if (state.y < 0) state.y = 0;
-        if (state.y > 400) state.y = 400;
+        state.health = Math.min(1000, Math.max(0, state.health));
+        state.x = Math.min(740, Math.max(0, state.x));
+        state.y = Math.min(400, Math.max(0, state.y));
     }
 
     private void checkHeartbeats() {
-        List<String> toRemove = new ArrayList<>();
+        long now = System.currentTimeMillis();
+        Iterator<Map.Entry<String, PlayerConnection>> it = players.entrySet().iterator();
 
-        for (Map.Entry<String, PlayerConnection> entry : players.entrySet()) {
-            if (!entry.getValue().isAlive()) {
-                toRemove.add(entry.getKey());
+        while (it.hasNext()) {
+            Map.Entry<String, PlayerConnection> entry = it.next();
+            if (now - entry.getValue().lastHeartbeat > 5000) {
                 System.out.println("💔 Player timeout: " + entry.getValue().playerId);
-            }
-        }
-
-        for (String key : toRemove) {
-            PlayerConnection pc = players.remove(key);
-            if (pc != null) {
-                if (pc.isHost) {
+                it.remove();
+                if (entry.getValue().isHost) {
                     hostPlayerId = null;
                 }
-                broadcastPlayerDisconnected(pc.playerId);
+                broadcastPlayerDisconnected(entry.getValue().playerId);
             }
         }
     }
 
-    private void sendResponse(DatagramPacket originalPacket, byte packetType, String message) {
+    private void sendResponse(DatagramPacket original, byte packetType, String message) {
         try {
             ByteBuffer bb = ByteBuffer.allocate(256);
             bb.put(packetType);
@@ -482,10 +482,10 @@ public class NetworkGameServer {
             bb.flip();
             bb.get(data);
 
-            DatagramPacket response = new DatagramPacket(data, data.length, originalPacket.getAddress(), originalPacket.getPort());
+            DatagramPacket response = new DatagramPacket(data, data.length, original.getAddress(), original.getPort());
             socket.send(response);
         } catch (Exception e) {
-            System.err.println("Error sending response: " + e.getMessage());
+            System.err.println("Send response error: " + e.getMessage());
         }
     }
 
@@ -496,25 +496,21 @@ public class NetworkGameServer {
     }
 
     private String readString(ByteBuffer bb) {
-        short length = bb.getShort();
-        byte[] bytes = new byte[length];
-        bb.get(bytes);
-        return new String(bytes);
+        short len = bb.getShort();
+        byte[] data = new byte[len];
+        bb.get(data);
+        return new String(data);
     }
 
     public void stop() {
         running = false;
-        scheduler.shutdown();
+        scheduler.shutdownNow();
         if (socket != null && !socket.isClosed()) {
             socket.close();
         }
         System.out.println("\n===========================================");
         System.out.println("         Server stopped gracefully        ");
         System.out.println("===========================================");
-    }
-
-    public int getPlayerCount() {
-        return players.size();
     }
 
     public static class PacketType {
@@ -532,6 +528,7 @@ public class NetworkGameServer {
         public static final byte PAUSE_GAME = 0x70;
         public static final byte RESUME_GAME = 0x71;
         public static final byte REMATCH = (byte) 0x80;
+        public static final byte NEXT_ROUND = (byte) 0x82;
         public static final byte WAITING_FOR_HOST = (byte) 0x81;
     }
 
@@ -539,14 +536,10 @@ public class NetworkGameServer {
         try {
             NetworkGameServer server = new NetworkGameServer();
             server.start();
-
             System.out.println("\nPress Enter to stop server...");
-            Scanner scanner = new Scanner(System.in);
-            scanner.nextLine();
-
+            new Scanner(System.in).nextLine();
             server.stop();
         } catch (Exception e) {
-            System.err.println("Failed to start server: " + e.getMessage());
             e.printStackTrace();
         }
     }

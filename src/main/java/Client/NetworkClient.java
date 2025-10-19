@@ -14,20 +14,17 @@ public class NetworkClient {
 
     private String playerId;
     private String playerName;
-    private boolean isHost; // NEW: Track if this client is the host
+    private boolean isHost;
 
     private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
     private NetworkCallback callback;
 
     private long frameNumber = 0;
     private static final int BUFFER_SIZE = 1024;
-
-    // Smoothing and interpolation
-    private static final int INPUT_BUFFER_SIZE = 3; // Buffer inputs for smoother gameplay
+    private static final int INPUT_BUFFER_SIZE = 3;
     private long lastInputSendTime = 0;
-    private static final long INPUT_SEND_INTERVAL = 16; // ~60 FPS
+    private static final long INPUT_SEND_INTERVAL = 16;
 
-    // Store reference to lobby controller for client
     private Object lobbyController = null;
 
     public interface NetworkCallback {
@@ -37,16 +34,17 @@ public class NetworkClient {
         void onInputReceived(String playerId, long frameNumber, short inputBits);
         void onPlayerDisconnected(String playerId);
         void onGameConfig(String p1Char, String p2Char, String mapFile);
-        void onPauseGame(String pausedBy); // NEW
-        void onResumeGame(); // NEW
-        void onRematchRequest(); // NEW
-        void onWaitingForHost(); // NEW
+        void onPauseGame(String pausedBy);
+        void onResumeGame();
+        void onRematchRequest();
+        void onNextRound(int round, int p1Wins, int p2Wins); // NEW
+        void onWaitingForHost();
     }
 
     public NetworkClient(String playerId, String playerName) {
         this.playerId = playerId;
         this.playerName = playerName;
-        this.isHost = playerId.equals("P1"); // P1 is always the host
+        this.isHost = playerId.equals("P1");
     }
 
     public void setLobbyController(Object controller) {
@@ -75,7 +73,7 @@ public class NetworkClient {
             bb.put(PacketType.CONNECT);
             writeString(bb, playerId);
             writeString(bb, playerName);
-            bb.put((byte) (isHost ? 1 : 0)); // Send host flag
+            bb.put((byte) (isHost ? 1 : 0));
 
             byte[] data = new byte[bb.position()];
             bb.flip();
@@ -141,6 +139,9 @@ public class NetworkClient {
                 case PacketType.REMATCH:
                     handleRematch(bb);
                     break;
+                case PacketType.NEXT_ROUND:
+                    handleNextRound(bb);
+                    break;
                 case PacketType.WAITING_FOR_HOST:
                     handleWaitingForHost(bb);
                     break;
@@ -194,12 +195,10 @@ public class NetworkClient {
 
         System.out.println("Received game config: " + p1Char + " vs " + p2Char + " on " + mapFile);
 
-        // Call callback first
         if (callback != null) {
             callback.onGameConfig(p1Char, p2Char, mapFile);
         }
 
-        // If client, launch game through lobby controller
         if (!isHost && lobbyController != null) {
             try {
                 java.lang.reflect.Method method = lobbyController.getClass()
@@ -242,6 +241,18 @@ public class NetworkClient {
         }
     }
 
+    private void handleNextRound(ByteBuffer bb) {
+        int round = bb.getInt();
+        int p1Wins = bb.getInt();
+        int p2Wins = bb.getInt();
+
+        System.out.println("Received next round: Round " + round + " (P1: " + p1Wins + ", P2: " + p2Wins + ")");
+
+        if (callback != null) {
+            Platform.runLater(() -> callback.onNextRound(round, p1Wins, p2Wins));
+        }
+    }
+
     private void handleWaitingForHost(ByteBuffer bb) {
         System.out.println("Waiting for host to start rematch");
         if (callback != null) {
@@ -249,7 +260,6 @@ public class NetworkClient {
         }
     }
 
-    // NEW: Send pause request
     public void sendPauseRequest() {
         if (!connected) return;
 
@@ -270,7 +280,6 @@ public class NetworkClient {
         }
     }
 
-    // NEW: Send resume request
     public void sendResumeRequest() {
         if (!connected) return;
 
@@ -291,7 +300,6 @@ public class NetworkClient {
         }
     }
 
-    // NEW: Send rematch request (host only)
     public void sendRematchRequest() {
         if (!connected || !isHost) {
             System.out.println("Only host can start rematch");
@@ -315,7 +323,33 @@ public class NetworkClient {
         }
     }
 
-    // NEW: Client sends waiting status
+    public void sendNextRound(int round, int p1Wins, int p2Wins) {
+        if (!connected || !isHost) {
+            System.out.println("Only host can send next round");
+            return;
+        }
+
+        try {
+            ByteBuffer bb = ByteBuffer.allocate(128);
+            bb.put(PacketType.NEXT_ROUND);
+            writeString(bb, playerId);
+            bb.putInt(round);
+            bb.putInt(p1Wins);
+            bb.putInt(p2Wins);
+
+            byte[] data = new byte[bb.position()];
+            bb.flip();
+            bb.get(data);
+
+            DatagramPacket packet = new DatagramPacket(data, data.length, serverAddress, serverPort);
+            socket.send(packet);
+
+            System.out.println("Sent next round: Round " + round + " (P1: " + p1Wins + ", P2: " + p2Wins + ")");
+        } catch (Exception e) {
+            System.err.println("Error sending next round: " + e.getMessage());
+        }
+    }
+
     public void sendWaitingForHost() {
         if (!connected || isHost) return;
 
@@ -344,8 +378,8 @@ public class NetworkClient {
         try {
             ByteBuffer bb = ByteBuffer.allocate(256);
             bb.put(PacketType.GAME_CONFIG);
-            writeString(bb, playerId);  // ✅ FIXED - Send actual player ID ("P1")
-            writeString(bb, p1Char);    // Character choices
+            writeString(bb, playerId);
+            writeString(bb, p1Char);
             writeString(bb, p2Char);
             writeString(bb, mapFile);
 
@@ -365,7 +399,6 @@ public class NetworkClient {
     public void sendInput(short inputBits) {
         if (!connected) return;
 
-        // Rate limiting for smoother network traffic
         long currentTime = System.currentTimeMillis();
         if (currentTime - lastInputSendTime < INPUT_SEND_INTERVAL) {
             return;
@@ -506,6 +539,7 @@ public class NetworkClient {
         public static final byte PAUSE_GAME = 0x70;
         public static final byte RESUME_GAME = 0x71;
         public static final byte REMATCH = (byte) 0x80;
+        public static final byte NEXT_ROUND = (byte) 0x82;
         public static final byte WAITING_FOR_HOST = (byte) 0x81;
     }
 
