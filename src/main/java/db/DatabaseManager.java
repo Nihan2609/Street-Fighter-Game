@@ -175,7 +175,7 @@ public class DatabaseManager {
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
 
-            System.out.println("\n Leaderboard:");
+            System.out.println("\n🏆 Leaderboard:");
             while (rs.next()) {
                 String name = rs.getString("username");
                 int wins = rs.getInt("wins");
