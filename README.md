@@ -249,4 +249,4 @@ Give a ⭐️ if this project helped you learn game development or JavaFX!
 
 ---
 
-**Made with ❤️ and ☕ by [Your Name]**
+**Made with ❤️ and ☕ by Nihan & Kabir**
