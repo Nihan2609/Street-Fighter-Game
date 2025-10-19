@@ -15,8 +15,6 @@ A fully-featured 2D fighting game inspired by Street Fighter, built with JavaFX.
   <img src="images/scene.png" width="300" />
 </p>
 
-*Add your game screenshots here*
-
 ## ✨ Features
 
 ### 🎮 Gameplay
