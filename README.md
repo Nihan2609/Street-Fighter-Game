@@ -232,16 +232,14 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👨‍💻 Author
 
-**Your Name**
-- GitHub: [@yourusername](https://github.com/yourusername)
-- Email: your.email@example.com
 
-## 📞 Support
+- GitHub: [Kabir](https://github.com/daicarus)
+- Email: miftahulkabir@gmail.com
+- GitHub: [Nihan](https://github.com/Nihan2609)
+- Email: extremenihan@gmail.com
 
-If you encounter any issues or have questions:
-- Open an issue on [GitHub Issues](https://github.com/yourusername/street-fighter-javafx/issues)
-- Check existing issues for solutions
-- Contact the maintainer
+
+
 
 ## ⭐ Show Your Support
 
