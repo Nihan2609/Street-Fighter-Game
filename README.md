@@ -10,9 +10,9 @@ A fully-featured 2D fighting game inspired by Street Fighter, built with JavaFX.
 <p align="center">
   <img src="images/login.png" width="300" />
   <img src="images/menu.png" width="300" />
-  <img src="images/scene.png" width="300" />
   <img src="images/select char.png" width="300" />
   <img src="images/select map.png" width="300" />
+  <img src="images/scene.png" width="300" />
 </p>
 
 *Add your game screenshots here*
