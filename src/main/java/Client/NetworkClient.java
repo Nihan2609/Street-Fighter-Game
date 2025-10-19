@@ -82,9 +82,8 @@ public class NetworkClient {
             DatagramPacket packet = new DatagramPacket(data, data.length, serverAddress, serverPort);
             socket.send(packet);
 
-            System.out.println("Connection request sent to " + serverAddress + ":" + serverPort + " as " + (isHost ? "HOST" : "CLIENT"));
         } catch (Exception e) {
-            System.err.println("Error sending connect request: " + e.getMessage());
+            System.err.println(e.getMessage());
         }
     }
 
@@ -100,7 +99,7 @@ public class NetworkClient {
                 // Normal timeout
             } catch (Exception e) {
                 if (running) {
-                    System.err.println("Error receiving packet: " + e.getMessage());
+                    System.err.println(e.getMessage());
                 }
             }
         }

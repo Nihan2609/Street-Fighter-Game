@@ -15,10 +15,10 @@ public class Fighter extends Entity {
 
     // Physics
     private double velX, velY;
-    private final double GRAVITY = 0.6; // REDUCED from 0.8 for smoother air movement
-    private final double JUMP_FORCE = -14; // SLIGHTLY REDUCED from -15
+    private final double GRAVITY = 0.6;
+    private final double JUMP_FORCE = -14;
     private final double MOVE_SPEED = 4;
-    private final double AIR_MOVE_SPEED = 2.5; // NEW: Slower air movement
+    private final double AIR_MOVE_SPEED = 2.5;
     private final double GROUND_Y = 270;
     private boolean onGround = true;
 
@@ -42,7 +42,7 @@ public class Fighter extends Entity {
     private boolean jumpInitiated = false;
     private boolean canPerformAirAction = true;
 
-    // NEW: Attack state tracking
+    // Attack state tracking
     private boolean isPerformingGroundAttack = false;
     private long attackStartTime = 0;
 
@@ -67,6 +67,17 @@ public class Fighter extends Entity {
 
     @Override
     public void tick() {
+        if (isDead()) {
+            y = (float) GROUND_Y;
+            velX = 0;
+            velY = 0;
+            onGround = true;
+        } else if (animationSM.getCurrentAnimationType() == AnimationStateMachine.AnimationType.WIN) {
+            y = (float) GROUND_Y;
+            velX = 0;
+            velY = 0;
+            onGround = true;
+        }
         updatePhysics();
         updateCombatState();
         processInput();
@@ -75,10 +86,13 @@ public class Fighter extends Entity {
 
     private void updatePhysics() {
         if (isDead() || animationSM.getCurrentAnimationType() == AnimationStateMachine.AnimationType.WIN) {
+            y = (float) GROUND_Y;
+            velX = 0;
+            velY = 0;
+            onGround = true;
             return;
         }
-
-        // Apply movement
+        // applying movement
         x += (float) velX;
         y += (float) velY;
 
@@ -91,13 +105,13 @@ public class Fighter extends Entity {
             velY = 0;
 
             if (!onGround) {
-                // Just landed
+                // now iam on ground
                 onGround = true;
                 jumpInitiated = false;
                 canPerformAirAction = true;
-                isPerformingGroundAttack = false; // Reset attack state on landing
+                isPerformingGroundAttack = false;
 
-                // Return to idle
+                // Back to idle
                 AnimationStateMachine.AnimationType currentAnim = animationSM.getCurrentAnimationType();
                 if (currentAnim == AnimationStateMachine.AnimationType.JUMP ||
                         currentAnim == AnimationStateMachine.AnimationType.AIR_PUNCH ||
@@ -110,12 +124,12 @@ public class Fighter extends Entity {
             }
         }
 
-        // Air friction - INCREASED for smoother feel
+        // Air math
         if (!onGround) {
-            velX *= 0.95; // CHANGED from 0.98 - slower deceleration
+            velX *= 0.95;
         } else {
             // Ground friction
-            if (!isMovementInputPressed() || isPerformingGroundAttack) { // NEW: Stop on attack
+            if (!isMovementInputPressed() || isPerformingGroundAttack) {
                 velX *= 0.85;
                 if (Math.abs(velX) < 0.1) velX = 0;
             }
@@ -133,11 +147,9 @@ public class Fighter extends Entity {
     }
 
     private void updateCombatState() {
-        // NEW: Check if attack animation finished
         if (isPerformingGroundAttack && onGround) {
             AnimationStateMachine.AnimationType currentAnim = animationSM.getCurrentAnimationType();
 
-            // If attack animation finished, allow movement again
             if (animationSM.isAnimationFinished() ||
                     currentAnim == AnimationStateMachine.AnimationType.IDLE ||
                     currentAnim == AnimationStateMachine.AnimationType.PARRY_FORWARD ||
@@ -199,7 +211,7 @@ public class Fighter extends Entity {
 
         AnimationStateMachine.AnimationType currentAnim = animationSM.getCurrentAnimationType();
 
-        // Flips during jump
+        // while in jump state I can do flip
         if (canPerformAirAction && jumpInitiated && currentAnim == AnimationStateMachine.AnimationType.JUMP) {
             if (forwardPressed) {
                 performFrontFlip();
@@ -229,27 +241,25 @@ public class Fighter extends Entity {
             }
         }
 
-        // Air movement - REDUCED speed
+        // Air movement
         if (inputManager.isActionPressed(playerId, "left")) {
-            velX -= 0.2; // CHANGED from 0.3
+            velX -= 0.2;
             velX = Math.max(-AIR_MOVE_SPEED, velX);
         } else if (inputManager.isActionPressed(playerId, "right")) {
-            velX += 0.2; // CHANGED from 0.3
+            velX += 0.2;
             velX = Math.min(AIR_MOVE_SPEED, velX);
         }
     }
 
     private void handleGroundInput(AnimationStateMachine.AnimationType currentAnim) {
-        // Jump input
         if (inputManager.isActionPressed(playerId, "up") && animationSM.canInterrupt()) {
             jump();
             return;
         }
 
-        // Ground attacks - check first before movement
+        // Ground attacks
         handleGroundAttackInput();
 
-        // Movement - ONLY if not attacking
         if (!isPerformingGroundAttack) {
             handleMovementInput(currentAnim);
         }
@@ -284,12 +294,10 @@ public class Fighter extends Entity {
     private void handleGroundAttackInput() {
         AnimationStateMachine.AnimationType currentAnim = animationSM.getCurrentAnimationType();
 
-        // Check attacks in priority order - ONLY if can interrupt
         if (animationSM.canInterrupt()) {
             if (inputManager.isActionPressed(playerId, "light_punch")) {
                 performAttack(AnimationStateMachine.AnimationType.QUICK_PUNCH);
             } else if (inputManager.isActionPressed(playerId, "heavy_punch")) {
-                // Check for uppercut (down + heavy punch)
                 if (inputManager.isActionPressed(playerId, "down")) {
                     performAttack(AnimationStateMachine.AnimationType.UPPERCUT);
                 } else {
@@ -303,9 +311,7 @@ public class Fighter extends Entity {
         }
     }
 
-    // Movement methods
     private void moveLeft() {
-        // NEW: Don't move if attacking
         if (isPerformingGroundAttack) {
             velX = 0;
             return;
@@ -325,7 +331,6 @@ public class Fighter extends Entity {
     }
 
     private void moveRight() {
-        // NEW: Don't move if attacking
         if (isPerformingGroundAttack) {
             velX = 0;
             return;
@@ -359,11 +364,10 @@ public class Fighter extends Entity {
             jumpInitiated = true;
             canPerformAirAction = true;
 
-            // Reduced initial horizontal velocity
             if (inputManager.isActionPressed(playerId, "left")) {
-                velX = -MOVE_SPEED * 0.6; // CHANGED from 0.8
+                velX = -MOVE_SPEED * 0.6;
             } else if (inputManager.isActionPressed(playerId, "right")) {
-                velX = MOVE_SPEED * 0.6; // CHANGED from 0.8
+                velX = MOVE_SPEED * 0.6;
             }
 
             animationSM.transition(AnimationStateMachine.AnimationType.JUMP, true);
@@ -374,8 +378,8 @@ public class Fighter extends Entity {
     private void performFrontFlip() {
         if (canPerformAirAction) {
             animationSM.transition(AnimationStateMachine.AnimationType.FRONT_FLIP, true);
-            velX = facingRight ? 5 : -5; // CHANGED from 6
-            velY = Math.min(velY, -4); // CHANGED from -5 - less upward boost
+            velX = facingRight ? 5 : -5;
+            velY = Math.min(velY, -4);
             canPerformAirAction = false;
         }
     }
@@ -383,8 +387,8 @@ public class Fighter extends Entity {
     private void performBackFlip() {
         if (canPerformAirAction) {
             animationSM.transition(AnimationStateMachine.AnimationType.BACK_FLIP, true);
-            velX = facingRight ? -5 : 5; // CHANGED from -6
-            velY = Math.min(velY, -4); // CHANGED from -5 - less upward boost
+            velX = facingRight ? -5 : 5;
+            velY = Math.min(velY, -4);
             canPerformAirAction = false;
         }
     }
@@ -395,18 +399,14 @@ public class Fighter extends Entity {
             canPerformAirAction = false;
             lastAttackTime = System.currentTimeMillis();
 
-            // Reduce momentum during air attack for better control
-            velX *= 0.5; // NEW: Slow down horizontal movement during attack
+            velX *= 0.5;
 
-            // Slight momentum adjustment based on attack
             if (attackType == AnimationStateMachine.AnimationType.PUNCH_DOWN) {
-                velY = Math.max(velY, 2); // CHANGED from 3 - slower descent
+                velY = Math.max(velY, 2);
             } else {
-                // Slight float during other air attacks
-                velY *= 0.7; // NEW: Reduce downward velocity
+                velY *= 0.7;
             }
 
-            // Play sound
             if (attackType == AnimationStateMachine.AnimationType.AIR_KICK) {
                 AudioManager.playKickSound();
             } else {
@@ -423,13 +423,12 @@ public class Fighter extends Entity {
 
     private void block() {
         animationSM.transition(AnimationStateMachine.AnimationType.PARRY_B, false);
-        velX = 0; // NEW: Stop movement when blocking
+        velX = 0;
     }
 
     private void performAttack(AnimationStateMachine.AnimationType attackType) {
-        // NEW: Set attack state and stop movement
         isPerformingGroundAttack = true;
-        velX = 0; // STOP all horizontal movement
+        velX = 0;
         attackStartTime = System.currentTimeMillis();
 
         animationSM.transition(attackType, true);
@@ -438,7 +437,6 @@ public class Fighter extends Entity {
         CombatSystem.AttackData attackData = CombatSystem.getAttackData(attackType);
         canCancelAttack = attackData != null && attackData.canCancel;
 
-        // Play appropriate sound
         switch (attackType) {
             case PUNCH:
             case QUICK_PUNCH:
@@ -447,9 +445,6 @@ public class Fighter extends Entity {
             case KICK_LOW:
             case UPPER_KICK:
                 AudioManager.playKickSound();
-                break;
-            case UPPERCUT:
-                AudioManager.playUppercutSound();
                 break;
             default:
                 AudioManager.playPunchSound();
@@ -465,7 +460,7 @@ public class Fighter extends Entity {
             return;
         }
 
-        // Draw shadow
+        //shadow
         g.setFill(Color.rgb(0, 0, 0, 0.3));
         g.fillOval(x + 10, GROUND_Y + 90, 40, 8);
 
@@ -478,23 +473,8 @@ public class Fighter extends Entity {
         } else {
             g.drawImage(currentFrame, x, y);
         }
-
-        // NEW: Debug info (optional - remove in production)
-        // drawDebugInfo(g);
     }
 
-    // NEW: Debug method to visualize state
-    private void drawDebugInfo(GraphicsContext g) {
-        g.setFill(Color.YELLOW);
-        g.setFont(javafx.scene.text.Font.font(10));
-
-        String state = isPerformingGroundAttack ? "ATTACKING" : "FREE";
-        g.fillText(state, x, y - 10);
-
-        g.fillText("VelX: " + String.format("%.1f", velX), x, y - 20);
-    }
-
-    // Combat methods
     public void takeDamage(int damage, AnimationStateMachine.AnimationType attackType) {
         if (invulnerable || isDead()) return;
 
@@ -518,7 +498,6 @@ public class Fighter extends Entity {
             animationSM.transition(hitAnim, true);
             hitstunTimer = attackData != null ? attackData.hitstun : 15;
 
-            // Knockback
             double knockback = CombatSystem.getKnockbackForce(attackType);
             velX += facingRight ? -knockback : knockback;
 
@@ -526,7 +505,6 @@ public class Fighter extends Entity {
                 canPerformAirAction = false;
             }
 
-            // NEW: Cancel attack state when hit
             isPerformingGroundAttack = false;
         }
 
@@ -534,8 +512,12 @@ public class Fighter extends Entity {
         if (health <= 0) {
             health = 0;
             die();
-        }
 
+            y = (float)  GROUND_Y;
+            velX = 0;
+            velY = 0;
+            onGround = true;
+        }
         AudioManager.playHitSound();
     }
 
@@ -543,6 +525,12 @@ public class Fighter extends Entity {
         animationSM.transition(AnimationStateMachine.AnimationType.DEAD, true);
         isPerformingGroundAttack = false;
         velX = 0;
+        velY = 0;
+        y = (float) GROUND_Y;
+        onGround = true;
+
+        jumpInitiated = false;
+        canPerformAirAction = false;
         AudioManager.playDeathSound();
     }
 
@@ -594,6 +582,9 @@ public class Fighter extends Entity {
         animationSM.transition(AnimationStateMachine.AnimationType.WIN, true);
         isPerformingGroundAttack = false;
         velX = 0;
+        velY = 0;
+        y = (float) GROUND_Y;
+        onGround = true;
 
         if (playerId.equals("P1")) {
             AudioManager.playP1WinSound();
@@ -615,7 +606,7 @@ public class Fighter extends Entity {
         onGround = true;
         jumpInitiated = false;
         canPerformAirAction = true;
-        isPerformingGroundAttack = false; // NEW
+        isPerformingGroundAttack = false;
         animationSM.transition(AnimationStateMachine.AnimationType.IDLE, true);
     }
 
@@ -643,7 +634,7 @@ public class Fighter extends Entity {
     public double getVelX() { return velX; }
     public double getVelY() { return velY; }
     public String getPlayerId() { return playerId; }
-    public boolean isPerformingAttack() { return isPerformingGroundAttack; } // NEW
+    public boolean isPerformingAttack() { return isPerformingGroundAttack; }
 
     public void setInvulnerable(boolean invulnerable, long duration) {
         this.invulnerable = invulnerable;
@@ -656,7 +647,7 @@ public class Fighter extends Entity {
     public String toString() {
         return characterName + " (HP: " + health + "/" + maxHealth +
                 ", Anim: " + animationSM.getCurrentAnimationType() +
-                ", Attacking: " + isPerformingGroundAttack + // NEW
+                ", Attacking: " + isPerformingGroundAttack +
                 ", Facing: " + (facingRight ? "Right" : "Left") +
                 ", Pos: " + (int)x + "," + (int)y + ")";
     }

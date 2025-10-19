@@ -15,6 +15,5 @@ public abstract class Entity {
 
     public abstract void render(GraphicsContext gc);
 
-    // Add this abstract method
     public abstract String getName();
 }

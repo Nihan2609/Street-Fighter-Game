@@ -4,14 +4,14 @@ import javafx.geometry.Rectangle2D;
 
 public class CombatSystem {
     public static class AttackData {
-        public int startupFrames;   // Frames before attack becomes active
+        public int startupFrames;   // Frames before attack
         public int activeFrames;    // Frames where attack can hit
-        public int recoveryFrames;  // Frames after attack before character can act
+        public int recoveryFrames;  // Frames after attack
         public int damage;
-        public int blockstun;       // Frames opponent is stuck blocking
-        public int hitstun;         // Frames opponent is stuck in hit animation
-        public boolean canCancel;   // Can this attack be canceled into another?
-        public double knockback;    // How far the opponent gets pushed back
+        public int blockstun;
+        public int hitstun;
+        public boolean canCancel;
+        public double knockback;
 
         public AttackData(int startup, int active, int recovery, int damage) {
             this.startupFrames = startup;
@@ -38,7 +38,7 @@ public class CombatSystem {
     private static final java.util.Map<AnimationStateMachine.AnimationType, AttackData> ATTACK_DATA =
             new java.util.HashMap<AnimationStateMachine.AnimationType, AttackData>() {{
 
-                // Light attacks - fast startup, can cancel
+                // Light attacks - fast startup can cancel
                 put(AnimationStateMachine.AnimationType.QUICK_PUNCH,
                         new AttackData(3, 2, 6, 12, true)); // Fast jab
 
@@ -85,7 +85,7 @@ public class CombatSystem {
         AttackData data = getAttackData(attackType);
         if (data == null) return new Rectangle2D(0, 0, 0, 0);
 
-        // Base hitbox dimensions
+        //Hitbox dimensions
         double hitboxWidth = 40;
         double hitboxHeight = 30;
         double hitboxX = facingRight ? attacker.x + 50 : attacker.x - hitboxWidth - 10;
@@ -142,7 +142,7 @@ public class CombatSystem {
         return new Rectangle2D(hitboxX, hitboxY, hitboxWidth, hitboxHeight);
     }
 
-    // Attack can be canceled into another attack -> CHECK
+
     public static boolean canCancelInto(AnimationStateMachine.AnimationType currentAttack,
                                         AnimationStateMachine.AnimationType newAttack) {
         AttackData currentData = getAttackData(currentAttack);
@@ -157,7 +157,6 @@ public class CombatSystem {
         return false;
     }
 
-    // Calculate damage and combo
     public static int calculateScaledDamage(int baseDamage, int comboCount) {
         if (comboCount <= 1) return baseDamage;
 
@@ -166,7 +165,7 @@ public class CombatSystem {
         return (int) (baseDamage * scalingFactor);
     }
 
-    // Attack priority
+
     public static int getAttackPriority(AnimationStateMachine.AnimationType attackType) {
         switch (attackType) {
             case QUICK_PUNCH:
@@ -218,7 +217,6 @@ public class CombatSystem {
         return frameTime < data.startupFrames;
     }
 
-    // Recovery frames -> CHECK
     public static boolean isInRecovery(AnimationStateMachine.AnimationType attackType,
                                        long animationStartTime) {
         AttackData data = getAttackData(attackType);

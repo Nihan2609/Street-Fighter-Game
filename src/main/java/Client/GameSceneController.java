@@ -1,5 +1,6 @@
 package Client;
 
+import db.DatabaseManager;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -72,7 +73,6 @@ public class GameSceneController {
 
     private FontManager fontManager = FontManager.getInstance();
 
-    // Character name images
     private Image ryuNameImage;
     private Image kenNameImage;
 
@@ -132,7 +132,6 @@ public class GameSceneController {
                 kenStream.close();
             }
         } catch (Exception e) {
-            System.err.println("Error loading character name images: " + e.getMessage());
         }
     }
 
@@ -152,8 +151,6 @@ public class GameSceneController {
         this.isNetworkMode = true;
         this.isHost = client.isHost();
 
-        System.out.println("Game initialized in network mode: " +
-                (isHost ? "HOST" : "CLIENT") + " (" + playerId + ")");
 
         if (networkClient != null) {
             networkClient.setCallback(new NetworkClient.NetworkCallback() {
@@ -230,7 +227,6 @@ public class GameSceneController {
                 @Override
                 public void onRematchRequest() {
                     Platform.runLater(() -> {
-                        System.out.println("Received rematch request - resetting to Round 1");
                         startRematch();
                     });
                 }
@@ -238,7 +234,6 @@ public class GameSceneController {
                 @Override
                 public void onNextRound(int round, int p1Wins, int p2Wins) {
                     Platform.runLater(() -> {
-                        System.out.println("Received next round: Round " + round + " (P1:" + p1Wins + " P2:" + p2Wins + ")");
                         handleNextRound(round, p1Wins, p2Wins);
                     });
                 }
@@ -484,6 +479,17 @@ public class GameSceneController {
             String winner = player1Wins >= 2 ? selectedPlayer1 : selectedPlayer2;
             showGameMessage(winner + " WINS MATCH!", 5000);
 
+            if (!isNetworkMode) {
+                String loggedInUser = LoginUIController.currentLoggedInUser;
+                if (loggedInUser != null) {
+                    if (player1Wins >= 2) {
+                        DatabaseManager.updatePlayerWin(loggedInUser);
+                    } else {
+                        DatabaseManager.updatePlayerLoss(loggedInUser);
+                    }
+                }
+            }
+
             if (continueButton != null) {
                 if (isNetworkMode) {
                     if (isHost) {
@@ -526,13 +532,12 @@ public class GameSceneController {
                 boolean isRematch = (currentGameState == GameState.GAME_OVER);
 
                 if (isRematch) {
-                    // Full rematch - reset everything
                     networkClient.sendRematchRequest();
                     player1Wins = 0;
                     player2Wins = 0;
                     currentRound = 1;
                 } else {
-                    // Next round - increment and sync
+                    // Next round
                     currentRound++;
                     networkClient.sendNextRound(currentRound, player1Wins, player2Wins);
                 }
@@ -550,7 +555,6 @@ public class GameSceneController {
     }
 
     private void startRematch() {
-        System.out.println("Starting rematch - resetting to Round 1");
         player1Wins = 0;
         player2Wins = 0;
         currentRound = 1;
@@ -564,8 +568,6 @@ public class GameSceneController {
     }
 
     private void handleNextRound(int round, int p1Wins, int p2Wins) {
-        System.out.println("Syncing to Round " + round + " (P1: " + p1Wins + " wins, P2: " + p2Wins + " wins)");
-
         currentRound = round;
         player1Wins = p1Wins;
         player2Wins = p2Wins;
@@ -714,6 +716,7 @@ public class GameSceneController {
             stage.setScene(new Scene(root));
             stage.setTitle("Street Fighter");
             stage.show();
+            AudioManager.playBGM("home.wav");
 
         } catch (Exception e) {
             e.printStackTrace();

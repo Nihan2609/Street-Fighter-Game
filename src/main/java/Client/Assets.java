@@ -4,9 +4,9 @@ import javafx.scene.image.Image;
 
 public class Assets {
 
-    // ============================================ SPRITE SHEETS: RYU ============================================
+    //SPRITE SHEETS: RYU
 
-    // Basic movement and stances
+    // Basic movement
     public static Image[] idle = new Image[6],
             parry_f = new Image[8],
             parry_b = new Image[8];
@@ -36,23 +36,21 @@ public class Assets {
             knockback = new Image[4],
             recover = new Image[5];
 
-    // Victory and defeat
+    // Win and Dead
     public static Image[] win = new Image[10],
             dead = new Image[1];
 
-    // ============================================ SPRITE SHEETS: KEN ============================================
 
-    // Basic movement and stances
+    // SPRITE SHEETS: KEN
+
+    // Basic movement
     public static Image[] idle1 = new Image[6],
             parry_f1 = new Image[8],
-            parry_b1 = new Image[8],
-            crouch1 = new Image[1];
+            parry_b1 = new Image[8];
 
     // Ground attacks
     public static Image[] punch1 = new Image[8],
             quick_punch1 = new Image[4],
-            crouch_punch1 = new Image[3],
-            crouch_attack1 = new Image[5],
             uppercut1 = new Image[8];
 
     // Kicks
@@ -70,14 +68,12 @@ public class Assets {
             jump1 = new Image[11];
 
     // Hit reactions and recovery
-    public static Image[] crouch_hit1 = new Image[2],
-            crouch_hit_back1 = new Image[4],
-            hit_stand1 = new Image[2],
+    public static Image[] hit_stand1 = new Image[2],
             hit_stand_back1 = new Image[4],
             knockback1 = new Image[4],
             recover1 = new Image[5];
 
-    // Victory and defeat
+    // Win and Dead
     public static Image[] win1 = new Image[10],
             dead1 = new Image[1];
 
@@ -87,25 +83,19 @@ public class Assets {
         if (initialized) return;
 
         try {
-            //System.out.println("Initializing Assets...");
             loadRyuAssets();
             loadKenAssets();
             initialized = true;
-            //System.out.println("Assets initialization complete - All " +
-            //        (getRyuAnimationCount() + getKenAnimationCount()) + " animations loaded");
-
         } catch (Exception e) {
-            //System.err.println("Error initializing assets: " + e.getMessage());
             e.printStackTrace();
-            initialized = true; // Prevent infinite retry loops
+            initialized = true;
         }
     }
 
     private static void loadRyuAssets() {
-        //System.out.println("Loading Ryu assets...");
+
 
         try {
-            // Load all Ryu sprite sheets
             SpriteSheet ss_idle = loadSpriteSheet("/images/ryu/idle.png");
             SpriteSheet ss_parry_f = loadSpriteSheet("/images/ryu/parry_f.png");
             SpriteSheet ss_parry_b = loadSpriteSheet("/images/ryu/parry_b.png");
@@ -131,7 +121,7 @@ public class Assets {
             SpriteSheet ss_win = loadSpriteSheet("/images/ryu/win.png");
             SpriteSheet ss_dead = loadSpriteSheet("/images/ryu/dead.png");
 
-            // Basic movement and stances
+            // Basic movement
             loadSpriteFrames(ss_idle, idle, 57, 106);
             loadSpriteFrames(ss_parry_f, parry_f, 70, 110);
             loadSpriteFrames(ss_parry_b, parry_b, 70, 108);
@@ -156,29 +146,26 @@ public class Assets {
             loadSpriteFrames(ss_punch_down, punch_down, 75, 90);
 
             // Hit reactions and recovery
-            loadSpriteFrames(ss_hit_stand, hit_stand, 57, 104);
+            loadSpriteFrames(ss_hit_stand, hit_stand, 62, 103);
             loadSpriteFrames(ss_hit_stand_back, hit_stand_back, 77, 104);
             loadSpriteFrames(ss_knockback, knockback, 86, 104);
             loadSpriteFrames(ss_recover, recover, 77, 104);
 
-            // Victory and defeat
-            loadSpriteFrames(ss_win, win, 64, 106);
+            // Win and Dead
+            loadSpriteFrames(ss_win, win, 73, 148);
             if (ss_dead != null) {
-                dead[0] = ss_dead.crop(98, 49, 0, 0);
+                dead[0] = ss_dead.crop(116, 46, 0, 0);
             }
 
-            ///System.out.println("Ryu assets loaded successfully - " + getRyuAnimationCount() + " animations");
 
         } catch (Exception e) {
-            //System.err.println("Error loading Ryu assets: " + e.getMessage());
+
         }
     }
 
     private static void loadKenAssets() {
-        //System.out.println("Loading Ken assets...");
 
         try {
-            // Load all Ken sprite sheets
             SpriteSheet ss_idle1 = loadSpriteSheet("/images/ken/idle.png");
             SpriteSheet ss_parry_f1 = loadSpriteSheet("/images/ken/parry_f.png");
             SpriteSheet ss_parry_b1 = loadSpriteSheet("/images/ken/parry_b.png");
@@ -234,16 +221,14 @@ public class Assets {
             loadSpriteFrames(ss_knockback1, knockback1, 86, 104);
             loadSpriteFrames(ss_recover1, recover1, 79, 104);
 
-            // Victory and defeat
-            loadSpriteFrames(ss_win1, win1, 73, 106);
+            // Win and Dead
+            loadSpriteFrames(ss_win1, win1, 70, 144);
             if (ss_dead1 != null) {
-                dead1[0] = ss_dead1.crop(108, 49, 0, 0);
+                dead1[0] = ss_dead1.crop(116, 46, 0, 0);
             }
 
-            //System.out.println("Ken assets loaded successfully - " + getKenAnimationCount() + " animations");
-
         } catch (Exception e) {
-            //System.err.println("Error loading Ken assets: " + e.getMessage());
+
         }
     }
 
@@ -251,7 +236,6 @@ public class Assets {
         try {
             return new SpriteSheet(path);
         } catch (Exception e) {
-           // System.err.println("Could not load sprite sheet: " + path + " - " + e.getMessage());
             return null;
         }
     }
@@ -263,7 +247,6 @@ public class Assets {
             try {
                 frames[i] = spriteSheet.crop(frameWidth, frameHeight, frameWidth * i, 0);
             } catch (Exception e) {
-                //System.err.println("Error cropping frame " + i + " with dimensions " + frameWidth + "x" + frameHeight);
             }
         }
     }
@@ -272,16 +255,14 @@ public class Assets {
         if (spriteSheet == null) return;
 
         try {
-            // Ryu's jump has special frame timing - first 3 frames are the same (pre-jump)
             for (int i = 0; i < 3; i++) {
                 frames[i] = spriteSheet.crop(frameWidth, frameHeight, 0, 0);
             }
-            // Then load the actual jump sequence
             for (int i = 3; i < frames.length; i++) {
                 frames[i] = spriteSheet.crop(frameWidth, frameHeight, frameWidth * (i - 2), 0);
             }
         } catch (Exception e) {
-            //System.err.println("Error loading Ryu jump frames: " + e.getMessage());
+            System.err.println(e.getMessage());
         }
     }
 
@@ -289,7 +270,6 @@ public class Assets {
         if (spriteSheet == null) return;
 
         try {
-            // Ken's jump has similar timing to Ryu
             for (int i = 0; i < 3; i++) {
                 frames[i] = spriteSheet.crop(frameWidth, frameHeight, 0, 0);
             }
@@ -297,7 +277,7 @@ public class Assets {
                 frames[i] = spriteSheet.crop(frameWidth, frameHeight, frameWidth * (i - 2), 0);
             }
         } catch (Exception e) {
-            //System.err.println("Error loading Ken jump frames: " + e.getMessage());
+            System.err.println(e.getMessage());
         }
     }
 

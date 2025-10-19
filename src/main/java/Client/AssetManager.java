@@ -1,9 +1,6 @@
 package Client;
 
 import javafx.scene.image.Image;
-import javafx.scene.paint.Color;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,7 +19,6 @@ public class AssetManager {
         return instance;
     }
 
-
     public void initialize() {
         if (initialized) return;
 
@@ -32,8 +28,6 @@ public class AssetManager {
         loadCharacterAssets("KEN");
 
         initialized = true;
-        System.out.println("AssetManager initialized with " +
-                characterAnimations.size() + " characters loaded");
     }
 
     public void loadCharacterAssets(String characterName) {
@@ -44,26 +38,19 @@ public class AssetManager {
         Map<String, Image[]> animations = new HashMap<>();
         String name = characterName.toUpperCase();
 
-        //System.out.println("Mapping animations for: " + name);
-
         try {
             if (name.equals("RYU")) {
                 mapRyuAnimations(animations);
             } else if (name.equals("KEN")) {
                 mapKenAnimations(animations);
             } else {
-               // System.err.println("Unknown character: " + characterName);
-                createPlaceholderAnimations(name);
                 return;
             }
 
             characterAnimations.put(name, animations);
-            //System.out.println("Successfully mapped " + animations.size() + " animations for " + name);
 
         } catch (Exception e) {
-           //System.err.println("Error mapping assets for " + characterName + ": " + e.getMessage());
             e.printStackTrace();
-            createPlaceholderAnimations(name);
         }
     }
 
@@ -139,8 +126,6 @@ public class AssetManager {
         if (Assets.dead != null && Assets.dead[0] != null) {
             animations.put("dead", Assets.dead);
         }
-
-        //System.out.println("Mapped " + animations.size() + " Ryu animations");
     }
 
     private void mapKenAnimations(Map<String, Image[]> animations) {
@@ -231,68 +216,6 @@ public class AssetManager {
         if (dead != null && dead[0] != null) {
             animations.put("dead", dead);
         }
-
-        //System.out.println("Mapped " + animations.size() + " Ken animations");
-    }
-
-    private void createPlaceholderAnimations(String characterName) {
-        Map<String, Image[]> animations = new HashMap<>();
-
-        animations.put("idle", createPlaceholderFrames(6, 60, 100, Color.LIGHTBLUE));
-        animations.put("parry_f", createPlaceholderFrames(8, 60, 100, Color.GREEN));
-        animations.put("parry_b", createPlaceholderFrames(8, 60, 100, Color.DARKGREEN));
-        animations.put("jump", createPlaceholderFrames(11, 60, 120, Color.YELLOW));
-        animations.put("front_flip", createPlaceholderFrames(8, 80, 120, Color.PURPLE));
-        animations.put("back_flip", createPlaceholderFrames(8, 80, 120, Color.VIOLET));
-
-        // Attack animations
-        animations.put("punch", createPlaceholderFrames(6, 80, 100, Color.RED));
-        animations.put("quick_punch", createPlaceholderFrames(3, 80, 100, Color.PINK));
-        animations.put("uppercut", createPlaceholderFrames(8, 80, 110, Color.CRIMSON));
-        animations.put("kick_low", createPlaceholderFrames(5, 100, 100, Color.BLUE));
-        animations.put("upper_kick", createPlaceholderFrames(9, 100, 120, Color.NAVY));
-
-        // Air attacks
-        animations.put("air_punch", createPlaceholderFrames(6, 80, 100, Color.LIGHTCORAL));
-        animations.put("air_kick", createPlaceholderFrames(5, 80, 100, Color.LIGHTBLUE));
-        animations.put("punch_down", createPlaceholderFrames(4, 80, 100, Color.LIGHTSALMON));
-
-        // Hit reactions
-        animations.put("hit_stand", createPlaceholderFrames(2, 60, 100, Color.GRAY));
-        animations.put("hit_stand_back", createPlaceholderFrames(4, 60, 100, Color.DARKGRAY));
-        animations.put("knockback", createPlaceholderFrames(4, 100, 100, Color.BLACK));
-        animations.put("recover", createPlaceholderFrames(5, 80, 100, Color.WHITE));
-
-        // End states
-        animations.put("win", createPlaceholderFrames(10, 80, 120, Color.GOLD));
-        animations.put("dead", createPlaceholderFrames(1, 100, 50, Color.DARKRED));
-
-        characterAnimations.put(characterName, animations);
-        //System.out.println("Created " + animations.size() + " placeholder animations for: " + characterName);
-    }
-
-    private Image[] createPlaceholderFrames(int count, int width, int height, Color baseColor) {
-        Image[] frames = new Image[count];
-
-        for (int i = 0; i < count; i++) {
-            Canvas canvas = new Canvas(width, height);
-            GraphicsContext gc = canvas.getGraphicsContext2D();
-
-            double alpha = 0.5 + (0.5 * Math.sin((i * Math.PI) / count));
-            gc.setFill(Color.color(baseColor.getRed(), baseColor.getGreen(), baseColor.getBlue(), alpha));
-            gc.fillRect(0, 0, width, height);
-
-            gc.setStroke(Color.WHITE);
-            gc.setLineWidth(2);
-            gc.strokeRect(1, 1, width-2, height-2);
-
-            gc.setFill(Color.WHITE);
-            gc.fillText("F" + (i + 1), width/2 - 10, height/2);
-
-            frames[i] = canvas.snapshot(null, null);
-        }
-
-        return frames;
     }
 
     public Image[] getAnimation(String character, String animationName) {
@@ -308,15 +231,14 @@ public class AssetManager {
             }
         }
 
+        // Play Default animation -> Idle.
         if (characterAnims != null && characterAnims.containsKey("idle")) {
             Image[] idle = characterAnims.get("idle");
             if (idle != null && idle.length > 0 && idle[0] != null) {
                 return idle;
             }
-        }
-
-        System.err.println("Creating emergency placeholder for " + character + "." + animationName);
-        return createPlaceholderFrames(1, 60, 100, Color.MAGENTA);
+        };
+        return null;
     }
 
     public void loadBackground(String mapName, String imagePath) {
@@ -324,12 +246,9 @@ public class AssetManager {
             Image bg = ImageLoader.loadImage(imagePath);
             if (bg != null && !bg.isError()) {
                 backgrounds.put(mapName, bg);
-                //System.out.println("Loaded background: " + mapName);
-            } else {
-                //System.err.println("Failed to load background: " + imagePath);
             }
         } catch (Exception e) {
-            //System.err.println("Exception loading background " + imagePath + ": " + e.getMessage());
+            System.err.println(e.getMessage());
         }
     }
 
@@ -360,9 +279,7 @@ public class AssetManager {
     }
 
     public void validateAssets() {
-        //System.out.println("=== Asset Validation Report ===");
         for (String character : characterAnimations.keySet()) {
-            System.out.println("Character: " + character);
             Map<String, Image[]> anims = characterAnimations.get(character);
 
             for (String animName : anims.keySet()) {
@@ -371,9 +288,7 @@ public class AssetManager {
                 for (Image frame : frames) {
                     if (frame != null && !frame.isError()) validFrames++;
                 }
-                System.out.println("  " + animName + ": " + validFrames + "/" + frames.length + " valid frames");
             }
         }
-        System.out.println("=== End Validation Report ===");
     }
 }

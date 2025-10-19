@@ -64,34 +64,27 @@ public class AudioManager {
         if (!soundEnabled) return;
 
         try {
-            // Try to get cached media first
             Media media = soundCache.get(soundName);
 
             if (media == null) {
-                // Load and cache the sound
                 String path = AudioManager.class.getResource("/sounds/" + soundName + ".wav").toString();
                 media = new Media(path);
                 soundCache.put(soundName, media);
             }
 
-            // Create new player for this sound instance
             MediaPlayer player = new MediaPlayer(media);
             player.setVolume(sfxVolume);
 
-            // Clean up after sound finishes
             player.setOnEndOfMedia(() -> {
                 player.dispose();
                 activePlayers.remove(soundName + "_" + player.hashCode());
             });
 
-            // Track active player
             activePlayers.put(soundName + "_" + player.hashCode(), player);
 
             player.play();
 
         } catch (Exception e) {
-            //System.err.println("Could not play SFX: " + soundName);
-            // Don't print full stack trace for missing sounds as it's not critical
         }
     }
 
@@ -132,10 +125,6 @@ public class AudioManager {
         playSFX("block");
     }
 
-    public static void playUppercutSound() {
-        playSFX("uppercut");
-    }
-
     public static void playAirAttackSound() {
         playSFX("air_attack");
     }
@@ -152,7 +141,7 @@ public class AudioManager {
         playSFX("fightFX");
     }
 
-    // Volume and Settings Control
+    // Volume
     public static void setBGMVolume(double volume) {
         bgmVolume = Math.max(0.0, Math.min(1.0, volume));
         if (bgmPlayer != null) {
@@ -174,7 +163,6 @@ public class AudioManager {
     public static void stopAllSounds() {
         stopBGM();
 
-        // Stop all active sound effects
         for (MediaPlayer player : activePlayers.values()) {
             if (player != null) {
                 player.stop();
@@ -184,7 +172,6 @@ public class AudioManager {
         activePlayers.clear();
     }
 
-    // Utility Methods
     public static double getBGMVolume() {
         return bgmVolume;
     }
@@ -206,7 +193,7 @@ public class AudioManager {
     public static void preloadSounds() {
         String[] commonSounds = {
                 "punch", "kick", "jump", "select", "confirm",
-                "hit", "block", "uppercut", "air_attack", "land", "death"
+                "hit", "block", "air_attack", "land", "death"
         };
 
         for (String sound : commonSounds) {
@@ -215,27 +202,13 @@ public class AudioManager {
                 Media media = new Media(path);
                 soundCache.put(sound, media);
             } catch (Exception e) {
-                System.out.println("Could not preload sound: " + sound);
             }
-        }
-
-        System.out.println("Preloaded " + soundCache.size() + " sound effects");
+        };
     }
 
-    // Clear cache to free memory
     public static void clearSoundCache() {
         soundCache.clear();
-        System.out.println("Sound cache cleared");
+
     }
 
-    // Get status information
-    public static String getAudioStatus() {
-        return String.format(
-                "Audio Status - BGM: %s, SFX Volume: %.1f, BGM Volume: %.1f, Active SFX: %d, Cached Sounds: %d",
-                isBGMPlaying() ? "Playing" : "Stopped",
-                sfxVolume, bgmVolume,
-                activePlayers.size(),
-                soundCache.size()
-        );
-    }
 }

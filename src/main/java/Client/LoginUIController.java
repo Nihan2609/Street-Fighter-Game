@@ -17,6 +17,9 @@ public class LoginUIController {
 
     private FontManager fontManager = FontManager.getInstance();
 
+    // leaderboard track korar jonno
+    public static String currentLoggedInUser = null;
+
     @FXML
     private void initialize() {
         fontManager.initialize();
@@ -84,12 +87,15 @@ public class LoginUIController {
         if (DatabaseManager.loginPlayer(user, pass)) {
             try {
                 AudioManager.playSelectSound();
+
+                currentLoggedInUser = user;
+
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/game/HomeUI.fxml"));
                 Parent root = loader.load();
 
                 Stage stage = (Stage) loginBtn.getScene().getWindow();
                 stage.setScene(new Scene(root, 600, 400));
-                stage.setTitle("Street Fighter");
+                stage.setTitle("Street Fighter - Welcome " + user);
                 stage.show();
 
             } catch (Exception ex) {

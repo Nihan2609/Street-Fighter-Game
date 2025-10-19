@@ -152,7 +152,7 @@ public class NetworkLobbyController {
         networkClient.setCallback(new NetworkClient.NetworkCallback() {
             @Override
             public void onConnected() {
-                System.out.println("Host callback: onConnected");
+                System.out.println("Connected");
             }
 
             @Override
@@ -210,7 +210,7 @@ public class NetworkLobbyController {
         networkClient.setCallback(new NetworkClient.NetworkCallback() {
             @Override
             public void onConnected() {
-                System.out.println("Client callback: onConnected");
+                System.out.println("Connected");
                 Platform.runLater(() -> {
                     statusLabel.setText("Connected! Waiting for host...");
                     statusLabel.setStyle(fontManager.getStyleString(14, "lime"));
@@ -287,7 +287,7 @@ public class NetworkLobbyController {
             stage.show();
 
         } catch (Exception e) {
-            System.err.println("Error proceeding to character select: " + e.getMessage());
+            System.err.println(e.getMessage());
             e.printStackTrace();
         }
     }
@@ -318,10 +318,8 @@ public class NetworkLobbyController {
                 stage.centerOnScreen();
                 stage.show();
 
-                System.out.println("✓ Game scene loaded successfully for client");
-
             } catch (Exception e) {
-                System.err.println("Error launching game: " + e.getMessage());
+                System.err.println(e.getMessage());
                 e.printStackTrace();
                 statusLabel.setText("Error loading game!");
                 statusLabel.setStyle(fontManager.getStyleString(10, "red"));
@@ -343,7 +341,7 @@ public class NetworkLobbyController {
             stage.show();
 
         } catch (Exception e) {
-            System.err.println("Error going back: " + e.getMessage());
+            System.err.println(e.getMessage());
             e.printStackTrace();
         }
     }

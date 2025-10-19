@@ -106,6 +106,9 @@ public class HomeUIController {
     private void logout() {
         try {
             AudioManager.playSelectSound();
+
+            LoginUIController.currentLoggedInUser = null;
+
             Stage stage = (Stage) logoutBtn.getScene().getWindow();
             Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/com/example/game/LoginUI.fxml")));
             stage.setScene(new Scene(root, 600, 400));

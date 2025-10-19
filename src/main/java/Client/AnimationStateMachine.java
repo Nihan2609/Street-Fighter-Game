@@ -55,7 +55,7 @@ public class AnimationStateMachine {
     public AnimationState currentState;
     private final String characterName;
     private final AssetManager assetManager;
-    private final boolean isRyu; // true for Ryu, false for Ken
+    private final boolean isRyu; // If ryu true, then ken false
 
     public AnimationStateMachine(String characterName) {
         this.characterName = characterName;
@@ -70,16 +70,13 @@ public class AnimationStateMachine {
         transition(AnimationType.IDLE, true);
     }
 
-    /**
-     * Transitions to a new animation state with improved logic
-     */
+
     public void transition(AnimationType newType, boolean force) {
-        // If we're already in the requested state and not forcing a restart, do nothing.
+
         if (currentState != null && currentState.type == newType && !force && !currentState.isFinished) {
             return;
         }
 
-        // If current state cannot be interrupted and we're not forcing, block transition.
         if (!force && currentState != null && !currentState.canBeInterrupted && !currentState.isFinished) {
             return;
         }
@@ -91,11 +88,12 @@ public class AnimationStateMachine {
     }
 
     private AnimationState createAnimationState(AnimationType type) {
-        // Get the actual frame count from the asset manager to ensure accuracy
+
+        //Actual frame count from Sprites.
         int actualFrameCount = getActualFrameCount(type);
 
         switch (type) {
-            // Basic movement - match actual sprite frame counts
+            // Basic movement
             case IDLE:
                 return new AnimationState(type, actualFrameCount, 150, true, true);
 
@@ -106,7 +104,6 @@ public class AnimationStateMachine {
             case PARRY_BACKWARD:
             case PARRY_B:
                 return new AnimationState(type, actualFrameCount, 120, true, true);
-
 
             case JUMP:
                 AnimationState jump = new AnimationState(type, actualFrameCount, 150, false, false);
@@ -120,7 +117,7 @@ public class AnimationStateMachine {
                 flip.nextState = AnimationType.IDLE;
                 return flip;
 
-            // Ground attacks - frame counts matching your sprites
+            // Ground attacks
             case PUNCH:
                 AnimationState punch = new AnimationState(type, actualFrameCount, 100, false, false);
                 punch.nextState = AnimationType.IDLE;
@@ -185,7 +182,6 @@ public class AnimationStateMachine {
                 recover.nextState = AnimationType.IDLE;
                 return recover;
 
-            // End states
             case WIN:
                 AnimationState win = new AnimationState(type, actualFrameCount, 200, false, false); // Slower frames, non-looping
                 win.nextState = null; // Stay in win state permanently
@@ -208,7 +204,6 @@ public class AnimationStateMachine {
             return animation.length;
         }
 
-        // Fallback default frame counts
         switch (type) {
             case IDLE: return 6;
             case PARRY_FORWARD:
@@ -325,7 +320,6 @@ public class AnimationStateMachine {
     }
 
 
-    // check
     public boolean isInActiveFrames() {
         if (currentState == null) return false;
 
@@ -335,13 +329,11 @@ public class AnimationStateMachine {
         return CombatSystem.isAttackActive(currentState.type, currentState.frameStartTime);
     }
 
-    // get
     public long getAnimationDuration() {
         if (currentState == null) return 0;
         return (long) currentState.frameCount * currentState.frameDelay;
     }
 
-    // reset
     public void resetCurrentAnimation() {
         if (currentState != null) {
             currentState.reset();

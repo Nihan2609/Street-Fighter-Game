@@ -34,18 +34,14 @@ public class FontManager {
                 fontStream.close();
 
                 if (pressStart2P != null) {
-                    //System.out.println("✓ PressStart2P font loaded successfully");
                     initialized = true;
                 } else {
-                    //System.err.println("✗ Failed to load PressStart2P font");
                     loadFallbackFont();
                 }
             } else {
-                //System.err.println("✗ Font file not found: /fonts/PressStart2P-Regular.ttf");
                 loadFallbackFont();
             }
         } catch (Exception e) {
-            //System.err.println("Error loading custom font: " + e.getMessage());
             e.printStackTrace();
             loadFallbackFont();
         }
@@ -53,7 +49,6 @@ public class FontManager {
 
     private void loadFallbackFont() {
         pressStart2P = Font.font("Monospaced", MEDIUM);
-        //System.out.println("Using fallback font: Monospaced");
         initialized = true;
     }
 
